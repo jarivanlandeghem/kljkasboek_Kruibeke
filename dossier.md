@@ -12,7 +12,7 @@
 - **Student:** Aykon Kirhan
 - **Studentennummer:** 202405274
 - **E-mailadres:** <aykon.kirhan@student.hogent.be>
-- **GitHub repository:** <LINK_NAAR_GITHUB_REPO>
+- **GitHub repository:** <https://github.com/HOGENT-frontendweb/frontendweb-2526-kirhanhuyghe>
 - **Online versies:**
   - **Back-end:** <LINK_NAAR_ONLINE_BACKEND>
   - **Front-end:** <LINK_NAAR_ONLINE_FRONTEND>
