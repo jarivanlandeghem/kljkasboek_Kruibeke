@@ -1,8 +1,10 @@
 # Examenopdracht Front-end Web Development & Web Services
 
-> Schrap hierboven eventueel wat niet past
+- Student: Aykon Kirhan
+- Studentennummer: 202405274
+- E-mailadres: <aykon.kirhan@student.hogent.be>
 
-- Student: VOORNAAM NAAM
+- Student: Jasper Huyghe
 - Studentennummer: xxxxxxxxx
 - E-mailadres: <voornaam.naam@student.hogent.be>
 
