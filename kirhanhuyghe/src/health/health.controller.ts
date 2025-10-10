@@ -1,0 +1,11 @@
+import { Controller, Get } from '@nestjs/common';
+
+@Controller('health')
+export class HealthController {
+  @Get('ping')
+  ping(): string {
+    return 'pong';
+  }
+}
+
+// uit cursus, en dat andere health ding verwijderd.
