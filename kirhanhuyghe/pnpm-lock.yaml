@@ -17,9 +17,6 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.0.1
         version: 11.1.6(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)
-      node_module:
-        specifier: ^0.0.0
-        version: 0.0.0
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -2319,9 +2316,6 @@ packages:
 
   node-releases@2.0.23:
     resolution: {integrity: sha512-cCmFDMSm26S6tQSDpBCg/NR8NENrVPhAJSf+XbxBG4rPFaaonlEoE9wHQmun+cls499TQGSb7ZyPBRlzgKfpeg==}
-
-  node_module@0.0.0:
-    resolution: {integrity: sha512-N7TDRKudPzT9vQm3Y0lGAkt1BsWF6i/AFSi/imzD19HKuAOed0GDipTovAf7PBmHXDF7ULS46M/6Sru/htfLWQ==}
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -5655,8 +5649,6 @@ snapshots:
   node-int64@0.4.0: {}
 
   node-releases@2.0.23: {}
-
-  node_module@0.0.0: {}
 
   normalize-path@3.0.0: {}
 
