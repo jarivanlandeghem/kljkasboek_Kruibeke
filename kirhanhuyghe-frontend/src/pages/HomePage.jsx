@@ -1,18 +1,14 @@
-import { useState } from "react";
+
 import AlgemeneLayout from "../components/AlgemeneLayout";
 import WelcomeMessage from "../components/WelcomeMessage";
 import ActionButton from "../components/ActionButton";
 import kidsPlaying from "../assets/PlayingKids.jpg";
 
-export default function Dashboard() {
-  // 🔴 STATE — verandert intern
-  const [activeSection, setActiveSection] = useState(null);
-
+export default function HomePage() {
   // 🟢 PROPS — vaste data die we doorgeven
   const username = "Aykon";
 
   const handleClick = (section) => {
-    setActiveSection(section);
     console.log(`Navigating to: ${section}`);
   };
 
@@ -33,12 +29,6 @@ export default function Dashboard() {
           label="Gebruiker toevoegen" 
           onClick={() => handleClick("gebruiker")} 
         />
-
-        {activeSection && (
-          <p className="text-gray-600 mt-4">
-            Geselecteerde sectie: <span className="font-medium">{activeSection}</span>
-          </p>
-        )}
       </div>
     </AlgemeneLayout>
   );
