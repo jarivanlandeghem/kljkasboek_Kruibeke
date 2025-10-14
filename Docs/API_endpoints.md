@@ -1,20 +1,18 @@
 # API Endpoints
 
-*TODO* - nog na laten kijken!
-
-| Functionaliteit               | HTTP Methode | Volledige URL                                               |
-|-------------------------------|--------------|-------------------------------------------------------------|
-| Inloggen                      | POST         | `http://localhost:3000/api/v1/auth/login`                   |
-| Gebruiker aanmaken                   | POST         | `http://localhost:3000/api/v1/auth/createUser`                |
-| Alle transacties ophalen      | GET          | `http://localhost:3000/api/v1/transactions`                 |
-| Nieuwe transactie toevoegen   | POST         | `http://localhost:3000/api/v1/transactions`                 |
-| Transactie bewerken           | PUT          | `http://localhost:3000/api/v1/transactions/{id}`            |
-| Transactie verwijderen        | DELETE       | `http://localhost:3000/api/v1/transactions/{id}`            |
-| Alle categorieën ophalen      | GET          | `http://localhost:3000/api/v1/categories`                   |
-| Nieuwe categorie toevoegen    | POST         | `http://localhost:3000/api/v1/categories`                   |
-| Alle gebruikers ophalen       | GET          | `http://localhost:3000/api/v1/users`                        |
-| Gebruiker verwijderen         | DELETE       | `http://localhost:3000/api/v1/users/{id}`                   |
-| CSV-bestand importeren        | POST         | `http://localhost:3000/api/v1/import/csv`                   |
+| Functionaliteit              | HTTP Methode | Volledige URL                                      |
+|------------------------------|---------------|---------------------------------------------------|
+| Inloggen (komt nog aan bod)  | POST          | `http://localhost:3000/api/auth/login`            |
+| Alle transacties ophalen     | GET           | `http://localhost:3000/api/transactions`          |
+| Nieuwe transactie toevoegen  | POST          | `http://localhost:3000/api/transactions`          |
+| Transactie bewerken          | PUT           | `http://localhost:3000/api/transactions/{id}`     |
+| Transactie verwijderen       | DELETE        | `http://localhost:3000/api/transactions/{id}`     |
+| Alle categorieën ophalen     | GET           | `http://localhost:3000/api/categories`            |
+| Nieuwe categorie toevoegen   | POST          | `http://localhost:3000/api/categories`            |
+| Alle gebruikers ophalen      | GET           | `http://localhost:3000/api/users`                 |
+| Eén gebruiker ophalen        | GET           | `http://localhost:3000/api/users/{id}`            |
+| Gebruiker verwijderen        | DELETE        | `http://localhost:3000/api/users/{id}`            |
+| CSV-bestand importeren       | POST          | `http://localhost:3000/api/import/csv`            |
 
 ## HTTP Statuscodes
 
