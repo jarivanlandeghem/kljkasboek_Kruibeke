@@ -42,13 +42,76 @@
 
 > **Instructie:** Beschrijf hier duidelijk en beknopt waarover jouw project gaat. Wat is het doel? Wie is de doelgroep? Welke functionaliteiten biedt het?
 
-[Beschrijf hier je project...]
+Het kasboek is een programma waar je alle uitgaven/inkomsten kunt bijhouden van een vereniging. Deze kan je dan in categorieën steken en zo per categorie kijken wat het verschil is.
 
-> **Instructie:** Voeg hier een afbeelding van jouw ERD toe en licht de belangrijkste entiteiten en relaties kort toe.
+Functionaliteiten:
+Lijst van alle uitgaven/inkomsten
+Huidig saldo
+Mededeling, datum, .. (zie excel)
+Met filters
+2 categorieën
+Per categorie bekijken (en kunnen filteren)
+Mogelijkheid om toe te voegen/verwijderen
+Importeren uit kbc csv
+Meerdere mensen toegang geven
 
-![ERD](pad/naar/erd-afbeelding.png)
+>
 
-[Korte toelichting bij het ERD...]
+![ERD]("frontendweb-2526-kirhanhuyghe\Docs\KIRHANHUYGHE_ERD_V1.png")
+
+Vereniging – User: 1 → *
+
+Vereniging – Rekening: 1 → *
+
+User – Transactie: 1 → *
+
+Rekening – Transactie: 1 → *
+
+Transactie – Categorie: *↔* (via TransactieCategorie)
+
+1. Vereniging
+
+Bevat de algemene gegevens van een vereniging (zoals naam en adres).
+
+Een vereniging kan meerdere gebruikers en meerdere rekeningen hebben.
+
+2. User
+
+Gebruikers zijn leden of beheerders van een vereniging.
+
+Elk record bevat o.a. e-mail, naam, wachtwoord en rechtenniveau.
+
+Elke gebruiker behoort tot één vereniging.
+
+Een gebruiker kan meerdere transacties uitvoeren.
+
+3. Rekening
+
+Vertegenwoordigt een bankrekening van een vereniging.
+
+Bevat o.a. het IBAN-nummer, type en naam van de houder.
+
+Elke rekening hoort bij één vereniging maar kan meerdere transacties bevatten.
+
+4. Transactie
+
+Stelt een financiële verrichting voor.
+
+Bevat gegevens zoals beschrijving, bedrag, type (inkomst of uitgave) en verwijzingen naar de rekening en de gebruiker die de transactie uitvoerde.
+
+Eén transactie kan aan meerdere categorieën gekoppeld zijn (via een tussentabel).
+
+5. Categorie
+
+Geeft aan tot welk soort uitgave of inkomst een transactie behoort (bijv. “Lidgeld”, “Materiaal”, “Sponsoring”).
+
+De relatie met transacties verloopt via de koppeltabel TransactieCategorie, omdat één transactie meerdere categorieën kan hebben en omgekeerd.
+
+6. TransactieCategorie (koppeltabel)
+
+Verbindt Transactie en Categorie in een many-to-many-relatie.
+
+Bestaat enkel uit twee foreign keys: transactieID en categorieID.
 
 ## ✅ Ontvankelijkheidscriteria
 
