@@ -1,27 +1,70 @@
-import KLJIcon from "../assets/KLJIcon.jpeg"
-import logout from "../assets/logout.png"
-import user from "../assets/user.png"
+import { useState } from "react";
+import KLJIcon from "../assets/KLJIcon.jpeg";
+import logout from "../assets/logout.png";
+import user from "../assets/user.png";
 
-export default function Navbar({username="Aykon"}){
-  return(
+export default function Navbar({ username = "Aykon" }) {
+  const [isChecked, setIsChecked] = useState(true);
+
+  const handleToggle = () => {
+    setIsChecked(!isChecked);
+    console.log(" light/dark Switch toggled:", !isChecked);
+    // TODO - DARK MODE TOGGLEN
+  };
+
+  return (
     <nav className="fixed top-0 left-0 right-0 h-20 bg-transparent shadow z-50 flex items-center px-6">
-      {/* Items die links zijn utigelijnd */}
+      {/* Links uitgelijnd */}
       <div className="flex items-center gap-6">
-        <img src={KLJIcon} alt="KLJIcon" className="h-12 w-auto"/>
-
-        {/* links die links uitgelijnd blijven */}
-        {/* a href ... */}
+        <img src={KLJIcon} alt="KLJIcon" className="h-12 w-auto" />
       </div>
 
-      {/* items die rechts zijn uitgelijnd */}
+      {/* Rechts uitgelijnd */}
       <div className="ml-auto flex items-center gap-4">
-        <span className="text-sm font-medium hidden sm:inline leading-none">Home</span>
-        <span className="text-sm font-medium hidden sm:inline leading-none">Lijst</span>
-        <span className="text-sm font-medium hidden sm:inline leading-none">Categorieen</span>
-        <span className="text-sm font-medium hidden sm:inline leading-none">{username}</span>
-        <img className="h-10 w-10 rounded-full flex-shrink-0" src={user} alt='user'/>
-        <img className="h-8 w-auto flex-shrink-0" src={logout} alt="logout"/> {/*ref={terug naar inlogpagina}*/}
+        <label className="switch">
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={handleToggle}
+          />
+          <span className="slider">
+            <div className="star star_1"></div>
+            <div className="star star_2"></div>
+            <div className="star star_3"></div>
+            <svg viewBox="0 0 16 16" className="cloud_1 cloud">
+              <path
+                transform="matrix(.77976 0 0 .78395-299.99-418.63)"
+                fill="#fff"
+                d="m391.84 540.91c-.421-.329-.949-.524-1.523-.524-1.351 0-2.451 1.084-2.485 2.435-1.395.526-2.388 1.88-2.388 3.466 0 1.874 1.385 3.423 3.182 3.667v.034h12.73v-.006c1.775-.104 3.182-1.584 3.182-3.395 0-1.747-1.309-3.186-2.994-3.379.007-.106.011-.214.011-.322 0-2.707-2.271-4.901-5.072-4.901-2.073 0-3.856 1.202-4.643 2.925"
+              ></path>
+            </svg>
+          </span>
+        </label>
+
+        <span className="text-sm font-medium hidden sm:inline leading-none">
+          Home
+        </span>
+        <span className="text-sm font-medium hidden sm:inline leading-none">
+          Lijst
+        </span>
+        <span className="text-sm font-medium hidden sm:inline leading-none">
+          Categorieen
+        </span>
+        <span className="text-sm font-medium hidden sm:inline leading-none">
+          {username}
+        </span>
+        <img
+          className="h-10 w-10 rounded-full flex-shrink-0"
+          src={user}
+          alt="user"
+        />
+        <img
+          className="h-8 w-auto flex-shrink-0 cursor-pointer"
+          src={logout}
+          alt="logout"
+          onClick={() => console.log("Logout clicked")}
+        />
       </div>
     </nav>
-  )
+  );
 }
