@@ -8,10 +8,22 @@ import { CategorieenController } from './categorieen/categorieen.controller';
 import { UsersController } from './users/users.controller';
 import { TransactiesController } from './transacties/transacties.controller';
 import { TransactieCategorieenController } from './transactie-categorieen/transactie-categorieen.controller';
-
+import { TransactiesService } from './transacties/transacties.service';
+import { CategorieenService } from './categorieen/categorieen.service';
 @Module({
   imports: [],
-  controllers: [AppController, HealthController, VerenigingenController, RekeningenController, CategorieenController, UsersController, TransactiesController, TransactieCategorieenController], // <- registreren
+  controllers: [
+    AppController,
+    HealthController,
+    VerenigingenController,
+    RekeningenController,
+    CategorieenController,
+    UsersController,
+    TransactiesController,
+    TransactieCategorieenController,
+    TransactiesService,
+    CategorieenService,
+  ], // <- registreren
   providers: [AppService],
 })
 export class AppModule {}
