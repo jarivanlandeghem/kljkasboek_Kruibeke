@@ -1,5 +1,5 @@
 // src/transactie/transactie.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   TRANSACTION_DATA,
   TRANSACTIE_CATEGORIE_DATA,
@@ -9,13 +9,14 @@ import {
   CreateTransactieRequestDto,
   TransactieListResponseDto,
   TransactieResponseDto,
-} from './transactie.dto';
+  UpdateTransactieDto,
+} from './transacties.dto';
 
 @Injectable()
 export class TransactieService {
   // Alle transacties ophalen
   getAll(): TransactieListResponseDto {
-    return { items: TRANSACTION_DATA.map(this.toResponseDto) };
+    return { items: TRANSACTION_DATA.map(this.toResponseDto.bind(this)) };
   }
 
   // Transactie op ID ophalen
@@ -23,6 +24,9 @@ export class TransactieService {
     const transactie = TRANSACTION_DATA.find(
       (t: Transactie) => t.transactieID === id,
     );
+    if (!transactie) {
+      throw new NotFoundException(`No transactie with this id exists`);
+    }
     return transactie ? this.toResponseDto(transactie) : undefined;
   }
 
@@ -54,17 +58,35 @@ export class TransactieService {
     return this.toResponseDto(newTransactie);
   }
 
-  // Transactie bijwerken (niet geïmplementeerd)
+  // UPDATE - niet exact volgens cursus via ai ma twerkt precies wel
   updateById(
     id: number,
-    dto: CreateTransactieRequestDto,
-  ): TransactieResponseDto {
-    throw new Error('Not yet implemented');
+    updateDto: UpdateTransactieDto,
+  ): TransactieResponseDto | undefined {
+    // Zoek de bestaande transactie
+    const existingTransactie = this.getById(id);
+    if (!existingTransactie) {
+      return undefined; // Geen match gevonden
+    }
+
+    // Combineer de bestaande waarden met de nieuwe updates
+    const updatedTransactie: TransactieResponseDto = {
+      ...existingTransactie,
+      ...updateDto,
+      id: id, // of transactieID, afhankelijk van je DTO
+    };
+
+    return updatedTransactie;
   }
 
-  // Transactie verwijderen (niet geïmplementeerd)
+  // VERWIJDER
   deleteById(id: number): void {
-    throw new Error('Not yet implemented');
+    const index = TRANSACTION_DATA.findIndex(
+      (item: Transactie) => item.transactieID === id,
+    );
+    if (index >= 0) {
+      TRANSACTION_DATA.splice(index, 1);
+    }
   }
 
   // Helper: converteer Transactie naar TransactieResponseDto

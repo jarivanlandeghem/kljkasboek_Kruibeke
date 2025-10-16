@@ -1,22 +1,27 @@
 // src/categorie/categorie.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CATEGORIE_DATA, Categorie } from '../api/data/mock_data';
 import {
   CreateCategorieRequestDto,
   CategorieListResponseDto,
   CategorieResponseDto,
+  UpdateCategorieDto,
 } from './categorieen.dto';
 
 @Injectable()
 export class CategorieenService {
   // Alle categorieën ophalen
   getAll(): CategorieListResponseDto {
-    return { items: CATEGORIE_DATA.map(this.toResponseDto) };
+    return { items: CATEGORIE_DATA.map(this.toResponseDto.bind(this)) };
   }
 
   // Categorie op ID ophalen
   getById(id: number): CategorieResponseDto | undefined {
     const categorie = CATEGORIE_DATA.find((c) => c.categorieID === id);
+    if (!categorie) {
+      throw new NotFoundException(`No categorie with this id exists`);
+    }
+
     return categorie ? this.toResponseDto(categorie) : undefined;
   }
 
@@ -38,13 +43,14 @@ export class CategorieenService {
   // Categorie bijwerken
   updateById(
     id: number,
-    dto: CreateCategorieRequestDto,
+    dto: UpdateCategorieDto,
   ): CategorieResponseDto | undefined {
     const categorie = CATEGORIE_DATA.find((c) => c.categorieID === id);
     if (!categorie) return undefined;
 
-    categorie.naam = dto.naam;
-    categorie.type = dto.type;
+    // Alleen velden bijwerken die aanwezig zijn
+    if (dto.naam !== undefined) categorie.naam = dto.naam;
+    if (dto.type !== undefined) categorie.type = dto.type;
 
     return this.toResponseDto(categorie);
   }
