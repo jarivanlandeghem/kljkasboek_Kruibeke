@@ -10,4 +10,5 @@ export class UsersController {
   getPlaceById(@Param('id') id: string): string {
     return `This action returns a #${id} categorie`;
   }
+  // TODO POST VOOR LOGIN
 }
