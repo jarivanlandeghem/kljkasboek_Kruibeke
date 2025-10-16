@@ -1,5 +1,5 @@
 import { useState } from "react";
-import KLJIcon from "../assets/KLJIcon.jpeg";
+import KLJIcon from "../assets/KLJIcon.png";
 import logout from "../assets/logout.png";
 import user from "../assets/user.png";
 
@@ -13,10 +13,10 @@ export default function Navbar({ username = "Aykon" }) {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-20 bg-transparent shadow z-50 flex items-center px-6">
+    <nav className="fixed top-0 left-0 right-0 h-20 bg-blue-950 shadow z-50 flex items-center px-6">
       {/* Links uitgelijnd */}
       <div className="flex items-center gap-6">
-        <img src={KLJIcon} alt="KLJIcon" className="h-12 w-auto" />
+        <img src={KLJIcon} alt="KLJIcon" className="h-18 w-auto" />
       </div>
 
       {/* Rechts uitgelijnd */}
