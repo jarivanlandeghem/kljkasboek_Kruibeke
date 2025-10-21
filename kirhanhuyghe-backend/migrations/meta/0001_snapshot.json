@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "17573d1d-9e94-4346-a1fb-64e240296d47",
-  "prevId": "0042a544-c719-41e3-96e0-44c0b21317a9",
+  "id": "01d684a1-77b6-4613-8901-1e0302a413ae",
+  "prevId": "2e53df31-97f0-46c7-be50-164e6fefcffe",
   "tables": {
     "transactieCategorie": {
       "name": "transactieCategorie",
@@ -41,10 +41,10 @@
       "columns": {
         "transactieID": {
           "name": "transactieID",
-          "type": "serial",
+          "type": "int",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "rekeningID": {
           "name": "rekeningID",
@@ -107,10 +107,7 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {
-      "\"transacties\".\"id\"": "\"transacties\".\"rekeningID\"",
-      "\"transacties\".\"name\"": "\"transacties\".\"userID\""
-    }
+    "columns": {}
   },
   "internal": {
     "tables": {},

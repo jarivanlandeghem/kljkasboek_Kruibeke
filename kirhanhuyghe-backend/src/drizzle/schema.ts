@@ -1,6 +1,5 @@
 import {
   mysqlTable,
-  serial,
   int,
   decimal,
   date,
@@ -10,7 +9,7 @@ import {
 } from 'drizzle-orm/mysql-core';
 
 export const transacties = mysqlTable('transacties', {
-  transactieID: serial('transactieID').primaryKey(),
+  transactieID: int('transactieID').primaryKey(),
   rekeningID: int('rekeningID').notNull(),
   userID: int('userID').notNull(),
   beschrijving: text('beschrijving').notNull(),
@@ -18,7 +17,6 @@ export const transacties = mysqlTable('transacties', {
   bedrag: decimal('bedrag', { precision: 10, scale: 2 }).notNull(),
   datum: date('datum').notNull(),
 });
-
 export const transactieCategorie = mysqlTable(
   'transactieCategorie',
   {
