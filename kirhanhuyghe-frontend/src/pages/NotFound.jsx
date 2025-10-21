@@ -1,6 +1,6 @@
 const NotFound = () => {
   return (
-    <div className="page-bg-white">
+    <div>
       <h1 className="text-4xl mb-4">Pagina niet gevonden</h1>
       <p>Er is geen pagina op deze url, probeer iets anders.</p>
     </div>
