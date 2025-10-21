@@ -11,14 +11,25 @@ import {
   TransactieResponseDto,
   UpdateTransactieDto,
 } from './transacties.dto';
+import {
+  type DatabaseProvider,
+  InjectDrizzle,
+} from '../drizzle/drizzle.provider';
 
 @Injectable()
 export class TransactieService {
+  constructor(
+    @InjectDrizzle()
+    private readonly db: DatabaseProvider,
+  ) {}
   // Alle transacties ophalen
-  getAll(): TransactieListResponseDto {
-    return { items: TRANSACTION_DATA.map(this.toResponseDto.bind(this)) };
+  // getAll(): TransactieListResponseDto {
+  //   return { items: TRANSACTION_DATA.map(this.toResponseDto.bind(this)) };
+  // }
+  async getAll(): Promise<TransactieListResponseDto> {
+    const items = await this.db.query.transacties.findMany();
+    return { items };
   }
-
   // Transactie op ID ophalen
   getById(id: number): TransactieResponseDto | undefined {
     const transactie = TRANSACTION_DATA.find(

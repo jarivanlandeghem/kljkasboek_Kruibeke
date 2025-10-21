@@ -26,7 +26,7 @@ export class TransactiesController {
   ) {}
 
   @Get()
-  getAllTransacties(): TransactieListResponseDto {
+  async getAllTransacties(): Promise<TransactieListResponseDto> {
     return this.transactieService.getAll();
   }
 

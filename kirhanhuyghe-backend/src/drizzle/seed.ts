@@ -1,3 +1,9 @@
+// src/drizzle/seed.ts
+//  AI Redenering:
+// - 'datum' mag geen Date-object zijn → aangepast naar ISO string zonder tijd.
+// - .map() buiten de .values() gehaald voor typecompatibiliteit met Drizzle.
+// - Commentaar toegevoegd voor duidelijkheid.
+
 import { drizzle } from 'drizzle-orm/mysql2';
 import * as mysql from 'mysql2/promise';
 import * as schema from './schema';
@@ -25,17 +31,18 @@ async function resetDatabase() {
 async function seedTransacties() {
   console.log('💰 Seeding transactions...');
 
-  // Seed transacties - laat transactieID weg (auto-increment)
-  await db.insert(schema.transacties).values(
-    TRANSACTION_DATA.map((t) => ({
-      rekeningID: t.rekeningID,
-      userID: t.userID,
-      beschrijving: t.beschrijving,
-      in_uit: t.in_uit,
-      bedrag: t.bedrag.toString(), // Decimal moet als string
-      datum: new Date(t.datum), // Converteer ISO string naar Date
-    })),
-  );
+  // ✅ Maak de transacties-array apart aan (duidelijker voor TypeScript)
+  const transacties = TRANSACTION_DATA.map((t) => ({
+    rekeningID: t.rekeningID,
+    userID: t.userID,
+    beschrijving: t.beschrijving,
+    in_uit: t.in_uit,
+    bedrag: t.bedrag.toString(), //  decimal moet als string
+    datum: new Date(t.datum), // date() verwacht 'YYYY-MM-DD', geen Date-object
+  }));
+
+  // ✅ Insert uitvoeren met correcte types
+  await db.insert(schema.transacties).values(transacties);
 
   console.log('✅ Transactions seeded successfully\n');
 }
