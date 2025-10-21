@@ -17,7 +17,9 @@ export default function Navbar({ username = "Aykon" }) {
     <nav className="fixed top-0 left-0 right-0 h-20 bg-blue-950 shadow z-50 flex items-center px-6">
       {/* Links uitgelijnd */}
       <div className="flex items-center gap-6">
-        <img src={KLJIcon} alt="KLJIcon" className="h-18 w-auto" />
+        <Link to='/'>
+          <img src={KLJIcon} alt="KLJIcon" className="h-18 w-auto" />
+        </Link>
       </div>
 
       {/* Rechts uitgelijnd */}
@@ -46,7 +48,7 @@ export default function Navbar({ username = "Aykon" }) {
           <Link to='/'>Home</Link>
         </span>
         <span className="text-sm font-medium hidden sm:inline leading-none">
-          <Link to='/transacties'>Transacties</Link>
+          <Link to='/transactions'>Transacties</Link>
         </span>
         <span className="text-sm font-medium hidden sm:inline leading-none">
           <Link to='/categories'>Categorieen</Link>

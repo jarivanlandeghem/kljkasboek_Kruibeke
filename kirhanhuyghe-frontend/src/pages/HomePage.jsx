@@ -15,13 +15,12 @@ export default function HomePage() {
 
   return (
     <AlgemeneLayout image={kidsPlaying}>
-      <div className="flex flex-col gap-4 items-center">
+      <div className="flex flex-col gap-4 items-center page-bg-white">
         <WelcomeMessage username={username} />
 
-        <Link to='addtransaction'>
+        <Link to='transactions'>
           <ActionButton 
-            label="Transactie toevoegen" 
-            onClick={() => handleClick("transactie")} 
+            label="Transacties weergeven" 
           />
         </Link>
         <Link to='/categories'>  
