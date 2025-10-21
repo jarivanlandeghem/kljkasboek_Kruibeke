@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from 'react-router';
 import KLJIcon from "../assets/KLJIcon.png";
 import logout from "../assets/logout.png";
 import user from "../assets/user.png";
@@ -42,28 +43,35 @@ export default function Navbar({ username = "Aykon" }) {
         </label>
 
         <span className="text-sm font-medium hidden sm:inline leading-none">
-          Home
+          <Link to='/'>Home</Link>
         </span>
         <span className="text-sm font-medium hidden sm:inline leading-none">
-          Lijst
+          <Link to='/transacties'>Transacties</Link>
         </span>
         <span className="text-sm font-medium hidden sm:inline leading-none">
-          Categorieen
+          <Link to='/categories'>Categorieen</Link>
         </span>
         <span className="text-sm font-medium hidden sm:inline leading-none">
+        <Link to='/profile'>
           {username}
+        </Link>
+
         </span>
-        <img
-          className="h-10 w-10 rounded-full flex-shrink-0"
-          src={user}
-          alt="user"
-        />
+        <Link to='/profile'>
+          <img
+            className="h-10 w-10 rounded-full flex-shrink-0"
+            src={user}
+            alt="user"
+          />
+        </Link>
+        <Link to='/login'> 
         <img
           className="h-8 w-auto flex-shrink-0 cursor-pointer"
           src={logout}
           alt="logout"
           onClick={() => console.log("Logout clicked")}
-        />
+          />
+        </Link>
       </div>
     </nav>
   );

@@ -1,4 +1,5 @@
 
+import { Link } from 'react-router';
 import AlgemeneLayout from "../components/AlgemeneLayout";
 import WelcomeMessage from "../components/WelcomeMessage";
 import ActionButton from "../components/ActionButton";
@@ -17,18 +18,24 @@ export default function HomePage() {
       <div className="flex flex-col gap-4 items-center">
         <WelcomeMessage username={username} />
 
-        <ActionButton 
-          label="Transactie toevoegen" 
-          onClick={() => handleClick("transactie")} 
-        />
-        <ActionButton 
-          label="Categorieoverzicht" 
-          onClick={() => handleClick("categorieoverzicht")} 
-        />
-        <ActionButton 
-          label="Gebruiker toevoegen" 
-          onClick={() => handleClick("gebruiker")} 
-        />
+        <Link to='addtransaction'>
+          <ActionButton 
+            label="Transactie toevoegen" 
+            onClick={() => handleClick("transactie")} 
+          />
+        </Link>
+        <Link to='/categories'>  
+          <ActionButton 
+            label="Categorieoverzicht" 
+            onClick={() => handleClick("categorieoverzicht")} 
+          />
+        </Link>
+        <Link to='adduser'>
+          <ActionButton 
+            label="Gebruiker toevoegen" 
+            onClick={() => handleClick("gebruiker")} 
+          />
+        </Link>
       </div>
     </AlgemeneLayout>
   );
