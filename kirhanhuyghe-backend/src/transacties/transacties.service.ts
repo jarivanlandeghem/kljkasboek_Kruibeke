@@ -118,6 +118,6 @@ export class TransactieService {
       bedrag: transactie.bedrag,
       datum: transactie.datum,
       categorieIDs,
-    };
+    }
   }
-}
+
