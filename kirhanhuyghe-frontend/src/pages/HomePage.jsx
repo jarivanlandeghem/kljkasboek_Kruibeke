@@ -6,8 +6,7 @@ import ActionButton from "../components/ActionButton";
 import kidsPlaying from "../assets/PlayingKids.jpg";
 
 export default function HomePage() {
-  // 🟢 PROPS — vaste data die we doorgeven
-  const username = "Aykon";
+  const username = "Aykon"; //later dit uit db halen adhv bepaalde user
 
   const handleClick = (section) => {
     console.log(`Navigating to: ${section}`);

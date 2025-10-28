@@ -1,9 +1,10 @@
 import Navbar from "../components/Navbar";
+import TransactionTable from "../components/transactions/TransactionTable";
 export default function TransactionsPage(){
     return(
     <div>
       <Navbar/>
-      <h1>test</h1> 
+      <TransactionTable/>
     </div>
   );
 }
