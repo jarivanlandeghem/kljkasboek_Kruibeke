@@ -42,18 +42,21 @@ export class TransactieService {
   }
 
   // Nieuwe transactie aanmaken
-  create(dto: CreateTransactieRequestDto): TransactieResponseDto {
-    const newId = Math.max(...TRANSACTION_DATA.map((t) => t.transactieID)) + 1;
+ async create(transactie: CreateTransactieRequestDto): Promise<TransactieResponseDto> {
 
-    const newTransactie: Transactie = {
-      transactieID: newId,
-      rekeningID: dto.rekeningID,
-      userID: dto.userID,
-      beschrijving: dto.beschrijving,
-      in_uit: dto.in_uit,
-      bedrag: dto.bedrag,
-      datum: dto.datum,
+    const transactieToInsert = {
+        ...transactie,
+        // Convert number 'bedrag' (from DTO) to string for Drizzle/DB decimal column
+        bedrag: transactie.bedrag.toString(), 
     };
+    const [newPlace] = await this.db
+      .insert(transactie)
+      .values(transactieToInsert)
+      .$returningId();
+
+    const newTransactieId = newTransactieIdObject.transactieID
+    return this.getById(newTransactieId);
+  }
 
     // Voeg transactie toe aan mock data
     TRANSACTION_DATA.push(newTransactie);

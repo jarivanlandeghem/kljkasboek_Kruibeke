@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Put,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   CreateTransactieRequestDto,

@@ -10,6 +10,11 @@ export default () => ({
   database: {
     url: process.env.DATABASE_URL,
   },
+  log: {
+    levels: process.env.LOG_LEVELS
+      ? (JSON.parse(process.env.LOG_LEVELS) as LogLevels[])
+      : ['log', 'error', 'warn'],
+  },
 });
 
 export interface ServerConfig {
@@ -17,6 +22,7 @@ export interface ServerConfig {
   port: number;
   cors: CorsConfig;
   database: DatabaseConfig;
+  log: LogConfig;
 }
 
 export interface CorsConfig {
@@ -26,3 +32,9 @@ export interface CorsConfig {
 export interface DatabaseConfig {
   url: string;
 }
+
+export interface LogConfig {
+  levels: LogLevels[];
+}
+
+type LogLevels = 'log' | 'error' | 'warn' | 'debug' | 'verbose' | 'fatal';
