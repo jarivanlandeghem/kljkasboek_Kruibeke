@@ -1,9 +1,8 @@
-import Transaction from './Transaction';
 
 export default function TransactionTable( /**hier een var met transactie */) {
 
   return (
-    <table className='table-auto w-full border-collapse'>
+    <table className='table-auto w-full justify-center border-collapse'>
       <thead>
         <tr className="border-b-2 border-gray-300">
           <th className="text-start py-2">Datum</th>
