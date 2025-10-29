@@ -1,0 +1,1 @@
+ALTER TABLE `categorieen` ADD `type` enum('IN','UIT') NOT NULL;

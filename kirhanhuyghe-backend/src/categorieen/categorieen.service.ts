@@ -7,12 +7,16 @@ import {
   CategorieResponseDto,
   UpdateCategorieDto,
 } from './categorieen.dto';
+import { categorieen } from '../drizzle/schema';
 
 @Injectable()
 export class CategorieenService {
   // Alle categorieën ophalen
-  getAll(): CategorieListResponseDto {
-    return { items: CATEGORIE_DATA.map(this.toResponseDto.bind(this)) };
+  async getAll(): Promise<CategorieListResponseDto> {
+    const items = await this.db.query.categorieen.findMany();
+    return { items };
+
+    // return { items: CATEGORIE_DATA.map(this.toResponseDto.bind(this)) };
   }
 
   // Categorie op ID ophalen
@@ -26,18 +30,20 @@ export class CategorieenService {
   }
 
   // Nieuwe categorie aanmaken
-  create(dto: CreateCategorieRequestDto): CategorieResponseDto {
-    const newId = Math.max(...CATEGORIE_DATA.map((c) => c.categorieID)) + 1;
-
-    const newCategorie: Categorie = {
-      categorieID: newId,
-      naam: dto.naam,
-      type: dto.type,
+  async create(dto: CreateCategorieRequestDto): Promise<CategorieResponseDto> {
+    const categorieToInsert = {
+      ...categorieen,
+    };
+   const[newCategorieIdObject] = await this.db 
+   .insert(categorieen)
+   .values(categorieToInsert)
+   .$returningId()
     };
 
-    CATEGORIE_DATA.push(newCategorie);
+    //TODO!!
+    // CATEGORIE_DATA.push(newCategorie);
 
-    return this.toResponseDto(newCategorie);
+    // return this.toResponseDto(newCategorie);
   }
 
   // Categorie bijwerken
@@ -49,7 +55,7 @@ export class CategorieenService {
     if (!categorie) return undefined;
 
     // Alleen velden bijwerken die aanwezig zijn
-    if (dto.naam !== undefined) categorie.naam = dto.naam;
+    if (dto.naam !== undefined) categorie.categorienaam = dto.naam;
     if (dto.type !== undefined) categorie.type = dto.type;
 
     return this.toResponseDto(categorie);
@@ -67,7 +73,7 @@ export class CategorieenService {
   private toResponseDto(categorie: Categorie): CategorieResponseDto {
     return {
       id: categorie.categorieID,
-      naam: categorie.naam,
+      naam: categorie.categorienaam,
       type: categorie.type,
     };
   }

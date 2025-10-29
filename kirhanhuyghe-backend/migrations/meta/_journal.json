@@ -15,6 +15,20 @@
       "when": 1761052962034,
       "tag": "0001_small_thor_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761779505232,
+      "tag": "0002_naive_marvel_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1761779972441,
+      "tag": "0003_thin_orphan",
+      "breakpoints": true
     }
   ]
 }

@@ -7,7 +7,7 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import * as mysql from 'mysql2/promise';
 import * as schema from './schema';
-import { TRANSACTION_DATA } from '../api/data/mock_data';
+import { TRANSACTION_DATA, CATEGORIE_DATA } from '../api/data/mock_data';
 
 const connection = mysql.createPool({
   uri: process.env.DATABASE_URL,
@@ -24,8 +24,25 @@ async function resetDatabase() {
 
   // Verwijder transacties
   await db.delete(schema.transacties).execute();
+  await db.delete(schema.categorieen).execute();
 
   console.log('✅ Database reset completed\n');
+}
+
+async function seedCategorieen() {
+  console.log('💰 Seeding categorieen...');
+
+  // ✅ Maak de transacties-array apart aan (duidelijker voor TypeScript)
+  const categorieen = CATEGORIE_DATA.map((t) => ({
+    categorieID: t.categorieID,
+    categorienaam: t.categorienaam,
+    type: t.type,
+  }));
+
+  // ✅ Insert uitvoeren met correcte types
+  await db.insert(schema.categorieen).values(categorieen);
+
+  console.log('✅ Transactions seeded successfully\n');
 }
 
 async function seedTransacties() {
@@ -52,6 +69,7 @@ async function main() {
 
   await resetDatabase();
   await seedTransacties();
+  await seedCategorieen();
 
   console.log('🎉 Database seeding completed successfully!');
 }
