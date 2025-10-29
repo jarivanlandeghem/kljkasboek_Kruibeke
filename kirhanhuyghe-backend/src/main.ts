@@ -5,6 +5,7 @@ import { ServerConfig, CorsConfig } from './config/configuration';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 import CustomLogger from '../core/customLogger';
+import { LogConfig } from './config/configuration';
 
 //TODO ZEKER DAT DIT WEKRT?
 async function bootstrap() {

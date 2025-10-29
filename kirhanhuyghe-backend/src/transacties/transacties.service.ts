@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   TRANSACTION_DATA,
-  TRANSACTIE_CATEGORIE_DATA,
+  // TRANSACTIE_CATEGORIE_DATA,
   Transactie,
 } from '../api/data/mock_data';
 import {
@@ -15,6 +15,7 @@ import {
   type DatabaseProvider,
   InjectDrizzle,
 } from '../drizzle/drizzle.provider';
+import { transacties } from '../drizzle/schema';
 
 @Injectable()
 export class TransactieService {
@@ -42,36 +43,37 @@ export class TransactieService {
   }
 
   // Nieuwe transactie aanmaken
- async create(transactie: CreateTransactieRequestDto): Promise<TransactieResponseDto> {
-
+  async create(
+    transactie: CreateTransactieRequestDto,
+  ): Promise<TransactieResponseDto> {
+    // De input DTO wordt gebruikt. Door 'mode: number' in Drizzle is bedrag al correct.
     const transactieToInsert = {
-        ...transactie,
-        // Convert number 'bedrag' (from DTO) to string for Drizzle/DB decimal column
-        bedrag: transactie.bedrag.toString(), 
-    };
-    const [newPlace] = await this.db
-      .insert(transactie)
+      ...transactie, // De conversie 'bedrag: transactie.bedrag.toString()' is hier NIET meer nodig.
+      // Datum is al een string (YYYY-MM-DD) volgens de DTO, dus geen conversie nodig.
+    }; // 1. Voer de INSERT uit en haal de ID op.
+    // Drizzle retourneert een array met een object dat de ID bevat: [{ transactieID: 42 }]
+
+    const [newTransactieIdObject] = await this.db
+      .insert(transacties) // Gebruik de geïmporteerde Drizzle-tabel
       .values(transactieToInsert)
-      .$returningId();
+      .$returningId(); // 2. Haal de ID uit het geretourneerde object.
 
-    const newTransactieId = newTransactieIdObject.transactieID
-    return this.getById(newTransactieId);
+    const newTransactieId = newTransactieIdObject.transactieID;
+
+    // 3. Haal de volledige transactie op.
+    // De returnwaarde kan 'TransactieResponseDto' of 'undefined' zijn.
+    const resultaat = this.getById(newTransactieId);
+
+    // 4. Controleer of het ophalen is gelukt (Type Narrowing).
+    if (!resultaat) {
+      // Dit zou theoretisch niet mogen gebeuren na een succesvolle insert.
+      // Gooi een fout als fallback.
+      throw new NotFoundException(
+        `Transactie met ID ${newTransactieId} kon niet worden opgehaald na creatie.`,
+      );
+    } // 5. Retourneer het resultaat. TypeScript weet nu dat 'resultaat' geen 'undefined' is.
+    return resultaat;
   }
-
-    // Voeg transactie toe aan mock data
-    TRANSACTION_DATA.push(newTransactie);
-
-    // Voeg koppelingen met categorieën toe
-    dto.categorieIDs.forEach((catID) => {
-      TRANSACTIE_CATEGORIE_DATA.push({
-        transactieID: newId,
-        categorieID: catID,
-      });
-    });
-
-    return this.toResponseDto(newTransactie);
-  }
-
   // UPDATE - niet exact volgens cursus via ai ma twerkt precies wel
   updateById(
     id: number,
@@ -87,7 +89,7 @@ export class TransactieService {
     const updatedTransactie: TransactieResponseDto = {
       ...existingTransactie,
       ...updateDto,
-      id: id, // of transactieID, afhankelijk van je DTO
+      transactieID: id, // of transactieID, afhankelijk van je DTO
     };
 
     return updatedTransactie;
@@ -105,19 +107,19 @@ export class TransactieService {
 
   // Helper: converteer Transactie naar TransactieResponseDto
   private toResponseDto(transactie: Transactie): TransactieResponseDto {
-    const categorieIDs = TRANSACTIE_CATEGORIE_DATA.filter(
-      (tc) => tc.transactieID === transactie.transactieID,
-    ).map((tc) => tc.categorieID);
+    // const categorieIDs = TRANSACTIE_CATEGORIE_DATA.filter(
+    //   (tc) => tc.transactieID === transactie.transactieID,
+    // ).map((tc) => tc.categorieID);
 
     return {
-      id: transactie.transactieID,
+      transactieID: transactie.transactieID,
       rekeningID: transactie.rekeningID,
       userID: transactie.userID,
       beschrijving: transactie.beschrijving,
       in_uit: transactie.in_uit,
       bedrag: transactie.bedrag,
       datum: transactie.datum,
-      categorieIDs,
+      // categorieIDs,
     };
   }
 }

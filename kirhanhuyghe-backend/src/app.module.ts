@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DrizzleModule } from './drizzle/drizzle.module';
 import configuration from './config/configuration';
+import { LoggerMiddleware } from './lib/logger.middleware';
 
 @Module({
   imports: [
@@ -12,4 +13,9 @@ import configuration from './config/configuration';
     DrizzleModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // 👈 1
+    consumer.apply(LoggerMiddleware).forRoutes('*path'); // 👈 2
+  }
+}

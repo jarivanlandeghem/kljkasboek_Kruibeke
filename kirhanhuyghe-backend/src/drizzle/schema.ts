@@ -21,9 +21,13 @@ export const transacties = mysqlTable('transacties', {
   beschrijving: text('beschrijving').notNull(),
   in_uit: mysqlEnum('in_uit', ['IN', 'UIT']).notNull(),
   //  decimal moet als string worden ingevoerd bij insert
-  bedrag: decimal('bedrag', { precision: 10, scale: 2 }).notNull(),
+  bedrag: decimal('bedrag', {
+    precision: 10,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
   //  date verwacht string, niet Date-object
-  datum: date('datum').notNull(),
+  datum: text('datum').notNull(),
 });
 
 //  TransactieCategorie (join table)
