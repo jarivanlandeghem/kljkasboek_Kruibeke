@@ -1,6 +1,13 @@
 // src/transactie/transactie.dto.ts
 
-import { isInt, isNotEmpty, isString, maxLength } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  IsIn,
+  Length,
+} from 'class-validator';
 
 /**
  * DTO voor het aanmaken van een nieuwe transactie.
@@ -9,26 +16,31 @@ import { isInt, isNotEmpty, isString, maxLength } from 'class-validator';
  * - 'bedrag' blijft number in DTO, maar bij insert in Drizzle moet je het omzetten naar string.
  */
 export class CreateTransactieRequestDto {
-  @isInt()
-  @isNotEmpty()
+  @IsInt()
+  @IsNotEmpty()
   rekeningID: number;
-  @isInt()
-  @isNotEmpty()
+
+  @IsInt()
+  @IsNotEmpty()
   userID: number;
-  @isString()
-  @isNotEmpty()
-  @maxLength(255)
-  @min(1)
-  @max(5)
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  @Length(1, 255)
   beschrijving: string;
-  @isNotEmpty()
+
+  @IsNotEmpty()
+  @IsIn(['IN', 'UIT'])
   in_uit: 'IN' | 'UIT';
-  @isInt()
-  @isNotEmpty()
+
+  @IsInt()
+  @IsNotEmpty()
   bedrag: number; // Wordt bij insert als string opgeslagen in decimal kolom
-  @isString()
-  @isNotEmpty()
-  @maxLength(255)
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
   datum: string; // YYYY-MM-DD
 }
 

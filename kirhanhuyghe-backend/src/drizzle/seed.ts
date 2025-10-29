@@ -37,8 +37,8 @@ async function seedTransacties() {
     userID: t.userID,
     beschrijving: t.beschrijving,
     in_uit: t.in_uit,
-    bedrag: t.bedrag.toString(), //  decimal moet als string
-    datum: new Date(t.datum), // date() verwacht 'YYYY-MM-DD', geen Date-object
+    bedrag: t.bedrag, //  decimal moet als string
+    datum: t.datum, // date() verwacht 'YYYY-MM-DD', geen Date-object
   }));
 
   // ✅ Insert uitvoeren met correcte types

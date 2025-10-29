@@ -8,7 +8,7 @@ import {
   HttpStatus,
   Put,
   Delete,
-  ParseIntPipe,
+  // ParseIntPipe,
 } from '@nestjs/common';
 import {
   CreateTransactieRequestDto,
@@ -42,7 +42,7 @@ export class TransactiesController {
   @HttpCode(HttpStatus.CREATED)
   createTransactie(
     @Body() createTransactieDto: CreateTransactieRequestDto,
-  ): TransactieResponseDto {
+  ): Promise<TransactieResponseDto> {
     return this.transactieService.create(createTransactieDto);
   }
 
