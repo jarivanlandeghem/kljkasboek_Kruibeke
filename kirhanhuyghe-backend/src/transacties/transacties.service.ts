@@ -122,4 +122,4 @@ export class TransactieService {
       // categorieIDs,
     };
   }
-
+}
