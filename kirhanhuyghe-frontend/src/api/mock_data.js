@@ -138,7 +138,7 @@ const TRANSACTIE_CATEGORIE_DATA = [
 ];
 
 // Exporteren
-export {
+export default {
   VERENIGING_DATA,
   REKENING_DATA,
   CATEGORIE_DATA,
