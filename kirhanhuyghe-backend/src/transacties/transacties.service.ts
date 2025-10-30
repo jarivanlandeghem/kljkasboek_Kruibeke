@@ -5,6 +5,7 @@ import {
   // TRANSACTIE_CATEGORIE_DATA,
   Transactie,
 } from '../api/data/mock_data';
+import { eq } from 'drizzle-orm';
 import {
   CreateTransactieRequestDto,
   TransactieListResponseDto,
@@ -24,24 +25,46 @@ export class TransactieService {
     private readonly db: DatabaseProvider,
   ) {}
   // Alle transacties ophalen
-  // getAll(): TransactieListResponseDto {
-  //   return { items: TRANSACTION_DATA.map(this.toResponseDto.bind(this)) };
-  // }
   async getAll(): Promise<TransactieListResponseDto> {
     const items = await this.db.query.transacties.findMany();
     return { items };
   }
   // Transactie op ID ophalen
-  getById(id: number): TransactieResponseDto | undefined {
+  async getById(id: number): Promise<TransactieResponseDto> {
+    // DB gebruiken via drizle
+    if (this.db) {
+      const transactie = await this.db.query.transacties.findFirst({
+        where: eq(transacties.transactieID, id),
+        with: {
+          categorieKoppelingen: true,
+        },
+      });
+
+      if (!transactie) {
+        throw new NotFoundException('Er bestaat geen transactie met deze ID');
+      }
+
+      return {
+        transactieID: transactie.transactieID,
+        rekeningID: transactie.rekeningID,
+        userID: transactie.userID,
+        beschrijving: transactie.beschrijving,
+        in_uit: transactie.in_uit,
+        bedrag: Number(transactie.bedrag),
+        datum: String(transactie.datum),
+      };
+    }
+
+    // Fallback to mock
     const transactie = TRANSACTION_DATA.find(
       (t: Transactie) => t.transactieID === id,
     );
     if (!transactie) {
-      throw new NotFoundException(`No transactie with this id exists`);
+      throw new NotFoundException('Er bestaat geen transactie met deze ID');
     }
-    return transactie ? this.toResponseDto(transactie) : undefined;
-  }
 
+    return this.toResponseDto(transactie);
+  }
   // Nieuwe transactie aanmaken
   async create(
     transactie: CreateTransactieRequestDto,
@@ -62,34 +85,33 @@ export class TransactieService {
 
     // 3. Haal de volledige transactie op.
     // De returnwaarde kan 'TransactieResponseDto' of 'undefined' zijn.
-    const resultaat = this.getById(newTransactieId);
+    const resultaat = await this.getById(newTransactieId);
 
-    // 4. Controleer of het ophalen is gelukt (Type Narrowing).
-    if (!resultaat) {
-      // Dit zou theoretisch niet mogen gebeuren na een succesvolle insert.
-      // Gooi een fout als fallback.
-      throw new NotFoundException(
-        `Transactie met ID ${newTransactieId} kon niet worden opgehaald na creatie.`,
-      );
-    } // 5. Retourneer het resultaat. TypeScript weet nu dat 'resultaat' geen 'undefined' is.
+    // 5. Retourneer het resultaat.
     return resultaat;
   }
   // UPDATE - niet exact volgens cursus via ai ma twerkt precies wel
-  updateById(
+  async updateById(
     id: number,
     updateDto: UpdateTransactieDto,
-  ): TransactieResponseDto | undefined {
+  ): Promise<TransactieResponseDto | undefined> {
     // Zoek de bestaande transactie
-    const existingTransactie = this.getById(id);
-    if (!existingTransactie) {
+    let existingTransactie: TransactieResponseDto;
+    try {
+      existingTransactie = await this.getById(id);
+    } catch {
       return undefined; // Geen match gevonden
     }
 
-    // Combineer de bestaande waarden met de nieuwe updates
+    // Combineer de bestaande waarden met de nieuwe updates (explicit field merge)
     const updatedTransactie: TransactieResponseDto = {
-      ...existingTransactie,
-      ...updateDto,
-      transactieID: id, // of transactieID, afhankelijk van je DTO
+      transactieID: id,
+      rekeningID: updateDto.rekeningID ?? existingTransactie.rekeningID,
+      userID: updateDto.userID ?? existingTransactie.userID,
+      beschrijving: updateDto.beschrijving ?? existingTransactie.beschrijving,
+      in_uit: updateDto.in_uit ?? existingTransactie.in_uit,
+      bedrag: updateDto.bedrag ?? existingTransactie.bedrag,
+      datum: updateDto.datum ?? existingTransactie.datum,
     };
 
     return updatedTransactie;

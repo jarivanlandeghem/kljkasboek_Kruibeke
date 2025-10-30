@@ -32,10 +32,10 @@ export class TransactiesController {
   }
 
   @Get(':id')
-  getTransactieById(
+  async getTransactieById(
     @Param('id') id: string,
-  ): TransactieResponseDto | undefined {
-    return this.transactieService.getById(Number(id));
+  ): Promise<TransactieResponseDto | undefined> {
+    return await this.transactieService.getById(Number(id));
   }
 
   @Post()
@@ -48,11 +48,11 @@ export class TransactiesController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  updateTransactieById(
+  async updateTransactieById(
     @Param('id') id: string,
     @Body() updateDto: UpdateTransactieDto,
-  ): TransactieResponseDto | undefined {
-    return this.transactieService.updateById(Number(id), updateDto);
+  ): Promise<TransactieResponseDto | undefined> {
+    return await this.transactieService.updateById(Number(id), updateDto);
   }
 
   @Delete(':id')

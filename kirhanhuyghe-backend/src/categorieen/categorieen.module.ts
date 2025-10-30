@@ -6,6 +6,6 @@ import { CategorieenService } from './categorieen.service';
   imports: [],
   controllers: [CategorieenController],
   providers: [CategorieenService],
-  exports: [CategorieenService]
+  exports: [CategorieenService],
 })
 export class TransactiesModule {}
