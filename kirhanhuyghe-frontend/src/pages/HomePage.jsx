@@ -14,7 +14,7 @@ export default function HomePage() {
 
   return (
     <AlgemeneLayout image={kidsPlaying}>
-      <div className="flex flex-col gap-4 items-center page-bg-white">
+      <div className="flex flex-col gap-4 items-center bg-white dark:bg-gray-600">
         <WelcomeMessage username={username} />
 
         <Link to='transactions'>
