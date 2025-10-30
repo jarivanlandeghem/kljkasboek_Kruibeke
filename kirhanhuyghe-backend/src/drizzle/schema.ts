@@ -8,7 +8,6 @@ import {
   primaryKey,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
-import { varchar } from 'drizzle-orm/mysql-core';
 //  Transacties
 
 // Opmerking AI:
@@ -55,9 +54,3 @@ export const transactieCategorieRelations = relations(
     }),
   }),
 );
-
-export const categories = mysqlTable('categories', {
-  categorieID: int('categorieID').autoincrement().primaryKey(),
-  naam: varchar('naam', { length: 255 }).notNull(),
-  type: varchar('type', { length: 255 }).notNull(),
-});
