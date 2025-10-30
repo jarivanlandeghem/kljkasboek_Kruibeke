@@ -40,7 +40,7 @@ export class TransactiesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createTransactie(
+  async createTransactie(
     @Body() createTransactieDto: CreateTransactieRequestDto,
   ): Promise<TransactieResponseDto> {
     return this.transactieService.create(createTransactieDto);
@@ -57,7 +57,7 @@ export class TransactiesController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deletePlace(@Param('id') id: string): void {
-    this.transactieService.deleteById(Number(id));
+  async deleteTransactie(@Param('id') id: string): Promise<void> {
+    await this.transactieService.deleteById(Number(id));
   }
 }

@@ -118,12 +118,13 @@ export class TransactieService {
   }
 
   // VERWIJDER
-  deleteById(id: number): void {
-    const index = TRANSACTION_DATA.findIndex(
-      (item: Transactie) => item.transactieID === id,
-    );
-    if (index >= 0) {
-      TRANSACTION_DATA.splice(index, 1);
+  async deleteById(id: number): Promise<void> {
+    const [result] = await this.db
+      .delete(transacties)
+      .where(eq(transacties.transactieID, id));
+
+    if (result.affectedRows === 0) {
+      throw new NotFoundException('Er bestaat geen transactie met deze ID');
     }
   }
 
@@ -144,4 +145,14 @@ export class TransactieService {
       // categorieIDs,
     };
   }
+
+  // tussentabel transacties en categorieen (worst practice om apparte controller en service te maken)
+  // weet niet zeker hoe ik dit implementeer
+  // async getFavoritePlacesByUserId(userId: number): Promise<TransactieResponseDto[]> {
+  //   const favoritePlaces = await this.db.query.transactieCategorie.findMany({
+  //     where: eq(transactieCategorie.transactieID, transactieID),
+  //     with: { place: true },
+  //   });
+  //   return favoritePlaces.map((fav) => fav.place);
+  // }
 }
