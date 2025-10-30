@@ -1,4 +1,5 @@
 import { StrictMode } from 'react';
+import ThemeProvider from './contexts/Theme.context';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
@@ -31,8 +32,23 @@ const router = createBrowserRouter([
   },
 ]);
 
+// OUDE VERSIE
+// createRoot(document.getElementById('root')).render(
+//   <StrictMode>
+//     <RouterProvider router={router} />
+//   </StrictMode>,
+// )
+
+// DARMODE implementatie
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    {/* 👇 */}
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+    {/* 👆 */}
   </StrictMode>,
-)
+);
+
+
+
