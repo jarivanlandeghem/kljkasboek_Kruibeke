@@ -3,12 +3,12 @@ import {
   mysqlTable,
   int,
   decimal,
-  date,
   text,
   mysqlEnum,
   primaryKey,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
+import { varchar } from 'drizzle-orm/mysql-core';
 //  Transacties
 
 // Opmerking AI:
@@ -45,6 +45,7 @@ export const transactieCategorie = mysqlTable(
 export const transactiesRelations = relations(transacties, ({ many }) => ({
   categorieKoppelingen: many(transactieCategorie), // <-- Relatie naar de join-tabel
 }));
+
 export const transactieCategorieRelations = relations(
   transactieCategorie,
   ({ one }) => ({
@@ -54,3 +55,9 @@ export const transactieCategorieRelations = relations(
     }),
   }),
 );
+
+export const categories = mysqlTable('categories', {
+  categorieID: int('categorieID').autoincrement().primaryKey(),
+  naam: varchar('naam', { length: 255 }).notNull(),
+  type: varchar('type', { length: 255 }).notNull(),
+});
