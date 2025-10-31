@@ -3,13 +3,16 @@ import {
   mysqlTable,
   int,
   decimal,
-  //  date,
   text,
   mysqlEnum,
   primaryKey,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 //  Transacties
+
+// Opmerking AI:
+// Let op: 'date()' verwacht een string in formaat 'YYYY-MM-DD', geen JS Date-object.
+// Als je liever DateTime wilt opslaan, gebruik 'timestamp()' in plaats van 'date()'.
 export const transacties = mysqlTable('transacties', {
   transactieID: int('transactieID').autoincrement().primaryKey(),
   rekeningID: int('rekeningID').notNull(),
@@ -22,17 +25,11 @@ export const transacties = mysqlTable('transacties', {
     scale: 2,
     mode: 'number',
   }).notNull(),
-
+  //  date verwacht string, niet Date-object
   datum: text('datum').notNull(),
 });
 
-// tabel categorieen
-export const categorieen = mysqlTable('categorieen', {
-  categorieID: int('categorieID').autoincrement().primaryKey(),
-  categorienaam: text('categorienaam').notNull(),
-  type: mysqlEnum('type', ['IN', 'UIT']).notNull(),
-});
-//  TransactieCategorie (join table) TODO
+//  TransactieCategorie (join table)
 export const transactieCategorie = mysqlTable(
   'transactieCategorie',
   {
@@ -44,10 +41,10 @@ export const transactieCategorie = mysqlTable(
   }),
 );
 
-// AI gedaan? TODO
 export const transactiesRelations = relations(transacties, ({ many }) => ({
   categorieKoppelingen: many(transactieCategorie), // <-- Relatie naar de join-tabel
 }));
+
 export const transactieCategorieRelations = relations(
   transactieCategorie,
   ({ one }) => ({

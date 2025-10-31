@@ -19,15 +19,8 @@
     {
       "idx": 2,
       "version": "5",
-      "when": 1761779505232,
-      "tag": "0002_naive_marvel_boy",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1761779972441,
-      "tag": "0003_thin_orphan",
+      "when": 1761819128945,
+      "tag": "0002_careful_cardiac",
       "breakpoints": true
     }
   ]

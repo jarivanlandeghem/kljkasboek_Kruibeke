@@ -6,7 +6,7 @@ import ActionButton from "../components/ActionButton";
 import kidsPlaying from "../assets/PlayingKids.jpg";
 
 export default function HomePage() {
-  const username = "Aykon"; //later dit uit db halen adhv bepaalde user
+  const username = "Ben"; //later dit uit db halen adhv bepaalde user
 
   const handleClick = (section) => {
     console.log(`Navigating to: ${section}`);
@@ -14,7 +14,7 @@ export default function HomePage() {
 
   return (
     <AlgemeneLayout image={kidsPlaying}>
-      <div className="flex flex-col gap-4 items-center page-bg-white">
+      <div className="flex flex-col gap-4 items-center bg-white dark:bg-gray-600">
         <WelcomeMessage username={username} />
 
         <Link to='transactions'>

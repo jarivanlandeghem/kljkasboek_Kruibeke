@@ -24,7 +24,7 @@ export interface Rekening {
 
 export interface Categorie {
   categorieID: number;
-  categorienaam: string;
+  naam: string;
   type: 'IN' | 'UIT';
 }
 
@@ -88,11 +88,11 @@ export const REKENING_DATA: Rekening[] = [
 
 // Categorieën
 export const CATEGORIE_DATA: Categorie[] = [
-  { categorieID: 1, categorienaam: 'Kilometervergoeding', type: 'UIT' },
-  { categorieID: 2, categorienaam: 'Materiaalaankoop', type: 'UIT' },
-  { categorieID: 3, categorienaam: 'Inschrijvingsgeld', type: 'IN' },
-  { categorieID: 4, categorienaam: 'Huur zaal', type: 'UIT' },
-  { categorieID: 5, categorienaam: 'Rente', type: 'IN' },
+  { categorieID: 1, naam: 'Kilometervergoeding', type: 'UIT' },
+  { categorieID: 2, naam: 'Materiaalaankoop', type: 'UIT' },
+  { categorieID: 3, naam: 'Inschrijvingsgeld', type: 'IN' },
+  { categorieID: 4, naam: 'Huur zaal', type: 'UIT' },
+  { categorieID: 5, naam: 'Rente', type: 'IN' },
 ];
 
 // Gebruikers

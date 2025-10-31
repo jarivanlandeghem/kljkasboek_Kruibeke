@@ -1,7 +1,8 @@
-CREATE TABLE `categorieen` (
+CREATE TABLE `categories` (
 	`categorieID` int AUTO_INCREMENT NOT NULL,
-	`categorienaam` text NOT NULL,
-	CONSTRAINT `categorieen_categorieID` PRIMARY KEY(`categorieID`)
+	`naam` varchar(255) NOT NULL,
+	`type` varchar(255) NOT NULL,
+	CONSTRAINT `categories_categorieID` PRIMARY KEY(`categorieID`)
 );
 --> statement-breakpoint
 ALTER TABLE `transacties` MODIFY COLUMN `transactieID` int AUTO_INCREMENT NOT NULL;--> statement-breakpoint

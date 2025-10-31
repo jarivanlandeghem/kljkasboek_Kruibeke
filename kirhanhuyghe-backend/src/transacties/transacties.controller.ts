@@ -32,15 +32,15 @@ export class TransactiesController {
   }
 
   @Get(':id')
-  getTransactieById(
+  async getTransactieById(
     @Param('id') id: string,
-  ): TransactieResponseDto | undefined {
-    return this.transactieService.getById(Number(id));
+  ): Promise<TransactieResponseDto | undefined> {
+    return await this.transactieService.getById(Number(id));
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createTransactie(
+  async createTransactie(
     @Body() createTransactieDto: CreateTransactieRequestDto,
   ): Promise<TransactieResponseDto> {
     return this.transactieService.create(createTransactieDto);
@@ -48,16 +48,16 @@ export class TransactiesController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  updateTransactieById(
+  async updateTransactieById(
     @Param('id') id: string,
     @Body() updateDto: UpdateTransactieDto,
-  ): TransactieResponseDto | undefined {
-    return this.transactieService.updateById(Number(id), updateDto);
+  ): Promise<TransactieResponseDto | undefined> {
+    return await this.transactieService.updateById(Number(id), updateDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deletePlace(@Param('id') id: string): void {
-    this.transactieService.deleteById(Number(id));
+  async deleteTransactie(@Param('id') id: string): Promise<void> {
+    await this.transactieService.deleteById(Number(id));
   }
 }

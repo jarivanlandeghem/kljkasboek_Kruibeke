@@ -26,7 +26,7 @@ export class CategorieenController {
   ) {}
 
   @Get()
-  async getAllCategorieen(): Promise<CategorieListResponseDto> {
+  getAllCategorieen(): CategorieListResponseDto {
     return this.categorieenService.getAll();
   }
 
@@ -37,9 +37,9 @@ export class CategorieenController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED) // statuscode op 201
-  async createCategorie(
+  createCategorie(
     @Body() createCategorieDto: CreateCategorieRequestDto,
-  ): Promise<CategorieResponseDto> {
+  ): CategorieResponseDto {
     return this.categorieenService.create(createCategorieDto);
   }
   @Put(':id')
