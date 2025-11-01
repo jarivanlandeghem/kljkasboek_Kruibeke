@@ -26,33 +26,35 @@ export class CategorieenController {
   ) {}
 
   @Get()
-  getAllCategorieen(): CategorieListResponseDto {
+  async getAllCategorieen(): Promise<CategorieListResponseDto> {
     return this.categorieenService.getAll();
   }
 
   @Get(':id')
-  getCategorieById(@Param('id') id: string): CategorieResponseDto | undefined {
-    return this.categorieenService.getById(Number(id));
+  async getCategorieById(
+    @Param('id') id: string,
+  ): Promise<CategorieResponseDto | undefined> {
+    return await this.categorieenService.getById(Number(id));
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED) // statuscode op 201
-  createCategorie(
+  async createCategorie(
     @Body() createCategorieDto: CreateCategorieRequestDto,
-  ): CategorieResponseDto {
+  ): Promise<CategorieResponseDto> {
     return this.categorieenService.create(createCategorieDto);
   }
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  updateTransactieById(
+  async updateTransactieById(
     @Param('id') id: string,
     @Body() updateDto: UpdateCategorieDto,
-  ): CategorieResponseDto | undefined {
-    return this.categorieenService.updateById(Number(id), updateDto);
+  ): Promise<CategorieResponseDto | undefined> {
+    return await this.categorieenService.updateById(Number(id), updateDto);
   }
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deletePlace(@Param('id') id: string): void {
-    this.categorieenService.deleteById(Number(id));
+  async deletePlace(@Param('id') id: string): Promise<void> {
+    await this.categorieenService.deleteById(Number(id));
   }
 }

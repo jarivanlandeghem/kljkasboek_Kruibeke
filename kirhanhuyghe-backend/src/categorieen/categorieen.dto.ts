@@ -1,14 +1,18 @@
-// src/categorie/categorie.dto.ts
-
+import { IsInt, IsNotEmpty, IsString, IsIn } from 'class-validator';
 /**
  * DTO voor het aanmaken van een nieuwe categorie.
  */
 export class CreateCategorieRequestDto {
-  naam: string;
+  @IsString()
+  @IsNotEmpty()
+  categorienaam: string;
+  @IsNotEmpty()
+  @IsIn(['IN', 'UIT'])
   type: 'IN' | 'UIT';
 }
 export class CategorieResponseDto extends CreateCategorieRequestDto {
-  id: number;
+  @IsInt()
+  categorieID: number;
 }
 
 export class CategorieListResponseDto {
@@ -22,7 +26,8 @@ export class CategorieListResponseDto {
  * DTO voor het wijzigen van een bestaande categorie.
  */
 export class UpdateCategorieDto {
-  naam?: string;
+  categorieID: number;
+  categorienaam?: string;
   type?: 'IN' | 'UIT';
 }
 // src/categorie/categorie.dto.ts
@@ -33,7 +38,7 @@ export class UpdateCategorieDto {
  */
 export class ReadCategorieDto {
   categorieID: number;
-  naam: string;
+  categorienaam: string;
   type: 'IN' | 'UIT';
   // Kan uitgebreid worden met bijvoorbeeld:
   // aantalTransacties: number;
