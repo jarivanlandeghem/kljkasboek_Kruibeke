@@ -31,8 +31,10 @@ export class CategorieenController {
   }
 
   @Get(':id')
-  getCategorieById(@Param('id') id: string): CategorieResponseDto | undefined {
-    return this.categorieenService.getById(Number(id));
+  async getCategorieById(
+    @Param('id') id: string,
+  ): Promise<CategorieResponseDto | undefined> {
+    return await this.categorieenService.getById(Number(id));
   }
 
   @Post()
@@ -44,15 +46,15 @@ export class CategorieenController {
   }
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  updateTransactieById(
+  async updateTransactieById(
     @Param('id') id: string,
     @Body() updateDto: UpdateCategorieDto,
-  ): CategorieResponseDto | undefined {
-    return this.categorieenService.updateById(Number(id), updateDto);
+  ): Promise<CategorieResponseDto | undefined> {
+    return await this.categorieenService.updateById(Number(id), updateDto);
   }
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deletePlace(@Param('id') id: string): void {
-    this.categorieenService.deleteById(Number(id));
+  async deletePlace(@Param('id') id: string): Promise<void> {
+    await this.categorieenService.deleteById(Number(id));
   }
 }

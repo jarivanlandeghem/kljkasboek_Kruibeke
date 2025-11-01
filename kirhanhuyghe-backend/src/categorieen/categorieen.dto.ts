@@ -1,30 +1,18 @@
-import {
-  IsInt,
-  IsNotEmpty,
-  IsString,
-  MaxLength,
-  IsIn,
-  Length,
-  isNotEmpty,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, IsIn } from 'class-validator';
 /**
  * DTO voor het aanmaken van een nieuwe categorie.
  */
 export class CreateCategorieRequestDto {
-  @IsInt()
-  @IsNotEmpty()
-  categorieID: number;
-
   @IsString()
   @IsNotEmpty()
-  categorienaam: Text;
+  categorienaam: string;
   @IsNotEmpty()
+  @IsIn(['IN', 'UIT'])
   type: 'IN' | 'UIT';
 }
 export class CategorieResponseDto extends CreateCategorieRequestDto {
-  categorieIDid: number;
-  categorienaam: Text;
-  type: 'IN' | 'UIT';
+  @IsInt()
+  categorieID: number;
 }
 
 export class CategorieListResponseDto {
