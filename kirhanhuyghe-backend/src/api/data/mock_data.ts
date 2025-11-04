@@ -3,7 +3,7 @@
 // -----------------------------
 // Interfaces
 // -----------------------------
-
+import { Role } from '../../auth/roles';
 export interface Vereniging {
   verenigingID: number;
   naam: string;
@@ -30,12 +30,12 @@ export interface Categorie {
 
 export interface User {
   userID: number;
-  verenigingID: number;
+  // verenigingID: number;
   voornaam: string;
   familienaam: string;
   email: string;
   paswoord: string;
-  rechten: 'admin' | 'user';
+  roles: Role[];
 }
 
 export interface Transactie {
@@ -99,30 +99,29 @@ export const CATEGORIE_DATA: Categorie[] = [
 export const USER_DATA: User[] = [
   {
     userID: 1,
-    verenigingID: 1,
     voornaam: 'Jasper',
     familienaam: 'Huyghe',
     email: 'jasper.huyghe@outlook.be',
     paswoord: 'hashed_pw_123',
-    rechten: 'admin',
+    roles: [Role.ADMIN, Role.USER],
   },
   {
     userID: 2,
-    verenigingID: 1,
+    //verenigingID: 1,
     voornaam: 'Aykon',
     familienaam: 'Kirhan',
     email: 'aykon.kirhan@kljsgw.be',
     paswoord: 'hashed_pw_456',
-    rechten: 'user',
+    roles: [Role.USER],
   },
   {
     userID: 3,
-    verenigingID: 1,
-    voornaam: 'Thomas',
-    familienaam: 'Martens',
-    email: 'thomas.martens@kljsgw.be',
+    // verenigingID: 1,
+    voornaam: 'Lotte',
+    familienaam: 'Speleman',
+    email: 'lotte.speleman@kljsgw.be',
     paswoord: 'hashed_pw_789',
-    rechten: 'user',
+    roles: [Role.LEIDING, Role.USER],
   },
 ];
 

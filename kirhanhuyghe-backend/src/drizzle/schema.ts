@@ -7,6 +7,9 @@ import {
   text,
   mysqlEnum,
   primaryKey,
+  varchar,
+  uniqueIndex,
+  json,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 //  Transacties
@@ -43,6 +46,22 @@ export const transactieCategorie = mysqlTable(
     pk: primaryKey({ columns: [table.transactieID, table.categorieID] }),
   }),
 );
+
+// TODO USER TABEL
+// src/drizzle/schema.ts
+export const users = mysqlTable(
+  'users',
+  {
+    userid: int('id', { unsigned: true }).primaryKey().autoincrement(),
+    voornaam: varchar('voornaam', { length: 255 }).notNull(),
+    familienaam: varchar('familienaam', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull(), // 👈
+    paswoord: varchar('password_hash', { length: 255 }).notNull(), // 👈
+    roles: json('roles').notNull(), // 👈
+  },
+  (table) => [uniqueIndex('idx_user_email_unique').on(table.email)], // 👈
+);
+// verenigingID ineens dat die er is
 
 // AI gedaan? TODO
 export const transactiesRelations = relations(transacties, ({ many }) => ({
