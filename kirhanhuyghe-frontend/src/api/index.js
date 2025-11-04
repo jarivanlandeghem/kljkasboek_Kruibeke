@@ -8,3 +8,7 @@ export async function getAll(url) {
 
   return data.items;
 }
+
+export const deleteById = async (url, { arg: id }) => {
+  await axios.delete(`${baseUrl}/${url}/${id}`); 
+};

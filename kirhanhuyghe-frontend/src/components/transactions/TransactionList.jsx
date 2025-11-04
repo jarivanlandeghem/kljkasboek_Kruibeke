@@ -1,14 +1,15 @@
 import TransactionsTable from './TransactionTable';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import AsyncData from '../AsyncData';
-import useSWR from 'swr';
-import { getAll } from '../../api';
+import useSWR, { useSWRConfig } from 'swr';
+import { getAll, deleteById } from '../../api';
 
 
 export default function TransactionList() {
 
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');  
+  const { mutate } = useSWRConfig();
 
    const {
     data: transacties = [],
@@ -24,6 +25,16 @@ export default function TransactionList() {
       }),
     [search, transacties],
   );
+
+  const handleDelete = useCallback(async (transactieID) => {
+    try {
+      await deleteById('transacties', { arg: transactieID });
+      mutate('transacties');
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      alert('Er is een fout opgetreden bij het verwijderen van de transactie.');
+    }
+  }, [mutate]);
 
   return (
     <div className='ml-5'>
@@ -47,7 +58,7 @@ export default function TransactionList() {
       
        <div className='mt-4'>
         <AsyncData loading={isLoading} error={error}>
-          <TransactionsTable transacties={filteredTransacties}/>
+          <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete}/>
         </AsyncData>
       </div>
     </div>

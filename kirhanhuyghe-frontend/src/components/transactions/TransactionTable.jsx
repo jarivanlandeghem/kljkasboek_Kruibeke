@@ -21,7 +21,7 @@ function TransactionsTable({ transacties, onDelete }) {
       </thead>
       <tbody>
         {transacties.map((transaction) => (
-          <Transaction key={transaction.id} {...transaction}  onDelete={onDelete} />
+          <Transaction key={transaction.transactieID} {...transaction} onDelete={onDelete} />
         ))}
       </tbody>
     </table>
