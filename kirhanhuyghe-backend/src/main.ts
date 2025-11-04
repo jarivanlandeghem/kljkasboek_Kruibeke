@@ -6,6 +6,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 import CustomLogger from '../core/customLogger';
 import { LogConfig } from './config/configuration';
+import { DrizzleQueryErrorFilter } from './drizzle/drizzle-query-error.filter';
 
 //TODO ZEKER DAT DIT WEKRT?
 async function bootstrap() {
@@ -55,6 +56,7 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000, () => {
     new Logger().log('🚀 Server listening on http://127.0.0.1:3000'); //TODO
   });
+  app.useGlobalFilters(new DrizzleQueryErrorFilter());
   console.log(`Application is running on: http://localhost:${port}/api`);
 }
 
