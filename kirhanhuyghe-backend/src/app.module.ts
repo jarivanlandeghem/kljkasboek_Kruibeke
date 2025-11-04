@@ -1,6 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DrizzleModule } from './drizzle/drizzle.module';
+import { TransactiesModule } from './transacties/transacties.module';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './lib/logger.middleware';
 import { UserModule } from './users/user.module';
@@ -12,6 +13,7 @@ import { UserModule } from './users/user.module';
       isGlobal: true,
     }),
     DrizzleModule,
+    TransactiesModule,
     UserModule,
   ],
 })
