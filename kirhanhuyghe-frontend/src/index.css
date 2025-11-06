@@ -4,7 +4,7 @@
 /*Implementatie darkmode - via cursus en geimplementeerd tijdens de les*/
 @layer base {
   html, body {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
+  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-black;
   min-height: 100vh;
   }
   h1 {
@@ -28,6 +28,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  color:white;
 }
 
 a {
@@ -59,7 +63,6 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
