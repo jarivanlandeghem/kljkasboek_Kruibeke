@@ -46,7 +46,7 @@ function Transaction({
       <td className="py-2">User {userID}</td>
       <td className="py-2">{amountFormat.format(bedrag || 0)}</td>
       <td className="text-end py-2 pl-8">
-        <button className='py-2 px-2.5 rounded-md bg-blue-600' onClick={handleDelete}>
+        <button className='py-2 px-2.5 rounded-md bg-gray-950' onClick={handleDelete}>
           <IoTrashOutline />
         </button>
       </td>

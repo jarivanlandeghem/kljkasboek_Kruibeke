@@ -38,25 +38,33 @@ export default function TransactionList() {
 
   return (
     <div className='ml-5'>
-      <h1 className="text-4xl mb-4 mt-5 text-black">Transactions</h1>
-      <div className='input-group mb-3 w-50'>
-        <input
-          type='search'
-          id='search'
-          className='form-control rounded mt-3 text-black'
-          placeholder='Search'
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <button className='mt-3' type='button' onClick={() => setSearch(text)}>
-          Search
-        </button>
-        <button className='ml-5 text-center bg-red-700 w-30'>
-          +
-        </button>
+      <h1 className="text-4xl mb-4 mt-5 text-black">Transacties</h1>
+      <div className='flex items-start justify-between mb-3 w-full'>
+        <div className='input-group flex items-center gap-2'>
+          <input
+            type='search'
+            id='search'
+            className='form-control border-2 h-10 rounded text-black flex-1 min-w-50'
+            placeholder='Search'
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <button className='bg-gray-950 text-white rounded min-w-30' type='button' onClick={() => setSearch(text)}>
+            Search
+          </button>
+        </div>
+
+        <div className='flex items-center gap-2'>
+          <button className='text-center w-40 bg-red-700 px-3 py-2 text-white rounded' type='button'>
+            Voeg toe
+          </button>
+          <button className='bg-blue-950 w-40 mr-5 text-white px-3 py-2 rounded' type='button'>
+            Importeer CSV
+          </button>
+        </div>
       </div>
       
-       <div className='mt-4'>
+       <div className='mt-4 mr-5'>
         <AsyncData loading={isLoading} error={error}>
           <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete}/>
         </AsyncData>

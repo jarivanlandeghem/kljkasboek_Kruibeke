@@ -1,9 +1,79 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "2e53df31-97f0-46c7-be50-164e6fefcffe",
+  "id": "30299321-1890-48e5-97b6-20d9af09ec5f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "categorieen": {
+      "name": "categorieen",
+      "columns": {
+        "categorieID": {
+          "name": "categorieID",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "categorienaam": {
+          "name": "categorienaam",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "enum('IN','UIT')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "categorieen_categorieID": {
+          "name": "categorieen_categorieID",
+          "columns": [
+            "categorieID"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "transactieCategorie": {
+      "name": "transactieCategorie",
+      "columns": {
+        "transactieID": {
+          "name": "transactieID",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "categorieID": {
+          "name": "categorieID",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "transactieCategorie_transactieID_categorieID_pk": {
+          "name": "transactieCategorie_transactieID_categorieID_pk",
+          "columns": [
+            "transactieID",
+            "categorieID"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "transacties": {
       "name": "transacties",
       "columns": {
@@ -12,7 +82,7 @@
           "type": "int",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
         "rekeningID": {
           "name": "rekeningID",
@@ -51,7 +121,7 @@
         },
         "datum": {
           "name": "datum",
-          "type": "date",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
