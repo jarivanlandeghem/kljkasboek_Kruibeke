@@ -133,3 +133,5 @@ dist
 
 #kirhanhuyghe map
 kirhanhuyghe
+kirhanhuyghe-frontend/package.json
+kirhanhuyghe-frontend/pnpm-lock.yaml
