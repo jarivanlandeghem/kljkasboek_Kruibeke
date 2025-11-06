@@ -7,8 +7,13 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import * as mysql from 'mysql2/promise';
 import * as schema from './schema';
-import { TRANSACTION_DATA, CATEGORIE_DATA } from '../api/data/mock_data';
-
+import {
+  TRANSACTION_DATA,
+  CATEGORIE_DATA,
+  USER_DATA,
+} from '../api/data/mock_data';
+import * as argon2 from 'argon2';
+// import { Role } from '../auth/roles';
 const connection = mysql.createPool({
   uri: process.env.DATABASE_URL,
   connectionLimit: 5,
@@ -64,12 +69,45 @@ async function seedTransacties() {
   console.log('✅ Transactions seeded successfully\n');
 }
 
+// USERS + PASWOORDHASH
+
+async function hashPassword(password: string): Promise<string> {
+  // 👇 2
+  return argon2.hash(password, {
+    type: argon2.argon2id, // 👈 3
+    hashLength: 32, // 👈 4
+    timeCost: 2, // 👈 5
+    memoryCost: 2 ** 16, // 👈 6
+  });
+}
+
+async function seedUsers() {
+  console.log('👥 Seeding users...');
+
+  // Hash passwords parallel
+  const usersData = await Promise.all(
+    USER_DATA.map(async (u) => ({
+      voornaam: u.voornaam,
+      familienaam: u.familienaam,
+      email: u.email,
+      paswoord: await hashPassword(u.paswoord), // hashfunctie
+      roles: u.roles,
+    })),
+  );
+
+  // ✅ Insert uitvoeren met gewone objecten
+  await db.insert(schema.users).values(usersData);
+
+  console.log('✅ Users seeded successfully\n');
+}
+
 async function main() {
   console.log('🌱 Starting database seeding...\n');
 
   await resetDatabase();
   await seedTransacties();
   await seedCategorieen();
+  await seedUsers();
 
   console.log('🎉 Database seeding completed successfully!');
 }

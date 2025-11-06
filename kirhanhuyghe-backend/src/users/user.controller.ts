@@ -27,9 +27,8 @@ import {
   PublicUserResponseDto,
   UpdateUserRequestDto,
   UserResponseDto,
-} from './user.dto'; // TODO
-
-import { UserService } from './user.service'; // TODO
+} from './user.dto';
+import { UserService } from './user.service';
 
 @Controller('users')
 export class UserController {
