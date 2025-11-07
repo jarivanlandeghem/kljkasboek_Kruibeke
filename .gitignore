@@ -130,10 +130,3 @@ dist
 
 # idea map
 .idea
-
-#kirhanhuyghe map
-kirhanhuyghe
-kirhanhuyghe-frontend/package.json
-kirhanhuyghe-frontend/pnpm-lock.yaml
-pnpm-lock.yaml
-package.json
