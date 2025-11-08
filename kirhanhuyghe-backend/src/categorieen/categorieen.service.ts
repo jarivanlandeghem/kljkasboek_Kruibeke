@@ -51,7 +51,7 @@ export class CategorieenService {
     //fallback
     const categorie = CATEGORIE_DATA.find((c) => c.categorieID === id);
     if (!categorie) {
-      throw new NotFoundException('No categorie with this id exists'); // ✅ Fixed
+      throw new NotFoundException('No categorie with this id exists');
     }
     return this.toResponseDto(categorie);
   }
@@ -86,6 +86,10 @@ export class CategorieenService {
       categorienaam: updateDto.categorienaam ?? existingCategorie.categorienaam,
       type: updateDto.type ?? existingCategorie.type,
     };
+    await this.db
+      .update(categorieen)
+      .set(updatedCategorie)
+      .where(eq(categorieen.categorieID, id));
     return updatedCategorie;
   }
 

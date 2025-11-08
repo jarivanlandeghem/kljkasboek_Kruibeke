@@ -114,6 +114,11 @@ export class TransactieService {
       datum: updateDto.datum ?? existingTransactie.datum,
     };
 
+    await this.db
+      .update(transacties)
+      .set(updatedTransactie)
+      .where(eq(transacties.transactieID, id));
+
     return updatedTransactie;
   }
 
