@@ -91,19 +91,20 @@ export class AuthService {
     return this.signJwt(user); // 👈 5
   }
   async register({
-    name,
+    voornaam,
+    familienaam,
     email,
     password,
   }: RegisterUserRequestDto): Promise<string> {
     // 👇 1
-    const passwordHash = await this.hashPassword(password);
+    const passwordHash = await this.hashPassword(password); // TODO
 
     // 👇 2
     const [newUser] = await this.db
       .insert(users)
-      .values({
-        naam,
-        voornaam, // hoezo ? TODO
+      .values({ //TODO
+        voornaam,
+        familienaam, // hoezo ? TODO
         email,
         password: password, // TODO paswoord of password of ..?
         roles: [Role.USER], // 👈 3
