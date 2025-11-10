@@ -212,47 +212,49 @@ export default function TransactionList() {
 >
   <DialogTitle>CSV importeren</DialogTitle>
   <DialogContent>
-    <Importer
-      /* -------------------------------------------------
-         1. Data ontvangen (async) – enkel de 4 gewenste velden
-         ------------------------------------------------- */
-      dataHandler={async (rows) => {
-        const mapped = rows.map((r) => ({
-          datum: r.Datum?.trim() ?? '',
-          bedrag: Number(String(r.Bedrag).replace(',', '.')) || 0,
-          vrijeMededeling: r['Vrije mededeling']?.trim() ?? '',
-          naamTegenpartij: r['Naam tegenpartij']?.trim() ?? '',
-        }));
-        console.log('Mapped', mapped);
-        // TODO stuur naar backend: await create('transacties', mapped);
-      }}
-
-      /* -------------------------------------------------
-         2. Klaar – sluit dialog en ververs lijst
-         ------------------------------------------------- */
-      onComplete={() => {
-        mutate('transacties');
-        setOpenDialog(null);
-      }}
-
-      /* -------------------------------------------------
-         3. PARSER-OPTIES – hier gebeurt de magie
-         ------------------------------------------------- */
-      parserOptions={{
-        delimiter: ';',          // BELANGRIJK: semicolon!
-        newline: '',             // laat de parser zelf kiezen
-        header: true,            // eerste regel = headers
-        skipEmptyLines: true,
-        transformHeader: (h) => h.trim(), // spaties weg
-        transform: (v) => v.trim(),       // spaties weg
-      }}
-    >
-      {/* Deze namen moeten exact overeenkomen met de HEADER in je CSV */}
-      <ImporterField name="Datum" label="Datum" />
-      <ImporterField name="Bedrag" label="Bedrag" />
-      <ImporterField name="Vrije mededeling" label="Vrije mededeling" />
-      <ImporterField name="Naam tegenpartij" label="Naam tegenpartij" />
-    </Importer>
+<Importer
+  parserOptions={{
+    header: true,
+    skipEmptyLines: true,
+    delimiter: ';',
+    quoteChar: '"',
+    escapeChar: '"',
+    transformHeader: (h) => h.trim().replace(/\u200B/g, ''),
+    transform: (value, field) => {
+      if (field.header === 'Bedrag') {
+        // Verwijder alle niet-numerieke karakters behalve , en -
+        let cleaned = String(value).replace(/[^\d,-]/g, '');
+        // Vervang komma door punt voor decimalen
+        cleaned = cleaned.replace(',', '.');
+        // Parse als float
+        const num = parseFloat(cleaned) || 0;
+        return num;
+      }
+      return String(value).trim().replace(/\u200B/g, '');
+    },
+  }}
+  dataHandler={async (rows) => {
+    const mapped = rows.map((r) => ({
+      datum: r['Datum'] || '',
+      bedrag: r['Bedrag'] || 0,
+      vrijeMededeling: r['Vrije mededeling'] || '',
+      naamTegenpartij: r['Naam tegenpartij'] || '',
+     
+    }));
+    console.log('Mapped rows:', mapped);
+    // TODO: stuur naar backend
+  }}
+  onComplete={() => {
+    mutate('transacties');
+    setOpenDialog(null);
+  }}
+>
+  <ImporterField name="Datum" label="Datum" />
+  <ImporterField name="Bedrag" label="Bedrag" />
+  <ImporterField name="Vrije mededeling" label="Vrije mededeling" />
+  <ImporterField name="Naam tegenpartij" label="Naam tegenpartij" />
+  
+</Importer>
   </DialogContent>
 </Dialog>
     </div>

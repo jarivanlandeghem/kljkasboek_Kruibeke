@@ -189,3 +189,34 @@ button:focus-visible {
 .switch input:checked ~ .slider .cloud {
   opacity: 1;
 }
+
+/* CSS voor de CSV parser */
+/* Nederlandse vertaling voor react-csv-importer */
+.CSVImporter_FileSelector::before {
+  content: "Kies CSV bestand";
+}
+
+.CSVImporter_FileSelectorLabel {
+  font-weight: bold;
+  color: #333;
+}
+
+.CSVImporter_HeaderTitle {
+  color: #1976d2;
+}
+
+.CSVImporter_ColumnMapping h3::before {
+  content: "Velden toewijzen";
+}
+
+.CSVImporter_ColumnMapping p::before {
+  content: "Wijs de kolommen uit je CSV-bestand toe aan de juiste velden:";
+}
+
+.CSVImporter_ColumnMappingRow label::before {
+  content: "Kolom ";
+}
+
+.CSVImporter_ProcessButton::before {
+  content: "Start importeren";
+}
