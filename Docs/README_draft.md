@@ -10,53 +10,154 @@
 
 ## Vereisten
 
-> Vul de vereisten eventueel aan
+Om dit project te kunnen draaien, moet je volgende software geïnstalleerd hebben:
 
-Ik verwacht dat volgende software reeds geïnstalleerd is:
-
-- [NodeJS](https://nodejs.org)
+- [NodeJS](https://nodejs.org) (versie ≥18)
 - [pnpm](https://pnpm.io)
 - [MySQL Community Server](https://dev.mysql.com/downloads/mysql/)
 
-> Je kan ook een aparte README per project (in de respectievelijke map) voorzien. Verwijs er dan hier naar.
-
 ## Front-end
 
-## Opstarten
+### Setup
 
-> Schrijf hier hoe we de applicatie starten (.env bestanden aanmaken, commando's om uit te voeren...)
+1. Installeer de dependencies:
 
-## Testen
+```bash
+pnpm install
+```
 
-> Schrijf hier hoe we de testen uitvoeren (.env bestanden aanmaken, commando's om uit te voeren...)
+2. Maak een `.env`-bestand in de root van het frontend-project met de volgende inhoud:
+
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+> Dit wijst de frontend naar de lokale backend.
+
+### Opstarten
+
+#### Development
+
+```bash
+pnpm run dev
+```
+
+- Zorg dat het `.env` bestand aanwezig is en correct ingesteld.
+- De app is standaard beschikbaar op [http://localhost:5173](http://localhost:5173).
+
+#### Production
+
+```bash
+pnpm run build
+pnpm run preview
+```
+
+- Build de applicatie met `vite build`.
+- Preview met `vite preview` of host de bestanden in `dist` via een server.
+
+### Testen
+
+- Frontend heeft momenteel geen specifieke test setup. Eventueel kan `vitest` of `jest` toegevoegd worden.
+
+---
 
 ## Back-end
 
-## Opstarten
+### Setup
 
-1. Repository clonen
-git clone <https://github.com/><jouw-gebruikersnaam>/<jouw-repository-naam>.git
-cd <jouw-repository-naam>
-2. Dependencies installeren
-Zorg dat je pnpm geïnstalleerd hebt. Indien niet, installeer het via:
+1. Installeer de dependencies:
 
-npm install -g pnpm
+```bash
+npm install
+```
 
-Installeer vervolgens alle projectdependencies:
+2. Maak een `.env`-bestand in de root van het backend-project met de volgende inhoud:
 
-pnpm install
-▶️ Server starten
-Development mode (met hot reload):
+```env
+NODE_ENV=development
+PORT=3000
+CORS_ORIGINS=["http://localhost:5173"]
+CORS_MAX_AGE=10800
+DATABASE_URL=mysql://devusr:devpwd@localhost:3307/kirhanhuyghe
+LOG_LEVELS=["log","error","warn","debug"]
+AUTH_JWT_SECRET=eensuperveiligsecretvoorindevelopment
+```
 
-pnpm start:dev
+> Pas indien nodig de `DATABASE_URL` aan voor jouw MySQL-configuratie.
 
-Productie:
+### Development
 
-pnpm build
-pnpm start:prod
+1. Voer databank migraties uit:
 
-De server draait standaard op <http://localhost:3000>
+```bash
+npx prisma migrate dev
+# of bij gebruik van Drizzle ORM:
+npm run db:migrate
+```
 
-## Testen
+2. Start de backend:
 
-> Schrijf hier hoe we de testen uitvoeren (.env bestanden aanmaken, commando's om uit te voeren...)
+```bash
+npm run start:dev
+```
+
+- De backend is standaard beschikbaar op [http://localhost:3000](http://localhost:3000).
+
+### Production
+
+1. Installeer dependencies:
+
+```bash
+npm install
+```
+
+2. Build de applicatie:
+
+```bash
+npm run build
+```
+
+3. Deploy migraties:
+
+```bash
+npx prisma migrate deploy
+# of bij Drizzle ORM:
+npm run db:migrate
+```
+
+4. Start de productieversie:
+
+```bash
+node dist/main.js
+```
+
+### Testen
+
+1. Zorg dat `.env.test` aanwezig is met test-configuratie.
+2. Installeer dependencies:
+
+```bash
+npm install
+```
+
+3. Voer migraties uit voor testdatabase:
+
+```bash
+npm run migrate:test
+```
+
+4. Start de testen:
+
+```bash
+npm run test:jest
+```
+
+5. Voor coverage:
+
+```bash
+npm run test:cov
+```
+
+- Coverage-rapport wordt aangemaakt in `__tests__/coverage`. Open `index.html` in de browser om het te bekijken.
+
+---
