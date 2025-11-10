@@ -68,7 +68,7 @@ pnpm run preview
 1. Installeer de dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Maak een `.env`-bestand in de root van het backend-project met de volgende inhoud:
@@ -80,7 +80,8 @@ CORS_ORIGINS=["http://localhost:5173"]
 CORS_MAX_AGE=10800
 DATABASE_URL=mysql://devusr:devpwd@localhost:3307/kirhanhuyghe
 LOG_LEVELS=["log","error","warn","debug"]
-AUTH_JWT_SECRET=eensuperveiligsecretvoorindevelopment
+AUTH_JWT_SECRET=eensuperveiligsecretvoorindevelopment 
+^^ MAG DIT ERIN?
 ```
 
 > Pas indien nodig de `DATABASE_URL` aan voor jouw MySQL-configuratie.
@@ -90,15 +91,14 @@ AUTH_JWT_SECRET=eensuperveiligsecretvoorindevelopment
 1. Voer databank migraties uit:
 
 ```bash
-npx prisma migrate dev
-# of bij gebruik van Drizzle ORM:
-npm run db:migrate
+
+pnpm run db:migrate
 ```
 
 2. Start de backend:
 
 ```bash
-npm run start:dev
+pnpm run start:dev
 ```
 
 - De backend is standaard beschikbaar op [http://localhost:3000](http://localhost:3000).
@@ -108,21 +108,20 @@ npm run start:dev
 1. Installeer dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Build de applicatie:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 3. Deploy migraties:
 
 ```bash
-npx prisma migrate deploy
-# of bij Drizzle ORM:
-npm run db:migrate
+
+pnpm run db:migrate
 ```
 
 4. Start de productieversie:
@@ -137,25 +136,25 @@ node dist/main.js
 2. Installeer dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Voer migraties uit voor testdatabase:
 
 ```bash
-npm run migrate:test
+pnpm run migrate:test
 ```
 
 4. Start de testen:
 
 ```bash
-npm run test:jest
+pnpm run test:jest
 ```
 
 5. Voor coverage:
 
 ```bash
-npm run test:cov
+pnpm run test:cov
 ```
 
 - Coverage-rapport wordt aangemaakt in `__tests__/coverage`. Open `index.html` in de browser om het te bekijken.
