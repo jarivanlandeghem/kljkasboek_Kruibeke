@@ -1,9 +1,21 @@
 import { Link } from 'react-router';
 import KLJIcon from "../assets/KLJIcon.png";
 import logout from "../assets/logout.png";
-import user from "../assets/user.png";
+import {
+  Avatar,
+  Tooltip
+} from '@mui/material';
+
+
+// Globale user - TODO: haal dit later uit backend
+const user = {
+  fullName: "Aykon Kirhan", // TODO: vervang met echte backend data
+};
 
 export default function Navbar({ username = "Aykon" }) {
+  // Eerste letter van de user
+  const firstLetter = user.fullName ? user.fullName.charAt(0) : 'N';
+
   return (
     <nav className="fixed top-0 left-0 right-0 h-20 bg-blue-950 shadow z-50 flex items-center px-6">
       {/* Links uitgelijnd */}
@@ -30,11 +42,11 @@ export default function Navbar({ username = "Aykon" }) {
           </Link>
         </span>
         <Link to='/profile'>
-          <img
-            className="h-10 w-10 rounded-full flex-shrink-0"
-            src={user}
-            alt="user"
-          />
+          <Tooltip title={user.fullName || "Naam onbekend"}>
+            <Avatar sx={{ bgcolor: '#ff0000' }}>
+              {firstLetter}
+            </Avatar>
+          </Tooltip>
         </Link>
         <Link to='/login'>
           <img
