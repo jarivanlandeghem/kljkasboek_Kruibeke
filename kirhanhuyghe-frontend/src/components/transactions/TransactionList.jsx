@@ -4,14 +4,25 @@ import AsyncData from '../AsyncData';
 import useSWR, { useSWRConfig } from 'swr';
 import { getAll, deleteById } from '../../api';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  MenuItem,
+} from '@mui/material';
 import { useForm } from 'react-hook-form';
-import { MenuItem } from '@mui/material';
+
+// CSV IMPORTER
+import { Importer, ImporterField } from 'react-csv-importer';
+import 'react-csv-importer/dist/index.css';
 
 export default function TransactionList() {
+  const [openDialog, setOpenDialog] = useState(null);
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
   const { mutate } = useSWRConfig();
 
   const {
@@ -34,33 +45,38 @@ export default function TransactionList() {
     [search, transacties]
   );
 
-  const handleDelete = useCallback(async (transactieID) => {
-    try {
-      await deleteById('transacties', { arg: transactieID });
-      mutate('transacties');
-    } catch (err) {
-      console.error(err);
-      alert('Er is een fout opgetreden bij het verwijderen van de transactie.');
-    }
-  }, [mutate]);
+  const handleDelete = useCallback(
+    async (transactieID) => {
+      try {
+        await deleteById('transacties', { arg: transactieID });
+        mutate('transacties');
+      } catch (err) {
+        console.error(err);
+        alert('Er is een fout opgetreden bij het verwijderen van de transactie.');
+      }
+    },
+    [mutate]
+  );
 
   const onSubmit = (data) => {
     console.log('Form data:', data);
     // TODO: await create('transacties', data);
     mutate('transacties');
     reset();
-    setIsOpen(false);
+    setOpenDialog(null);
   };
 
   const handleClose = () => {
     reset();
-    setIsOpen(false);
+    setOpenDialog(null);
   };
 
   return (
     <div className="ml-5">
       <h1 className="text-4xl mb-4 mt-5 text-black">Transacties</h1>
+
       <div className="flex items-start justify-between mb-3 w-full">
+        {/* Zoeken */}
         <div className="input-group flex items-center gap-2">
           <input
             type="search"
@@ -78,99 +94,168 @@ export default function TransactionList() {
           </button>
         </div>
 
+        {/* Knoppen */}
         <div className="flex items-center gap-2">
-          <Button variant="contained" color="error" onClick={() => setIsOpen(true)} sx={{ width: 160 }}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => setOpenDialog('voegtoe')}
+            sx={{ width: 160 }}
+          >
             Voeg toe
           </Button>
-          <Button variant="contained" sx={{ width: 160, mr: 5 }}>
+          <Button
+            variant="contained"
+            onClick={() => setOpenDialog('importcsv')}
+            sx={{ width: 160, mr: 5 }}
+          >
             Importeer CSV
           </Button>
         </div>
       </div>
 
+      {/* Tabel */}
       <div className="mt-4 mr-5">
         <AsyncData loading={isLoading} error={error}>
           <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} />
         </AsyncData>
       </div>
 
-<Dialog open={isOpen} onClose={handleClose} maxWidth="sm" fullWidth>
-  <DialogTitle>Transactie toevoegen</DialogTitle>
-
-  <form onSubmit={handleSubmit(onSubmit)}>
-    <DialogContent>
-      {/* Beschrijving */}
-      <TextField
-        margin="dense"
-        label="Beschrijving"
+      {/* DIALOG: Transactie toevoegen */}
+      <Dialog
+        open={openDialog === 'voegtoe'}
+        onClose={() => setOpenDialog(null)}
+        maxWidth="sm"
         fullWidth
-        {...register('beschrijving', { required: 'Beschrijving is verplicht' })}
-        error={Boolean(errors.beschrijving)}
-        helperText={errors.beschrijving?.message}
-      />
-
-      {/* Bedrag (met decimalen) */}
-      <TextField
-        margin="dense"
-        label="Bedrag"
-        type="number"
-        step="0.01"
-        fullWidth
-        {...register('bedrag', {
-          required: 'Bedrag is verplicht',
-          valueAsNumber: true,
-        })}
-        error={Boolean(errors.bedrag)}
-        helperText={errors.bedrag?.message}
-      />
-
-      {/* Datum */}
-      <TextField
-        margin="dense"
-        label="Datum"
-        type="date"
-        fullWidth
-        InputLabelProps={{ shrink: true }}
-        {...register('datum', { required: 'Datum is verplicht' })}
-        error={Boolean(errors.datum)}
-        helperText={errors.datum?.message}
-      />
-
-      {/* Categorieën – max 2 */}
-      <TextField
-        margin="dense"
-        label="Categorieën"
-        select
-        SelectProps={{
-          multiple: true,
-          renderValue: (selected) => (selected || []).join(', '),
-        }}
-        fullWidth
-        defaultValue={[]}
-        {...register('categorieen', {
-          required: 'Kies minstens 1 categorie',
-          validate: (v) => v.length <= 2 || 'Maximaal 2 categorieën',
-        })}
-        error={Boolean(errors.categorieen)}
-        helperText={errors.categorieen?.message}
       >
-        <MenuItem value="Voeding">Voeding</MenuItem>
-        <MenuItem value="Transport">Transport</MenuItem>
-        <MenuItem value="Vermaak">Vermaak</MenuItem>
-        <MenuItem value="Wonen">Wonen</MenuItem>
-        <MenuItem value="Overig">Overig</MenuItem>
-      </TextField>
-    </DialogContent>
+        <DialogTitle>Transactie toevoegen</DialogTitle>
 
-    <DialogActions>
-      <Button onClick={handleClose} color="inherit">
-        Annuleren
-      </Button>
-      <Button type="submit" color="error" variant="contained">
-        Opslaan
-      </Button>
-    </DialogActions>
-  </form>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogContent>
+            <TextField
+              margin="dense"
+              label="Beschrijving"
+              fullWidth
+              {...register('beschrijving', { required: 'Beschrijving is verplicht' })}
+              error={Boolean(errors.beschrijving)}
+              helperText={errors.beschrijving?.message}
+            />
+
+            <TextField
+              margin="dense"
+              label="Bedrag"
+              type="number"
+              step="0.01"
+              fullWidth
+              {...register('bedrag', {
+                required: 'Bedrag is verplicht',
+                valueAsNumber: true,
+              })}
+              error={Boolean(errors.bedrag)}
+              helperText={errors.bedrag?.message}
+            />
+
+            <TextField
+              margin="dense"
+              label="Datum"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              {...register('datum', { required: 'Datum is verplicht' })}
+              error={Boolean(errors.datum)}
+              helperText={errors.datum?.message}
+            />
+
+            <TextField
+              margin="dense"
+              label="Categorieën"
+              select
+              SelectProps={{
+                multiple: true,
+                renderValue: (selected) => (selected || []).join(', '),
+              }}
+              fullWidth
+              defaultValue={[]}
+              {...register('categorieen', {
+                required: 'Kies minstens 1 categorie',
+                validate: (v) => v.length <= 2 || 'Maximaal 2 categorieën',
+              })}
+              error={Boolean(errors.categorieen)}
+              helperText={errors.categorieen?.message}
+            >
+              <MenuItem value="Voeding">Voeding</MenuItem>
+              <MenuItem value="Transport">Transport</MenuItem>
+              <MenuItem value="Vermaak">Vermaak</MenuItem>
+              <MenuItem value="Wonen">Wonen</MenuItem>
+              <MenuItem value="Overig">Overig</MenuItem>
+            </TextField>
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={handleClose} color="inherit">
+              Annuleren
+            </Button>
+            <Button type="submit" color="error" variant="contained">
+              Opslaan
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+
+{/* DIALOG: CSV importeren */}
+<Dialog
+  open={openDialog === 'importcsv'}
+  onClose={() => setOpenDialog(null)}
+  fullWidth
+  maxWidth="md"
+>
+  <DialogTitle>CSV importeren</DialogTitle>
+  <DialogContent>
+<Importer
+  parserOptions={{
+    header: true,
+    skipEmptyLines: true,
+    delimiter: ';',
+    quoteChar: '"',
+    escapeChar: '"',
+    transformHeader: (h) => h.trim().replace(/\u200B/g, ''),
+    transform: (value, field) => {
+      if (field.header === 'Bedrag') {
+        // Verwijder alle niet-numerieke karakters behalve , en -
+        let cleaned = String(value).replace(/[^\d,-]/g, '');
+        // Vervang komma door punt voor decimalen
+        cleaned = cleaned.replace(',', '.');
+        // Parse als float
+        const num = parseFloat(cleaned) || 0;
+        return num;
+      }
+      return String(value).trim().replace(/\u200B/g, '');
+    },
+  }}
+  dataHandler={async (rows) => {
+    const mapped = rows.map((r) => ({
+      datum: r['Datum'] || '',
+      bedrag: r['Bedrag'] || 0,
+      vrijeMededeling: r['Vrije mededeling'] || '',
+      naamTegenpartij: r['Naam tegenpartij'] || '',
+     
+    }));
+    console.log('Mapped rows:', mapped);
+    // TODO: stuur naar backend
+  }}
+  onComplete={() => {
+    mutate('transacties');
+    setOpenDialog(null);
+  }}
+>
+  <ImporterField name="Datum" label="Datum" />
+  <ImporterField name="Bedrag" label="Bedrag" />
+  <ImporterField name="Vrije mededeling" label="Vrije mededeling" />
+  <ImporterField name="Naam tegenpartij" label="Naam tegenpartij" />
+  
+</Importer>
+  </DialogContent>
 </Dialog>
     </div>
   );
