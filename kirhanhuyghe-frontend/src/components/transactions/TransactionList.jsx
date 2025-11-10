@@ -81,7 +81,7 @@ export default function TransactionList() {
           <input
             type="search"
             className="form-control border-2 h-10 rounded text-black flex-1 min-w-50"
-            placeholder="Search"
+            placeholder="Zoek"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
@@ -90,7 +90,7 @@ export default function TransactionList() {
             type="button"
             onClick={() => setSearch(text)}
           >
-            Search
+            Zoek
           </button>
         </div>
 
