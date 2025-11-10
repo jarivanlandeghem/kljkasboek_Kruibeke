@@ -74,7 +74,7 @@ export class AuthService {
     // 👇 2
     if (!user) {
       throw new UnauthorizedException(
-        'The given email and password do not match',
+        'Het gegeven emailadres en paswoord matchen niet.',
       );
     }
 
@@ -94,19 +94,20 @@ export class AuthService {
     voornaam,
     familienaam,
     email,
-    password,
+    paswoord,
   }: RegisterUserRequestDto): Promise<string> {
     // 👇 1
-    const passwordHash = await this.hashPassword(password); // TODO
+    const passwordHash = await this.hashPassword(paswoord); // TODO
 
     // 👇 2
     const [newUser] = await this.db
       .insert(users)
-      .values({ //TODO
+      .values({
+        //TODO
         voornaam,
         familienaam, // hoezo ? TODO
         email,
-        password: password, // TODO paswoord of password of ..?
+        paswoord: paswoord, // TODO paswoord of password of ..?
         roles: [Role.USER], // 👈 3
       })
       .$returningId();

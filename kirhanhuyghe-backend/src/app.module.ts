@@ -37,6 +37,6 @@ import { RolesGuard } from './auth/guards/roles.guard';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // 👈 1
-    consumer.apply(LoggerMiddleware).forRoutes('*path'); // 👈 2
+    consumer.apply(LoggerMiddleware).forRoutes('*'); // 👈 2
   }
 }
