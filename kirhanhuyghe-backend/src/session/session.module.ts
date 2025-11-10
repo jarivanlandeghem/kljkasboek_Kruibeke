@@ -1,4 +1,4 @@
-// src/sessions/sessions.module.ts
+// src/session/session.module.ts
 import { Module } from '@nestjs/common';
 
 import { SessionController } from './session.controller';

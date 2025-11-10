@@ -1,4 +1,4 @@
-// src/sessions/sessions.controller.ts
+// src/session/session.controller.ts
 import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
 
 import { AuthService } from '../auth/auth.service';
