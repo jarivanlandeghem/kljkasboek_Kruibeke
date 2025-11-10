@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "5cad6da3-fd21-4ea9-99cd-af00df82b362",
-  "prevId": "18e8addc-d747-4bfc-9306-363cae836a4c",
+  "id": "261fce50-5ce0-461e-b98e-0a13d032273a",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "categorieen": {
       "name": "categorieen",
