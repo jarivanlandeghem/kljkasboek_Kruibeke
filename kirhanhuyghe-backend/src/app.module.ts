@@ -10,6 +10,7 @@ import { SessionModule } from './session/session.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,10 +28,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
       provide: APP_GUARD,
       useClass: AuthGuard, // 👈
     },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard, // 👈
-    },
+
     // ... andere providers
   ],
 })
