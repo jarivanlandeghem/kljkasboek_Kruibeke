@@ -1,36 +1,29 @@
 // src/api/index.js
-import axiosRoot from 'axios';
-import { JWT_TOKEN_KEY } from '../contexts/auth';
+import axios from 'axios';
 
-const baseUrl = import.meta.env.VITE_API_URL;
+const baseUrl = 'http://localhost:3000/api'; 
 
-// Maak axios instance aan voordat je het gebruikt
-export const axios = axiosRoot.create({
-  baseURL: baseUrl,
+const api = axios.create({
+  baseURL: '/api',
+  withCredentials: true, // laat cookies mee-sturen (indien server CORS dit toestaat)
 });
 
-// Interceptor toevoegen
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem(JWT_TOKEN_KEY);
-
+// als je token in localStorage bewaart (naam kan anders zijn)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token') || localStorage.getItem('accessToken') || null;
   if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
-// Functie declarations komen na de axios setup
-export async function getAll(url) {
-  const { data } = await axios.get(url);
-  return data.items;
-}
+export const getAll = (path) => api.get(`/${path}`).then(r => r.data);
+// export async function getAll(url) {
+//   const { data } = await axios.get(`${baseUrl}/${url}`); 
 
-// 👇 NIEUW: getById functie toegevoegd
-export async function getById(url) {
-  const { data } = await axios.get(url);
-  return data;
-}
+//   return data.items;
+// }
 
 export const deleteById = async (url, { arg: id }) => {
   await axios.delete(`${url}/${id}`);

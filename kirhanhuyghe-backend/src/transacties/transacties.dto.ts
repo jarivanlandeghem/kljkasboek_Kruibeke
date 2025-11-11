@@ -110,7 +110,6 @@ export class UpdateTransactieDto {
 export interface TransactieCategorieDetails {
   categorieID: number;
   naam: string;
-  type: 'IN' | 'UIT';
 }
 
 /**

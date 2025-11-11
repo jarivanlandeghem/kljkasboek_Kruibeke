@@ -45,7 +45,6 @@ export class CategorieenService {
       return {
         categorieID: categorie.categorieID,
         categorienaam: categorie.categorienaam,
-        type: categorie.type,
       };
     }
     //fallback
@@ -84,7 +83,6 @@ export class CategorieenService {
     const updatedCategorie: CategorieResponseDto = {
       categorieID: id,
       categorienaam: updateDto.categorienaam ?? existingCategorie.categorienaam,
-      type: updateDto.type ?? existingCategorie.type,
     };
     await this.db
       .update(categorieen)
@@ -109,7 +107,6 @@ export class CategorieenService {
     return {
       categorieID: categorie.categorieID,
       categorienaam: categorie.categorienaam,
-      type: categorie.type,
     };
   }
 }

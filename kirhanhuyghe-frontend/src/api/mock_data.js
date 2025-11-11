@@ -31,11 +31,11 @@ const REKENING_DATA = [
 
 // Categorieën
 const CATEGORIE_DATA = [
-  { categorieID: 1, naam: "Kilometervergoeding", type: "UIT" },
-  { categorieID: 2, naam: "Materiaalaankoop", type: "UIT" },
-  { categorieID: 3, naam: "Inschrijvingsgeld", type: "IN" },
-  { categorieID: 4, naam: "Huur zaal", type: "UIT" },
-  { categorieID: 5, naam: "Rente", type: "IN" },
+  { categorieID: 1, naam: "Kilometervergoeding" },
+  { categorieID: 2, naam: "Materiaalaankoop" },
+  { categorieID: 3, naam: "Inschrijvingsgeld" },
+  { categorieID: 4, naam: "Huur zaal" },
+  { categorieID: 5, naam: "Rente" },
 ];
 
 // Gebruikers

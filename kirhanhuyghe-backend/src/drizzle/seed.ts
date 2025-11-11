@@ -28,8 +28,22 @@ async function resetDatabase() {
   console.log('🗑️ Resetting database...');
 
   // Verwijder transacties
+  try {
+    await db.delete(schema.transactieCategorie).execute();
+  } catch (e) {}
+
+  // Verwijder transacties (verwijst naar users)
   await db.delete(schema.transacties).execute();
+
+  // Verwijder categorieen
   await db.delete(schema.categorieen).execute();
+
+  // Verwijder users ook om duplicate-key fouten bij seeden te voorkomen
+  try {
+    await db.delete(schema.users).execute();
+  } catch (e) {
+    // als users niet bestaan of leeg zijn, doorgaan
+  }
 
   console.log('✅ Database reset completed\n');
 }
@@ -41,7 +55,6 @@ async function seedCategorieen() {
   const categorieen = CATEGORIE_DATA.map((t) => ({
     categorieID: t.categorieID,
     categorienaam: t.categorienaam,
-    type: t.type,
   }));
 
   // ✅ Insert uitvoeren met correcte types

@@ -25,7 +25,6 @@ export interface Rekening {
 export interface Categorie {
   categorieID: number;
   categorienaam: string;
-  type: 'IN' | 'UIT';
 }
 
 // src/drizzle/schema.ts
@@ -64,7 +63,6 @@ export const transacties = mysqlTable('transacties', {
 export const categorieen = mysqlTable('categorieen', {
   categorieID: int('categorieID').autoincrement().primaryKey(),
   categorienaam: text('categorienaam').notNull(),
-  type: mysqlEnum('type', ['IN', 'UIT']).notNull(),
 });
 //  TransactieCategorie (join table) TODO
 export const transactieCategorie = mysqlTable(
@@ -158,11 +156,11 @@ export const REKENING_DATA: Rekening[] = [
 
 // Categorieën
 export const CATEGORIE_DATA: Categorie[] = [
-  { categorieID: 1, categorienaam: 'Kilometervergoeding', type: 'UIT' },
-  { categorieID: 2, categorienaam: 'Materiaalaankoop', type: 'UIT' },
-  { categorieID: 3, categorienaam: 'Inschrijvingsgeld', type: 'IN' },
-  { categorieID: 4, categorienaam: 'Huur zaal', type: 'UIT' },
-  { categorieID: 5, categorienaam: 'Rente', type: 'IN' },
+  { categorieID: 1, categorienaam: 'Kilometervergoeding' },
+  { categorieID: 2, categorienaam: 'Materiaalaankoop' },
+  { categorieID: 3, categorienaam: 'Inschrijvingsgeld' },
+  { categorieID: 4, categorienaam: 'Huur zaal' },
+  { categorieID: 5, categorienaam: 'Rente' },
 ];
 
 // Gebruikers

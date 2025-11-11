@@ -33,7 +33,6 @@ export const transacties = mysqlTable('transacties', {
 export const categorieen = mysqlTable('categorieen', {
   categorieID: int('categorieID').autoincrement().primaryKey(),
   categorienaam: text('categorienaam').notNull(),
-  type: mysqlEnum('type', ['IN', 'UIT']).notNull(),
 });
 //  TransactieCategorie (join table) TODO
 export const transactieCategorie = mysqlTable(
