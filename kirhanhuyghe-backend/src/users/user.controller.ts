@@ -25,22 +25,23 @@ import { CheckUserAccessGuard } from '../auth/guards/userAccess.guard';
 import { CurrentUser } from '../auth/decorators/currentUser.decorator';
 import { ParseUserIdPipe } from '../auth/pipes/parseUserId.pipe';
 import { type Session } from '../types/auth';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('users')
+@UseGuards(AuthGuard, RolesGuard)
 export class UserController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
 
-  // 🔹 ADMIN: Alle gebruikers ophalen
   @Get()
   @Roles(Role.ADMIN)
   async getAllUsers(): Promise<UserListResponseDto> {
     return await this.userService.getAll();
   }
 
-  // 🔹 Publiek: Registreren (maakt user aan + token)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async registerUser(
@@ -50,7 +51,6 @@ export class UserController {
     return { token };
   }
 
-  // 🔹 Gebruiker ophalen (ook met 'me')
   @Get(':id')
   @UseGuards(CheckUserAccessGuard)
   async getUserById(
@@ -61,7 +61,6 @@ export class UserController {
     return await this.userService.getById(userId);
   }
 
-  // 🔹 Gebruiker updaten (ook met 'me')
   @Put(':id')
   @UseGuards(CheckUserAccessGuard)
   async updateUserById(
@@ -75,7 +74,6 @@ export class UserController {
     );
   }
 
-  // 🔹 Gebruiker verwijderen (ook met 'me')
   @Delete(':id')
   @UseGuards(CheckUserAccessGuard)
   async deleteUserById(
