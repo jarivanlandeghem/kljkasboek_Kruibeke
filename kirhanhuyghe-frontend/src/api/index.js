@@ -26,6 +26,12 @@ export async function getAll(url) {
   return data.items;
 }
 
+// 👇 NIEUW: getById functie toegevoegd
+export async function getById(url) {
+  const { data } = await axios.get(url);
+  return data;
+}
+
 export const deleteById = async (url, { arg: id }) => {
   await axios.delete(`${url}/${id}`);
 };

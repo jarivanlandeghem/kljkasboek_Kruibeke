@@ -31,9 +31,25 @@ export class CreateUserRequestDto {
   roles: Role[];
 }
 
-export class UserResponseDto extends CreateUserRequestDto {
+export class UserResponseDto {
+  @Expose()
   @IsInt()
   userid: number;
+
+  @Expose()
+  @IsString()
+  voornaam: string;
+
+  @Expose()
+  @IsString()
+  familienaam: string;
+
+  @Expose()
+  @IsEmail()
+  email: string;
+
+  @Expose()
+  roles: Role[];
 }
 
 export class UserListResponseDto {

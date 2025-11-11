@@ -10,6 +10,11 @@ import {
 export default function Navbar() {
   const { user } = useAuth();
 
+  // Debug logging
+  console.log('🔍 Navbar - user object:', user);
+  console.log('🔍 Navbar - user.voornaam:', user?.voornaam);
+  console.log('🔍 Navbar - user.familienaam:', user?.familienaam);
+
   // Haal de volledige naam en eerste letter op
   const fullName = user ? `${user.voornaam} ${user.familienaam}` : 'Gebruiker';
   const firstLetter = user?.voornaam ? user.voornaam.charAt(0).toUpperCase() : 'G';
