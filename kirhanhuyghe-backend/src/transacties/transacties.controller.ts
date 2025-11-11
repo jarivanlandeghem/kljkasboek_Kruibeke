@@ -1,15 +1,20 @@
 import {
   Controller,
   Get,
-  Param,
   Post,
+  Put,
+  Delete,
+  Param,
   Body,
   HttpCode,
   HttpStatus,
-  Put,
-  Delete,
-  // ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '../auth/guards/auth.guard';
+
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/roles';
 import {
   CreateTransactieRequestDto,
   TransactieListResponseDto,
@@ -17,14 +22,11 @@ import {
   UpdateTransactieDto,
 } from './transacties.dto';
 import { TransactieService } from './transacties.service';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('transacties')
+@UseGuards(AuthGuard, RolesGuard)
 export class TransactiesController {
-  constructor(
-    private readonly transactieService: TransactieService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly transactieService: TransactieService) {}
 
   @Get()
   async getAllTransacties(): Promise<TransactieListResponseDto> {
@@ -35,27 +37,30 @@ export class TransactiesController {
   async getTransactieById(
     @Param('id') id: string,
   ): Promise<TransactieResponseDto | undefined> {
-    return await this.transactieService.getById(Number(id));
+    return this.transactieService.getById(Number(id));
   }
 
   @Post()
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   async createTransactie(
-    @Body() createTransactieDto: CreateTransactieRequestDto,
+    @Body() dto: CreateTransactieRequestDto,
   ): Promise<TransactieResponseDto> {
-    return this.transactieService.create(createTransactieDto);
+    return this.transactieService.create(dto);
   }
 
   @Put(':id')
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   async updateTransactieById(
     @Param('id') id: string,
-    @Body() updateDto: UpdateTransactieDto,
+    @Body() dto: UpdateTransactieDto,
   ): Promise<TransactieResponseDto | undefined> {
-    return await this.transactieService.updateById(Number(id), updateDto);
+    return this.transactieService.updateById(Number(id), dto);
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteTransactie(@Param('id') id: string): Promise<void> {
     await this.transactieService.deleteById(Number(id));
