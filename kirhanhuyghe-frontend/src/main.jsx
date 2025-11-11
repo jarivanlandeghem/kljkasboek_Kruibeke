@@ -13,6 +13,7 @@ import UsersPage from './pages/UsersPage.jsx';
 import AddUser from './pages/AddUser.jsx';
 import Login from './pages/Login.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import { AuthProvider } from './contexts/Auth.context'; // 👈 Voeg deze import toe
 
 const router = createBrowserRouter([
   {
@@ -23,32 +24,21 @@ const router = createBrowserRouter([
       { path: 'categories', Component: CategoriesPage },
       { path: 'transactions', Component: TransactionsPage },
       { path: 'about', Component: About },
-      { path: 'users', Component:UsersPage  },
-      { path: 'adduser', Component:AddUser  },
-      { path: 'login', Component:Login  },
-      { path: 'profile', Component:ProfilePage  },
-      { path: '*', Component:NotFound  },
+      { path: 'users', Component: UsersPage },
+      { path: 'adduser', Component: AddUser },
+      { path: 'login', Component: Login },
+      { path: 'profile', Component: ProfilePage },
+      { path: '*', Component: NotFound },
     ],
   },
 ]);
 
-// OUDE VERSIE
-// createRoot(document.getElementById('root')).render(
-//   <StrictMode>
-//     <RouterProvider router={router} />
-//   </StrictMode>,
-// )
-
-// DARMODE implementatie
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    {/* 👇 */}
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
-    {/* 👆 */}
+  <StrictMode> {/* 👈 Gebruik StrictMode zonder React. */}
+    <AuthProvider>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </AuthProvider>
   </StrictMode>,
 );
-
-
-
