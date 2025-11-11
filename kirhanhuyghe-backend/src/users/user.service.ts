@@ -22,54 +22,44 @@ export class UserService {
     private readonly db: DatabaseProvider,
   ) {}
 
+  // 🔹 1. Alle users ophalen + mappen naar DTO's
   async getAll(): Promise<UserListResponseDto> {
-    const dbUsers = await this.db.query.users.findMany();
-    const items = plainToInstance(UserResponseDto, dbUsers);
-    return { items };
-  } //TODO niet zeker of dit werkt!!
+    const dbUsers = this.db ? await this.db.query.users.findMany() : USER_DATA;
 
+    const items = dbUsers.map((user) =>
+      plainToInstance(UserResponseDto, user, {
+        excludeExtraneousValues: true,
+      }),
+    );
+
+    return { items };
+  }
+
+  // 🔹 2. Enkel user ophalen + via DTO teruggeven
   async getById(id: number): Promise<UserResponseDto> {
+    let user;
+
     if (this.db) {
-      const user = await this.db.query.users.findFirst({
+      user = await this.db.query.users.findFirst({
         where: eq(users.userid, id),
         with: {
           userKoppelingen: true,
         },
       });
-
-      if (!user) {
-        throw new NotFoundException('Er bestaat geen gebruiker met deze ID');
-      }
-
-      return {
-        userid: user.userid,
-        voornaam: user.voornaam,
-        familienaam: user.familienaam,
-        email: user.email,
-        paswoord: user.paswoord,
-        roles: (user as any).role,
-      };
+    } else {
+      user = USER_DATA.find((u) => u.userid === id);
     }
 
-    const user = USER_DATA.find((u) => u.userid === id);
     if (!user) {
-      throw new NotFoundException('No user with this ID exists');
+      throw new NotFoundException('Er bestaat geen gebruiker met deze ID');
     }
 
-    return this.toResponseDto(user);
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  private toResponseDto(user: any): UserResponseDto {
-    return {
-      userid: user.userid,
-      voornaam: user.voornaam,
-      familienaam: user.familienaam,
-      email: user.email,
-      paswoord: user.paswoord,
-      roles: user.roles,
-    };
-  }
-
+  // 🔹 3. User aanmaken en DTO teruggeven
   async create(dto: CreateUserRequestDto): Promise<UserResponseDto> {
     const hashedPassword = dto.paswoord ? await argon2.hash(dto.paswoord) : '';
 
@@ -83,16 +73,27 @@ export class UserService {
 
     const newUserId = newUserIdObject.userid;
 
-    const resultaat = await this.getById(newUserId);
-    return resultaat;
+    const newUser = await this.db.query.users.findFirst({
+      where: eq(users.userid, newUserId),
+    });
+
+    return plainToInstance(UserResponseDto, newUser, {
+      excludeExtraneousValues: true,
+    });
   }
 
+  // 🔹 4. User bijwerken en DTO teruggeven
   async updateById(
     id: number,
     updateDto: updateUserDto,
   ): Promise<UserResponseDto> {
-    // ← geen “| undefined” meer
-    const existing = await this.getById(id); // werpt zelf NotFoundException
+    const existing = await this.db.query.users.findFirst({
+      where: eq(users.userid, id),
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Er bestaat geen gebruiker met deze ID');
+    }
 
     const hashedPassword = updateDto.paswoord
       ? await argon2.hash(updateDto.paswoord)
@@ -106,20 +107,30 @@ export class UserService {
       ...(hashedPassword && { paswoord: hashedPassword }),
     };
 
-    await this.db
+    const [result] = await this.db
       .update(users)
       .set(updatedUserData)
       .where(eq(users.userid, id));
 
-    // opnieuw ophalen → altijd een waarde
-    return this.getById(id);
+    if (result.affectedRows === 0) {
+      throw new NotFoundException('Er bestaat geen gebruiker met deze ID');
+    }
+
+    const updated = await this.db.query.users.findFirst({
+      where: eq(users.userid, id),
+    });
+
+    return plainToInstance(UserResponseDto, updated, {
+      excludeExtraneousValues: true,
+    });
   }
 
+  // 🔹 5. User verwijderen
   async deleteByid(id: number): Promise<void> {
     const [result] = await this.db.delete(users).where(eq(users.userid, id));
 
     if (result.affectedRows === 0) {
-      throw new NotFoundException('Er bestaat geen user met deze ID');
+      throw new NotFoundException('Er bestaat geen gebruiker met deze ID');
     }
   }
 }

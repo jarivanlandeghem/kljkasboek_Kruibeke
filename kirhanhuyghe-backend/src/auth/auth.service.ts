@@ -65,58 +65,62 @@ export class AuthService {
 
     return payload;
   }
-  async login({ email, password }: LoginRequestDto): Promise<string> {
-    // 👇 1
-    const user = await this.db.query.users.findFirst({
-      where: eq(users.email, email),
-    });
 
-    // 👇 2
+  async login({ email, password }: LoginRequestDto): Promise<string> {
+    // ✅ Gebruik select().from() in plaats van db.query
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
     if (!user) {
       throw new UnauthorizedException(
-        'The given email and password do not match',
+        'Het gegeven emailadres en paswoord matchen niet.',
       );
     }
 
-    // 👇 3
     const passwordValid = await this.verifyPassword(password, user.paswoord);
 
-    // 👇 4
     if (!passwordValid) {
       throw new UnauthorizedException(
         'The given email and password do not match',
       );
     }
 
-    return this.signJwt(user); // 👈 5
+    return this.signJwt(user);
   }
+
   async register({
     voornaam,
     familienaam,
     email,
-    password,
+    paswoord,
   }: RegisterUserRequestDto): Promise<string> {
-    // 👇 1
-    const passwordHash = await this.hashPassword(password); // TODO
+    const passwordHash = await this.hashPassword(paswoord);
 
-    // 👇 2
     const [newUser] = await this.db
       .insert(users)
-      .values({ //TODO
+      .values({
         voornaam,
-        familienaam, // hoezo ? TODO
+        familienaam,
         email,
-        password: password, // TODO paswoord of password of ..?
-        roles: [Role.USER], // 👈 3
+        paswoord: passwordHash,
+        roles: [Role.USER],
       })
       .$returningId();
 
-    // 👇 4
-    const user = await this.db.query.users.findFirst({
-      where: eq(users.userid, newUser.userid),
-    });
+    // ✅ Ook hier select().from()
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.userid, newUser.userid))
+      .limit(1);
 
-    // 👇 5
-    return this.signJwt(user!);
+    if (!user) {
+      throw new Error('Failed to create user');
+    }
+
+    return this.signJwt(user);
   }
 }

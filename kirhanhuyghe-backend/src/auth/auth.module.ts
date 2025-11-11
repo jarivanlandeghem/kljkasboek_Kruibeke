@@ -7,6 +7,7 @@ import { ServerConfig, AuthConfig } from '../config/configuration';
 
 @Module({
   imports: [
+    DrizzleModule,
     // 👇 1
     JwtModule.registerAsync({
       inject: [ConfigService], // 👈 2
@@ -25,7 +26,6 @@ import { ServerConfig, AuthConfig } from '../config/configuration';
         };
       },
     }),
-    DrizzleModule,
   ],
   providers: [AuthService],
   exports: [AuthService],

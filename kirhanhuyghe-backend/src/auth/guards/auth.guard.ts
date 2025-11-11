@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { Session } from 'react-router';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,41 +19,45 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // 👇 2
+    console.log('🛡️ AuthGuard CALLED');
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) {
-      return true;
-    }
+    console.log('→ isPublic?', isPublic);
 
-    // 👇 3
+    if (isPublic) return true;
+
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
+    console.log('→ token?', token?.substring(0, 20) + '...');
+
     if (!token) {
+      console.log('❌ No token → 401');
       throw new UnauthorizedException('You need to be signed in');
     }
 
     try {
-      // 👇 4
       const payload = await this.authService.verifyJwt(token);
+      console.log('✅ JWT verified. Payload:', payload);
 
-      // 👇 5
+      // ✅ Belangrijk: gebruik `userId`, niet `id`
       request.user = {
-        id: payload.sub,
-        roles: payload.roles,
+        userId: payload.sub, // 👈 MOET userId zijn (niet id!)
         email: payload.email,
+        roles: payload.roles || [],
       };
+      console.log('✅ request.user set:', request.user);
     } catch (err) {
-      // 👇 6
+      console.log('❌ JWT error:', err.message || err);
       if (err.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Token has expired');
-      } else {
-        throw new UnauthorizedException('Invalid authentication token');
       }
+      throw new UnauthorizedException('Invalid authentication token');
     }
-    return true; // 👈 7
+
+    return true;
   }
 
   // 👇 3

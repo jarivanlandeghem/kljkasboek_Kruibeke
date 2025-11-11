@@ -67,3 +67,21 @@ export default (): ServerConfig => ({
     },
   },
 });
+export interface JwtConfig {
+  expirationInterval: number;
+  secret: string;
+  audience: string;
+  issuer: string;
+}
+
+export interface AuthConfig {
+  hashLength: number;
+  timeCost: number;
+  memoryCost: number;
+  jwt: JwtConfig;
+}
+
+export interface ServerConfig {
+  // ...
+  auth: AuthConfig;
+}
