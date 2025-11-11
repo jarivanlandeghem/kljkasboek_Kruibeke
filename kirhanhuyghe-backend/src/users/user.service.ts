@@ -40,12 +40,13 @@ export class UserService {
     let user;
 
     if (this.db) {
-      user = await this.db.query.users.findFirst({
-        where: eq(users.userid, id),
-        with: {
-          userKoppelingen: true,
-        },
-      });
+      // ✅ Gebruik select().from() voor meer controle
+      const [dbUser] = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.userid, id))
+        .limit(1);
+      user = dbUser;
     } else {
       user = USER_DATA.find((u) => u.userid === id);
     }
