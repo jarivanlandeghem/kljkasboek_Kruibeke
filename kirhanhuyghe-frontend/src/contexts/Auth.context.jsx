@@ -7,18 +7,14 @@ import {
 import useSWRMutation from 'swr/mutation';
 import useSWR from 'swr';
 import * as api from '../api';
-import { JWT_TOKEN_KEY, AuthContext } from './auth'; // 👈 Importeer hier
-
-// 👈 Verwijder deze exports:
-// export const JWT_TOKEN_KEY = 'jwtToken';
-// export const AuthContext = createContext();
+import { JWT_TOKEN_KEY, AuthContext } from './auth';
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem(JWT_TOKEN_KEY));
 
   const {
     data: user,
-    isLoading: userLoading, // 👈 gebruik isLoading ipv loading
+    isLoading: userLoading,
     error: userError,
   } = useSWR(token ? 'users/me' : null, api.getById);
 
@@ -26,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     trigger: doLogin,
     isMutating: loginLoading,
     error: loginError,
-  } = useSWRMutation('sessions', api.post);
+  } = useSWRMutation('session', api.post); // 👈 'sessions' gewijzigd naar 'session'
 
   const login = useCallback(
     async (email, password) => {
@@ -55,13 +51,25 @@ export const AuthProvider = ({ children }) => {
 
   const value = useMemo(
     () => ({
+      token,
       user,
       error: loginError || userError,
       loading: loginLoading || userLoading,
+      isAuthed: Boolean(token),
+      ready: !userLoading,
       login,
       logout,
     }),
-    [user, loginError, loginLoading, userError, userLoading, login, logout],
+    [
+      token,
+      user,
+      loginError,
+      loginLoading,
+      userError,
+      userLoading,
+      login,
+      logout,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

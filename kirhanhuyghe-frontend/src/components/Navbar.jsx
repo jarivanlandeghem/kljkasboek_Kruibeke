@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { useAuth } from '../contexts/auth';
 import KLJIcon from "../assets/KLJIcon.png";
 import logout from "../assets/logout.png";
 import {
@@ -6,15 +7,12 @@ import {
   Tooltip
 } from '@mui/material';
 
+export default function Navbar() {
+  const { user } = useAuth();
 
-// Globale user - TODO: haal dit later uit backend
-const user = {
-  fullName: "Aykon Kirhan", // TODO: vervang met echte backend data
-};
-
-export default function Navbar({ username = "Aykon" }) {
-  // Eerste letter van de user
-  const firstLetter = user.fullName ? user.fullName.charAt(0) : 'N';
+  // Haal de volledige naam en eerste letter op
+  const fullName = user ? `${user.voornaam} ${user.familienaam}` : 'Gebruiker';
+  const firstLetter = user?.voornaam ? user.voornaam.charAt(0).toUpperCase() : 'G';
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-20 bg-blue-950 shadow z-50 flex items-center px-6">
@@ -38,22 +36,21 @@ export default function Navbar({ username = "Aykon" }) {
         </span>
         <span className="text-sm font-medium hidden sm:inline leading-none">
           <Link to='/profile'>
-            {username}
+            {fullName}
           </Link>
         </span>
         <Link to='/profile'>
-          <Tooltip title={user.fullName || "Naam onbekend"}>
+          <Tooltip title={fullName}>
             <Avatar sx={{ bgcolor: '#ff0000' }}>
               {firstLetter}
             </Avatar>
           </Tooltip>
         </Link>
-        <Link to='/login'>
+        <Link to='/logout'>
           <img
             className="h-8 w-auto flex-shrink-0 cursor-pointer"
             src={logout}
             alt="logout"
-            onClick={() => console.log("Logout clicked")}
           />
         </Link>
       </div>

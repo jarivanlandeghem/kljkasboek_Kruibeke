@@ -42,9 +42,6 @@ export class UserService {
     if (this.db) {
       user = await this.db.query.users.findFirst({
         where: eq(users.userid, id),
-        with: {
-          userKoppelingen: true,
-        },
       });
     } else {
       user = USER_DATA.find((u) => u.userid === id);
