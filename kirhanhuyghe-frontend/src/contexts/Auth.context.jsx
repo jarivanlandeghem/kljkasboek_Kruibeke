@@ -27,17 +27,20 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(
     async (email, password) => {
       try {
-        const { token } = await doLogin({
+        console.debug('Auth.login: calling doLogin', { url: import.meta.env.VITE_API_URL || '/api', email });
+        const result = await doLogin({
           email,
           password,
         });
+        console.debug('Auth.login: doLogin result', result);
+        const { token } = result || {};
 
         setToken(token);
         localStorage.setItem(JWT_TOKEN_KEY, token);
 
         return true;
       } catch (error) {
-        console.error(error);
+        console.error('Auth.login: login error', error);
         return false;
       }
     },
