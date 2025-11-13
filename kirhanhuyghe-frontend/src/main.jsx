@@ -17,6 +17,8 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import { AuthProvider } from './contexts/Auth.context';
 import PrivateRoute from './components/PrivateRoute';
 import Logout from './pages/Logout.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+
 
 const router = createBrowserRouter([
   {
@@ -63,6 +65,7 @@ const router = createBrowserRouter([
         ]
       },
       { path: 'login', element: <Login /> },
+      { path: 'register', element: <RegisterPage /> }, // Register route toegevoegd
       { 
         path: 'profile', 
         element: <PrivateRoute />,
@@ -71,6 +74,7 @@ const router = createBrowserRouter([
         ]
       },
       { path: 'logout', element: <Logout /> },
+     
       { path: '*', element: <NotFound /> },
     ],
   },

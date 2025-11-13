@@ -4,13 +4,15 @@ import AlgemeneLayout from "../components/AlgemeneLayout";
 import WelcomeMessage from "../components/WelcomeMessage";
 import ActionButton from "../components/ActionButton";
 import kidsPlaying from "../assets/PlayingKids.jpg";
-
+import { useAuth } from '../contexts/auth';
 export default function HomePage() {
-  const username = "Ben"; //later dit uit db halen adhv bepaalde user
+   const { user } = useAuth();
+  const username = user ? `${user.voornaam}` : 'Gebruiker'; //later dit uit db halen adhv bepaalde user
 
   const handleClick = (section) => {
     console.log(`Navigating to: ${section}`);
   };
+  
 
   return (
     <AlgemeneLayout image={kidsPlaying}>
