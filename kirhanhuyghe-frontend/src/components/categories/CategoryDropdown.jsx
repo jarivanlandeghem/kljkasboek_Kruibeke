@@ -1,38 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import { getAll } from '../../api';
+import useSWR from 'swr';
 
 export default function CategoryDropdown({ value, onChange, categories = [] }){
-  // lokale state voor categorieën uit de backend
-  const [remoteCategories, setRemoteCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  // Fetch categories from backend unless provided via props
+  const { data: fetched, error, isLoading } = useSWR(
+    categories && categories.length ? null : 'categorieen',
+    getAll,
+  );
 
-  useEffect(() => {
-    // als categories via props worden meegegeven, geen fetch doen
-    if (categories && categories.length) return;
-
-    let mounted = true;
-    setLoading(true);
-    getAll('categorieen')
-      .then((data) => {
-        // backend retourneert waarschijnlijk { items: [...] }
-        const items = Array.isArray(data) ? data : data?.items ?? [];
-        const names = items.map((i) => i.categorienaam ?? i.naam ?? i.name ?? String(i));
-        if (mounted) setRemoteCategories(names);
-      })
-      .catch((e) => {
-        console.error('Failed to load categories', e);
-        if (mounted) setError(e);
-      })
-      .finally(() => mounted && setLoading(false));
-
-    return () => { mounted = false; };
-  }, [categories]);
+  const remoteCategories = useMemo(() => {
+    if (!fetched) return [];
+    const items = Array.isArray(fetched) ? fetched : fetched?.items ?? [];
+    return items.map((i) => i.categorienaam ?? i.naam ?? i.name ?? String(i));
+  }, [fetched]);
 
   const sample = categories.length ? categories : (remoteCategories.length ? remoteCategories : ["Salaris","Boodschappen","Huur"]);
 
@@ -52,12 +38,12 @@ export default function CategoryDropdown({ value, onChange, categories = [] }){
         displayEmpty
       >
         <MenuItem value="">— Alle categorieën —</MenuItem>
-        {loading && !sample.length && (
+        {isLoading && !sample.length && (
           <MenuItem value="" disabled>
             <CircularProgress size={18} />&nbsp;Laden...
           </MenuItem>
         )}
-        {!loading && sample.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+        {!isLoading && sample.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
         {error && (
           <MenuItem value="" disabled>Fout bij laden categorieën</MenuItem>
         )}
