@@ -1,14 +1,10 @@
 import { useMemo } from 'react';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import CircularProgress from '@mui/material/CircularProgress';
-import { getAll } from '../../api';
+import { CircularProgress, TextField, Autocomplete } from '@mui/material';
 import useSWR from 'swr';
+import { getAll } from '../../api';
 
-export default function CategoryDropdown({ value, onChange, categories = [] }){
-  // Fetch categories from backend unless provided via props
+export default function CategoryDropdown({ value, onChange, categories = [] }) {
+  // Fetch categories van backend tenzij meegegeven via props
   const { data: fetched, error, isLoading } = useSWR(
     categories && categories.length ? null : 'categorieen',
     getAll,
@@ -20,34 +16,42 @@ export default function CategoryDropdown({ value, onChange, categories = [] }){
     return items.map((i) => i.categorienaam ?? i.naam ?? i.name ?? String(i));
   }, [fetched]);
 
-  const sample = categories.length ? categories : (remoteCategories.length ? remoteCategories : ["Salaris","Boodschappen","Huur"]);
+  const options = categories.length
+    ? categories
+    : remoteCategories.length
+    ? remoteCategories
+    : ['Salaris', 'Boodschappen', 'Huur'];
 
-  const handleChange = (event) => {
-    const v = event.target.value === '' ? null : event.target.value;
-    if (typeof onChange === 'function') onChange(v);
+  const handleChange = (_, newValue) => {
+    if (typeof onChange === 'function') onChange(newValue || null);
   };
 
   return (
-    <FormControl fullWidth size="medium">
-      <InputLabel id="category-select-label"></InputLabel>
-      <Select
-        labelId="category-select-label"
-        value={value ?? ''}
-        label="Categorie"
-        onChange={handleChange}
-        displayEmpty
-      >
-        <MenuItem value="">— Alle categorieën —</MenuItem>
-        {isLoading && !sample.length && (
-          <MenuItem value="" disabled>
-            <CircularProgress size={18} />&nbsp;Laden...
-          </MenuItem>
-        )}
-        {!isLoading && sample.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-        {error && (
-          <MenuItem value="" disabled>Fout bij laden categorieën</MenuItem>
-        )}
-      </Select>
-    </FormControl>
+    <Autocomplete
+      value={value ?? ''}
+      onChange={handleChange}
+      options={options}
+      loading={isLoading}
+      disabled={!!error}
+      fullWidth
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Categorie"
+          placeholder="Selecteer of typ een categorie"
+          error={!!error}
+          helperText={error ? 'Fout bij laden categorieën' : ''}
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <>
+                {isLoading ? <CircularProgress color="inherit" size={18} /> : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
+        />
+      )}
+    />
   );
 }
