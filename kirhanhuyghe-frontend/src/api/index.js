@@ -30,6 +30,9 @@ export const getAll = (path) =>
     if (r.data && Array.isArray(r.data.items)) return r.data.items;
     return r.data;
   });
+
+// Generic GET for single resource or 'me' endpoints. Returns response.data
+export const getById = (path) => api.get(`/${path}`).then((r) => r.data);
 // export async function getAll(url) {
 //   const { data } = await axios.get(`${baseUrl}/${url}`); 
 
