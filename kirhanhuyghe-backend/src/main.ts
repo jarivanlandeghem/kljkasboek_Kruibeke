@@ -41,8 +41,14 @@ async function bootstrap() {
   // CORS
 
   const cors = config.get<CorsConfig>('cors')!;
+  // If no origins configured (development), fall back to localhost:5173
+  const allowedOrigins =
+    cors.origins && cors.origins.length > 0
+      ? cors.origins
+      : ['http://localhost:5173'];
   app.enableCors({
-    origins: cors.origins,
+    origin: allowedOrigins,
+    credentials: true,
     maxAge: cors.maxAge,
   });
   // Globale prefix
@@ -60,4 +66,4 @@ async function bootstrap() {
   console.log(`Application is running on: http://localhost:${port}/api`);
 }
 
-bootstrap();
+void bootstrap();

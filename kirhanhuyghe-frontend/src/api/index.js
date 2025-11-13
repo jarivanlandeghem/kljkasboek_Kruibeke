@@ -11,7 +11,12 @@ const api = axios.create({
 
 // als je token in localStorage bewaart (naam kan anders zijn)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token') || localStorage.getItem('accessToken') || null;
+  // Try all common token keys; the Auth provider uses 'jwtToken'
+  const token =
+    localStorage.getItem('jwtToken') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    null;
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -19,7 +24,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const getAll = (path) => api.get(`/${path}`).then(r => r.data);
+export const getAll = (path) =>
+  api.get(`/${path}`).then((r) => {
+    // Backend responses often return { items: [...] } — return items when present
+    if (r.data && Array.isArray(r.data.items)) return r.data.items;
+    return r.data;
+  });
 // export async function getAll(url) {
 //   const { data } = await axios.get(`${baseUrl}/${url}`); 
 
