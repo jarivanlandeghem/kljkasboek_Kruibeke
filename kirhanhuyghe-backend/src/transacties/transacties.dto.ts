@@ -102,6 +102,8 @@ export class UpdateTransactieDto {
   in_uit?: 'IN' | 'UIT';
   bedrag?: number;
   datum?: string; // YYYY-MM-DD
+  // Optionele lijst met categorieIDs voor koppeling
+  categorieIDs?: number[];
 }
 
 /**

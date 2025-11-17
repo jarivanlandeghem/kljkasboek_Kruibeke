@@ -50,13 +50,27 @@ export class TransactiesController {
   }
 
   @Put(':id')
-  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   async updateTransactieById(
     @Param('id') id: string,
     @Body() dto: UpdateTransactieDto,
   ): Promise<TransactieResponseDto | undefined> {
     return this.transactieService.updateById(Number(id), dto);
+  }
+
+  // Nieuwe endpoint om alleen categorie-koppelingen bij te werken
+  @Put(':id/categorieen')
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async updateCategorieKoppelingen(
+    @Param('id') id: string,
+    @Body() body: { categorieIDs?: number[] },
+  ): Promise<TransactieResponseDto | undefined> {
+    await this.transactieService.updateCategorieKoppelingen(
+      Number(id),
+      body.categorieIDs || [],
+    );
+    return this.transactieService.getById(Number(id));
   }
 
   @Delete(':id')

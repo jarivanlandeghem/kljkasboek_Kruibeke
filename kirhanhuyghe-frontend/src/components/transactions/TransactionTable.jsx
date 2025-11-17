@@ -7,15 +7,15 @@ function TransactionsTable({ transacties, onDelete }) {
     );
   }
   return (
-    <table className='table-auto w-full border-collapse'>
+    <table className='table-fixed w-full border-collapse'>
       <thead className='text-black'>
         <tr className="border-b-2 border-gray-300">
-          <th className="text-start py-2">Beschrijving</th>
-          <th className='text-start py-2'>Categorie 1</th>
-          <th className='text-start py-2'>Categorie 2</th>
-          <th className="text-start py-2">Datum</th>
-          <th className="text-start py-2">Gebruiker</th>
-          <th className='text-start py-2'>Bedrag</th>
+          <th className="text-start py-2 w-3/11">Beschrijving</th>
+          <th className='text-start py-2 w-80'>Categorie 1</th>
+          <th className='text-start py-2 w-85'>Categorie 2</th>
+          <th className="text-start py-2 w-45">Datum</th>
+          <th className="text-start py-2 w-45">Gebruiker</th>
+          <th className='text-start py-2 w-45'>Bedrag</th>
           <th></th>
         </tr>
       </thead>
