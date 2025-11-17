@@ -21,16 +21,17 @@ import 'react-csv-importer/dist/index.css';
 
 export default function TransactionList() {
   const { user } = useAuth();
-  const userid = user.userid
-  // Debug: log het user object bij component mount
+  const userid = user.userid;
   
+  // Debug: log het user object bij component mount
+  console.log('User object:', user);
 
   const [openDialog, setOpenDialog] = useState(null);
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');
   const { mutate } = useSWRConfig();
 
-  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
     defaultValues: { 
       beschrijving: '', 
       bedrag: '', 
@@ -40,13 +41,39 @@ export default function TransactionList() {
   });
 
   const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
+  
+  // VOEG TOE: Haal gebruikersdata op
+  const { data: gebruikers = [] } = useSWR('users', getAll);
+
+  // Maak een mapping van userID naar voornaam
+  const gebruikerMapping = useMemo(() => {
+    const mapping = {};
+    gebruikers.forEach(gebruiker => {
+      mapping[gebruiker.userid] = gebruiker.voornaam; // Let op: 'userid' niet 'userID'
+    });
+    console.log('Gebruiker mapping:', mapping);
+    return mapping;
+  }, [gebruikers]);
+
+  // Verrijk transacties met voornaam voor display
+  const verrijkteTransacties = useMemo(() => 
+    transacties.map(transactie => ({
+      ...transactie,
+      // Gebruik de mapping om voornaam toe te voegen
+      displayVoornaam: gebruikerMapping[transactie.userID] || `User ${transactie.userID}`
+    })),
+    [transacties, gebruikerMapping]
+  );
+
+  // Debug: toon de verrijkte transacties
+  console.log('Verrijkte transacties:', verrijkteTransacties);
 
   const filteredTransacties = useMemo(() =>
-    transacties.filter((t) => {
+    verrijkteTransacties.filter((t) => {
       const beschrijving = (t.beschrijving || t.description || '').toString();
       return beschrijving.toLowerCase().includes(search.toLowerCase());
     }),
-    [search, transacties]
+    [search, verrijkteTransacties]
   );
 
   const handleDelete = useCallback(async (transactieID) => {
@@ -67,12 +94,6 @@ export default function TransactionList() {
       const [day, month, year] = data.datum.split('-');
       const formattedDate = `${year}-${month}-${day}`;
 
-      // Debug: log het user object
-      
-      
-      // Probeer verschillende mogelijke veldnamen voor userID
-      userid
-      
       if (!userid) {
         console.error('Geen userID gevonden in user object:', user);
         alert('Fout: Gebruiker niet gevonden. Probeer opnieuw in te loggen.');
@@ -81,7 +102,7 @@ export default function TransactionList() {
 
       const newTransactie = {
         rekeningID: 1,
-        userID: userid,
+        userID: userid, // Stuur userID naar database
         beschrijving: data.beschrijving,
         in_uit: bedragNum >= 0 ? 'IN' : 'UIT',
         bedrag: bedragNum,
@@ -103,6 +124,105 @@ export default function TransactionList() {
   const handleClose = () => {
     reset();
     setOpenDialog(null);
+  };
+
+  // CSV import handler voor KBC data
+  const handleCSVImport = async (rows) => {
+    try {
+      if (!userid) {
+        console.error('Geen userID gevonden in user object:', user);
+        alert('Fout: Gebruiker niet gevonden. Probeer opnieuw in te loggen.');
+        return;
+      }
+
+      console.log('Start CSV import met', rows.length, 'rijen');
+      
+      const importResults = {
+        success: 0,
+        failed: 0,
+        errors: []
+      };
+
+      // Verwerk elke rij
+      for (const row of rows) {
+        try {
+          // Parse bedrag - KBC gebruikt komma als decimaal, behoud het teken
+          const rawAmount = row['Bedrag'] || row['bedrag'] || 0;
+          let bedragNum;
+          
+          if (typeof rawAmount === 'number') {
+            bedragNum = rawAmount;
+          } else {
+            const amountStr = String(rawAmount).trim();
+            // Behoud het minteken voor negatieve bedragen
+            let cleaned = amountStr.replace(/[^\d,-]/g, '');
+            // Vervang komma door punt voor parseFloat
+            cleaned = cleaned.replace(',', '.');
+            bedragNum = parseFloat(cleaned) || 0;
+          }
+
+          // Parse en format datum - KBC gebruikt DD/MM/YYYY
+          const rawDate = row['Datum'] || row['datum'] || '';
+          let formattedDate;
+          
+          if (rawDate.includes('/')) {
+            // DD/MM/YYYY naar YYYY-MM-DD
+            const [day, month, year] = rawDate.split('/');
+            formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          } else {
+            // Fallback: gebruik huidige datum
+            formattedDate = new Date().toISOString().split('T')[0];
+          }
+
+          // Maak beschrijving: vrije mededeling + ' ' + naam tegenpartij
+          const vrijeMededeling = row['Vrije mededeling'] || row['vrijeMededeling'] || '';
+          const naamTegenpartij = row['Naam tegenpartij'] || row['naamTegenpartij'] || '';
+          const beschrijving = vrijeMededeling && naamTegenpartij 
+            ? `${vrijeMededeling} ${naamTegenpartij}`
+            : vrijeMededeling || naamTegenpartij || 'Geen beschrijving';
+
+          // Bereid transactie voor - behoud het originele bedrag (positief of negatief)
+          const newTransactie = {
+            rekeningID: 1,
+            userID: userid, // Stuur userID naar database
+            beschrijving: beschrijving,
+            in_uit: bedragNum >= 0 ? 'IN' : 'UIT',
+            bedrag: bedragNum, // Behoud het originele bedrag met teken
+            datum: formattedDate,
+          };
+
+          console.log('Importing transaction:', newTransactie);
+          
+          // Verstuur naar API
+          await post('transacties', { arg: newTransactie });
+          importResults.success++;
+          
+        } catch (rowError) {
+          console.error('Fout bij importeren rij:', row, rowError);
+          importResults.failed++;
+          importResults.errors.push({
+            row: row,
+            error: rowError.message
+          });
+        }
+      }
+
+      console.log('Import voltooid:', importResults);
+      
+      // Toon resultaat aan gebruiker
+      if (importResults.failed === 0) {
+        alert(`Succesvol ${importResults.success} transacties geïmporteerd!`);
+      } else {
+        alert(`Import voltooid: ${importResults.success} succesvol, ${importResults.failed} gefaald.`);
+      }
+      
+      // Vernieuw de data
+      mutate('transacties');
+      
+    } catch (error) {
+      console.error('Algemene fout bij CSV import:', error);
+      alert('Er is een fout opgetreden bij het importeren van de CSV. Controleer de console voor details.');
+    }
   };
 
   return (
@@ -139,6 +259,7 @@ export default function TransactionList() {
 
       <div className="mt-4 mr-5">
         <AsyncData loading={isLoading} error={error}>
+          {/* Geef de verrijkte transacties door aan de tabel met voornamen */}
           <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} />
         </AsyncData>
       </div>
@@ -207,27 +328,15 @@ export default function TransactionList() {
               quoteChar: '"',
               escapeChar: '"',
               transformHeader: (h) => h.trim().replace(/\u200B/g, ''),
-              transform: (value, field) => {
-                if (field.header === 'Bedrag') {
-                  let cleaned = String(value).replace(/[^\d,-]/g, '');
-                  cleaned = cleaned.replace(',', '.');
-                  return parseFloat(cleaned) || 0;
-                }
-                return String(value).trim().replace(/\u200B/g, '');
-              },
             }}
-            dataHandler={async (rows) => {
-              const mapped = rows.map((r) => ({
-                datum: r['Datum'] || '',
-                bedrag: r['Bedrag'] || 0,
-                vrijeMededeling: r['Vrije mededeling'] || '',
-                naamTegenpartij: r['Naam tegenpartij'] || '',
-              }));
-              console.log('Mapped rows:', mapped);
-            }}
+            dataHandler={handleCSVImport}
             onComplete={() => {
-              mutate('transacties');
+              console.log('CSV import voltooid');
               setOpenDialog(null);
+            }}
+            onError={(error) => {
+              console.error('CSV import fout:', error);
+              alert('Er is een fout opgetreden bij het lezen van het CSV bestand.');
             }}
           >
             <ImporterField name="Datum" label="Datum" />
