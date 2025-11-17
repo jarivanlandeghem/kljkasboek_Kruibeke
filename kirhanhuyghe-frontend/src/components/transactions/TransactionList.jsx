@@ -1,9 +1,9 @@
-import TransactionsTable from './TransactionTable';
+import TransactionsTable from './TransactionTable'; 
 import { useState, useMemo, useCallback } from 'react';
 import AsyncData from '../AsyncData';
 import useSWR, { useSWRConfig } from 'swr';
-import { getAll, deleteById } from '../../api';
-
+import { getAll, deleteById, post } from '../../api';
+import { useAuth } from '../../contexts/auth';
 import {
   Dialog,
   DialogTitle,
@@ -20,50 +20,84 @@ import { Importer, ImporterField } from 'react-csv-importer';
 import 'react-csv-importer/dist/index.css';
 
 export default function TransactionList() {
+  const { user } = useAuth();
+  const userid = user.userid
+  // Debug: log het user object bij component mount
+  
+
   const [openDialog, setOpenDialog] = useState(null);
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');
   const { mutate } = useSWRConfig();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm({
-    defaultValues: { beschrijving: '', bedrag: 0, datum: '', categorieen: [] },
+  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
+    defaultValues: { 
+      beschrijving: '', 
+      bedrag: '', 
+      datum: new Date().toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('-'), // DD-MM-YYYY
+      categorieen: [] 
+    },
   });
 
   const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
 
-  const filteredTransacties = useMemo(
-    () =>
-      transacties.filter((t) => {
-        const beschrijving = (t.beschrijving || t.description || '').toString();
-        return beschrijving.toLowerCase().includes(search.toLowerCase());
-      }),
+  const filteredTransacties = useMemo(() =>
+    transacties.filter((t) => {
+      const beschrijving = (t.beschrijving || t.description || '').toString();
+      return beschrijving.toLowerCase().includes(search.toLowerCase());
+    }),
     [search, transacties]
   );
 
-  const handleDelete = useCallback(
-    async (transactieID) => {
-      try {
-        await deleteById('transacties', { arg: transactieID });
-        mutate('transacties');
-      } catch (err) {
-        console.error(err);
-        alert('Er is een fout opgetreden bij het verwijderen van de transactie.');
-      }
-    },
-    [mutate]
-  );
+  const handleDelete = useCallback(async (transactieID) => {
+    try {
+      await deleteById('transacties', { arg: transactieID });
+      mutate('transacties');
+    } catch (err) {
+      console.error(err);
+      alert('Er is een fout opgetreden bij het verwijderen van de transactie.');
+    }
+  }, [mutate]);
 
-  const onSubmit = (data) => {
-    console.log('Form data:', data);
-    // TODO: await create('transacties', data);
-    mutate('transacties');
-    reset();
-    setOpenDialog(null);
+  const onSubmit = async (data) => {
+    try {
+      const bedragNum = parseFloat(String(data.bedrag).replace(',', '.'));
+
+      // Converteer DD-MM-YYYY naar YYYY-MM-DD voor de backend
+      const [day, month, year] = data.datum.split('-');
+      const formattedDate = `${year}-${month}-${day}`;
+
+      // Debug: log het user object
+      
+      
+      // Probeer verschillende mogelijke veldnamen voor userID
+      userid
+      
+      if (!userid) {
+        console.error('Geen userID gevonden in user object:', user);
+        alert('Fout: Gebruiker niet gevonden. Probeer opnieuw in te loggen.');
+        return;
+      }
+
+      const newTransactie = {
+        rekeningID: 1,
+        userID: userid,
+        beschrijving: data.beschrijving,
+        in_uit: bedragNum >= 0 ? 'IN' : 'UIT',
+        bedrag: bedragNum,
+        datum: formattedDate,
+      };
+
+      console.log('Nieuwe transactie:', newTransactie);
+      
+      await post('transacties', { arg: newTransactie });
+      mutate('transacties');
+      reset();
+      setOpenDialog(null);
+    } catch (error) {
+      console.error('Fout bij aanmaken transactie:', error);
+      alert('Er is een fout opgetreden bij het aanmaken van de transactie.');
+    }
   };
 
   const handleClose = () => {
@@ -76,7 +110,6 @@ export default function TransactionList() {
       <h1 className="text-4xl mb-4 mt-5 text-black">Transacties</h1>
 
       <div className="flex items-start justify-between mb-3 w-full">
-        {/* Zoeken */}
         <div className="input-group flex items-center gap-2">
           <input
             type="search"
@@ -94,42 +127,24 @@ export default function TransactionList() {
           </button>
         </div>
 
-        {/* Knoppen */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => setOpenDialog('voegtoe')}
-            sx={{ width: 160 }}
-          >
+          <Button variant="contained" color="error" onClick={() => setOpenDialog('voegtoe')} sx={{ width: 160 }}>
             Voeg toe
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => setOpenDialog('importcsv')}
-            sx={{ width: 160, mr: 5 }}
-          >
+          <Button variant="contained" onClick={() => setOpenDialog('importcsv')} sx={{ width: 160, mr: 5 }}>
             Importeer CSV
           </Button>
         </div>
       </div>
 
-      {/* Tabel */}
       <div className="mt-4 mr-5">
         <AsyncData loading={isLoading} error={error}>
           <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} />
         </AsyncData>
       </div>
 
-      {/* DIALOG: Transactie toevoegen */}
-      <Dialog
-        open={openDialog === 'voegtoe'}
-        onClose={() => setOpenDialog(null)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={openDialog === 'voegtoe'} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>Transactie toevoegen</DialogTitle>
-
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogContent>
             <TextField
@@ -144,12 +159,11 @@ export default function TransactionList() {
             <TextField
               margin="dense"
               label="Bedrag"
-              type="number"
-              step="0.01"
+              type="text"
               fullWidth
               {...register('bedrag', {
                 required: 'Bedrag is verplicht',
-                valueAsNumber: true,
+                validate: (v) => !isNaN(parseFloat(String(v).replace(',', '.'))) || 'Ongeldig getal',
               })}
               error={Boolean(errors.bedrag)}
               helperText={errors.bedrag?.message}
@@ -157,106 +171,72 @@ export default function TransactionList() {
 
             <TextField
               margin="dense"
-              label="Datum"
-              type="date"
+              label="Datum (DD-MM-YYYY)"
+              type="text"
               fullWidth
-              InputLabelProps={{ shrink: true }}
-              {...register('datum', { required: 'Datum is verplicht' })}
+              placeholder="DD-MM-YYYY"
+              {...register('datum', { 
+                required: 'Datum is verplicht',
+                pattern: {
+                  value: /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/,
+                  message: 'Gebruik formaat DD-MM-YYYY'
+                }
+              })}
               error={Boolean(errors.datum)}
               helperText={errors.datum?.message}
             />
 
-            <TextField
-              margin="dense"
-              label="Categorieën"
-              select
-              SelectProps={{
-                multiple: true,
-                renderValue: (selected) => (selected || []).join(', '),
-              }}
-              fullWidth
-              defaultValue={[]}
-              {...register('categorieen', {
-                required: 'Kies minstens 1 categorie',
-                validate: (v) => v.length <= 2 || 'Maximaal 2 categorieën',
-              })}
-              error={Boolean(errors.categorieen)}
-              helperText={errors.categorieen?.message}
-            >
-              <MenuItem value="Voeding">Voeding</MenuItem>
-              <MenuItem value="Transport">Transport</MenuItem>
-              <MenuItem value="Vermaak">Vermaak</MenuItem>
-              <MenuItem value="Wonen">Wonen</MenuItem>
-              <MenuItem value="Overig">Overig</MenuItem>
-            </TextField>
+          
           </DialogContent>
 
           <DialogActions>
-            <Button onClick={handleClose} color="inherit">
-              Annuleren
-            </Button>
-            <Button type="submit" color="error" variant="contained">
-              Opslaan
-            </Button>
+            <Button onClick={handleClose} color="inherit">Annuleren</Button>
+            <Button type="submit" color="error" variant="contained">Opslaan</Button>
           </DialogActions>
         </form>
       </Dialog>
 
-
-{/* DIALOG: CSV importeren */}
-<Dialog
-  open={openDialog === 'importcsv'}
-  onClose={() => setOpenDialog(null)}
-  fullWidth
-  maxWidth="md"
->
-  <DialogTitle>CSV importeren</DialogTitle>
-  <DialogContent>
-<Importer
-  parserOptions={{
-    header: true,
-    skipEmptyLines: true,
-    delimiter: ';',
-    quoteChar: '"',
-    escapeChar: '"',
-    transformHeader: (h) => h.trim().replace(/\u200B/g, ''),
-    transform: (value, field) => {
-      if (field.header === 'Bedrag') {
-        // Verwijder alle niet-numerieke karakters behalve , en -
-        let cleaned = String(value).replace(/[^\d,-]/g, '');
-        // Vervang komma door punt voor decimalen
-        cleaned = cleaned.replace(',', '.');
-        // Parse als float
-        const num = parseFloat(cleaned) || 0;
-        return num;
-      }
-      return String(value).trim().replace(/\u200B/g, '');
-    },
-  }}
-  dataHandler={async (rows) => {
-    const mapped = rows.map((r) => ({
-      datum: r['Datum'] || '',
-      bedrag: r['Bedrag'] || 0,
-      vrijeMededeling: r['Vrije mededeling'] || '',
-      naamTegenpartij: r['Naam tegenpartij'] || '',
-     
-    }));
-    console.log('Mapped rows:', mapped);
-    // TODO: stuur naar backend
-  }}
-  onComplete={() => {
-    mutate('transacties');
-    setOpenDialog(null);
-  }}
->
-  <ImporterField name="Datum" label="Datum" />
-  <ImporterField name="Bedrag" label="Bedrag" />
-  <ImporterField name="Vrije mededeling" label="Vrije mededeling" />
-  <ImporterField name="Naam tegenpartij" label="Naam tegenpartij" />
-  
-</Importer>
-  </DialogContent>
-</Dialog>
+      <Dialog open={openDialog === 'importcsv'} onClose={handleClose} fullWidth maxWidth="md">
+        <DialogTitle>CSV importeren</DialogTitle>
+        <DialogContent>
+          <Importer
+            parserOptions={{
+              header: true,
+              skipEmptyLines: true,
+              delimiter: ';',
+              quoteChar: '"',
+              escapeChar: '"',
+              transformHeader: (h) => h.trim().replace(/\u200B/g, ''),
+              transform: (value, field) => {
+                if (field.header === 'Bedrag') {
+                  let cleaned = String(value).replace(/[^\d,-]/g, '');
+                  cleaned = cleaned.replace(',', '.');
+                  return parseFloat(cleaned) || 0;
+                }
+                return String(value).trim().replace(/\u200B/g, '');
+              },
+            }}
+            dataHandler={async (rows) => {
+              const mapped = rows.map((r) => ({
+                datum: r['Datum'] || '',
+                bedrag: r['Bedrag'] || 0,
+                vrijeMededeling: r['Vrije mededeling'] || '',
+                naamTegenpartij: r['Naam tegenpartij'] || '',
+              }));
+              console.log('Mapped rows:', mapped);
+            }}
+            onComplete={() => {
+              mutate('transacties');
+              setOpenDialog(null);
+            }}
+          >
+            <ImporterField name="Datum" label="Datum" />
+            <ImporterField name="Bedrag" label="Bedrag" />
+            <ImporterField name="Vrije mededeling" label="Vrije mededeling" />
+            <ImporterField name="Naam tegenpartij" label="Naam tegenpartij" />
+          </Importer>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

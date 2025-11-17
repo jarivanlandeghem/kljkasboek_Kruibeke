@@ -34,7 +34,6 @@ export class CreateTransactieRequestDto {
   @IsIn(['IN', 'UIT'])
   in_uit: 'IN' | 'UIT';
 
-  @IsInt()
   @IsNotEmpty()
   bedrag: number; // Wordt bij insert als string opgeslagen in decimal kolom
 
