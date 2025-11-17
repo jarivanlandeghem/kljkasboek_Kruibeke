@@ -51,3 +51,15 @@ export const post = async (url, { arg }) => {
   const { data } = await api.post(`/${url}`, arg);
   return data;
 };
+
+// Generic PUT helper for updating resources by id
+export const putById = async (url, { id, arg }) => {
+  const { data } = await api.put(`/${url}/${id}`, arg);
+  return data;
+};
+
+// Generic PUT by full path, useful for endpoints like 'transacties/:id/categorieen'
+export const put = async (path, arg) => {
+  const { data } = await api.put(`/${path}`, arg);
+  return data;
+};

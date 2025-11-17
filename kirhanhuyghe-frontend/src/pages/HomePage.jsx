@@ -19,7 +19,7 @@ export default function HomePage() {
       <div className="flex flex-col gap-4 items-center bg-white">
         <WelcomeMessage username={username} />
 
-        <Link to='transactions'>
+        <Link to='/transactions'>
           <ActionButton 
             label="Transacties weergeven" 
           />
@@ -30,7 +30,7 @@ export default function HomePage() {
             onClick={() => handleClick("categorieoverzicht")} 
           />
         </Link>
-        <Link to='adduser'>
+        <Link to='/adduser'>
           <ActionButton 
             label="Gebruiker toevoegen" 
             onClick={() => handleClick("gebruiker")} 

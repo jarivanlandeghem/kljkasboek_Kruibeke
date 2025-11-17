@@ -16,7 +16,7 @@ import {
   type DatabaseProvider,
   InjectDrizzle,
 } from '../drizzle/drizzle.provider';
-import { transacties } from '../drizzle/schema';
+import { transacties, transactieCategorie } from '../drizzle/schema';
 
 @Injectable()
 export class TransactieService {
@@ -26,8 +26,30 @@ export class TransactieService {
   ) {}
   // Alle transacties ophalen
   async getAll(): Promise<TransactieListResponseDto> {
-    const items = await this.db.query.transacties.findMany();
-    return { items };
+    // Haal transacties inclusief koppelingen
+    const items = await this.db.query.transacties.findMany({
+      with: { categorieKoppelingen: true },
+    });
+
+    // Haal alle categorieën (kleine dataset) en maak een lookup zodat we categorienamen kunnen toevoegen
+    const allCategories = await this.db.query.categorieen.findMany();
+    const catMap = new Map(
+      allCategories.map((c) => [c.categorieID, c.categorienaam]),
+    );
+
+    const itemsWithDetails = items.map((t) => {
+      const koppelingen = t.categorieKoppelingen || [];
+      const categorieDetails = koppelingen.map((k) => ({
+        categorieID: k.categorieID,
+        categorienaam: catMap.get(k.categorieID) ?? String(k.categorieID),
+      }));
+      return {
+        ...t,
+        categorieDetails,
+      };
+    });
+
+    return { items: itemsWithDetails };
   }
   // Transactie op ID ophalen
   async getById(id: number): Promise<TransactieResponseDto> {
@@ -119,7 +141,29 @@ export class TransactieService {
       .set(updatedTransactie)
       .where(eq(transacties.transactieID, id));
 
+    // indien categorieIDs meegegeven: update de koppeltabel (vervang alle bestaande koppelingen)
+    if (updateDto.categorieIDs) {
+      await this.updateCategorieKoppelingen(id, updateDto.categorieIDs);
+    }
+
     return updatedTransactie;
+  }
+
+  // Update only the transactie-categorie koppelingen (replace existing links)
+  async updateCategorieKoppelingen(id: number, categorieIDs: number[]) {
+    // Verwijder bestaande koppelingen
+    await this.db
+      .delete(transactieCategorie)
+      .where(eq(transactieCategorie.transactieID, id));
+
+    const toInsert = (categorieIDs || []).map((categorieID) => ({
+      transactieID: id,
+      categorieID,
+    }));
+
+    if (toInsert.length > 0) {
+      await this.db.insert(transactieCategorie).values(toInsert);
+    }
   }
 
   // VERWIJDER
