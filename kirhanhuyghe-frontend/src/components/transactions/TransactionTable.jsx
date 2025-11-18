@@ -21,7 +21,13 @@ function TransactionsTable({ transacties, onDelete }) {
       </thead>
       <tbody>
         {transacties.map((transaction) => (
-          <Transaction key={transaction.transactieID} {...transaction} onDelete={onDelete} />
+          <Transaction 
+            key={transaction.transactieID} 
+            {...transaction} 
+            // Zorg dat de displayVoornaam wordt doorgegeven aan de Transaction component
+            displayVoornaam={transaction.displayVoornaam}
+            onDelete={onDelete} 
+          />
         ))}
       </tbody>
     </table>
@@ -29,4 +35,3 @@ function TransactionsTable({ transacties, onDelete }) {
 }
 
 export default TransactionsTable;
-
