@@ -105,4 +105,3 @@ function TransactionsTable({ transacties, onDelete, currentUser }) {
 }
 
 export default TransactionsTable;
-
