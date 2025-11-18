@@ -1,6 +1,8 @@
 {
 	"dependencies": {
 		"@headlessui/react": "^2.2.9",
+		"@nestjs/swagger": "^11.2.3",
+		"nestjs-swagger-dto": "^3.8.5",
 		"react": "^19.2.0",
 		"react-dom": "^19.2.0",
 		"react-hook-form": "^7.66.0",

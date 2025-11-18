@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { CircularProgress, TextField, Autocomplete } from '@mui/material';
 import useSWR from 'swr';
 import { getAll } from '../../api';
@@ -30,12 +30,27 @@ export default function CategoryDropdown({ value, onChange, categories = [], sx,
       ];
 
   const handleChange = (_, newValue) => {
-    if (typeof onChange === 'function') onChange(newValue || null);
+    if (typeof onChange === 'function') {
+      onChange(newValue || null);
+    } else {
+      // when parent doesn't control value, manage local state
+      setInternalValue(newValue || null);
+    }
   };
+
+  // local state when caller does not provide controlled `value`
+  const [internalValue, setInternalValue] = useState(value ?? null);
+
+  // sync when parent provides value prop
+  useEffect(() => {
+    if (value !== undefined) setInternalValue(value ?? null);
+  }, [value]);
+
+  const controlledValue = value !== undefined ? value ?? null : internalValue;
 
   return (
     <Autocomplete
-      value={value ?? null}
+      value={controlledValue}
       onChange={handleChange}
       options={options}
       getOptionLabel={(option) => (typeof option === 'string' ? option : option?.categorienaam ?? '')}

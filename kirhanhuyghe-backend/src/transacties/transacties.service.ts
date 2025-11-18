@@ -16,7 +16,7 @@ import {
   type DatabaseProvider,
   InjectDrizzle,
 } from '../drizzle/drizzle.provider';
-import { transacties, transactieCategorie } from '../drizzle/schema';
+import { transacties, transactieCategorie, users } from '../drizzle/schema';
 
 @Injectable()
 export class TransactieService {
@@ -49,7 +49,39 @@ export class TransactieService {
       };
     });
 
-    return { items: itemsWithDetails };
+    // Voeg auteurgegevens (voornaam, familienaam) toe bij elke transactie
+    // Verzamel unieke userIDs
+    const userIds = Array.from(
+      new Set(itemsWithDetails.map((it) => it.userID).filter(Boolean)),
+    );
+    const userMap = new Map<
+      number,
+      { voornaam: string; familienaam: string }
+    >();
+    for (const id of userIds) {
+      try {
+        const [dbUser] = await this.db
+          .select()
+          .from(users)
+          .where(eq(users.userid, id))
+          .limit(1);
+        if (dbUser) {
+          userMap.set(id, {
+            voornaam: dbUser.voornaam,
+            familienaam: dbUser.familienaam,
+          });
+        }
+      } catch (e) {
+        // ignore errors, leave user unknown
+      }
+    }
+
+    const itemsWithAuthors = itemsWithDetails.map((it) => ({
+      ...it,
+      author: userMap.has(it.userID) ? userMap.get(it.userID) : null,
+    }));
+
+    return { items: itemsWithAuthors };
   }
   // Transactie op ID ophalen
   async getById(id: number): Promise<TransactieResponseDto> {

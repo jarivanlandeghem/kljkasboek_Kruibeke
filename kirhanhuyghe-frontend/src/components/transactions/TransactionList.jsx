@@ -1,4 +1,4 @@
-import TransactionsTable from './TransactionTable'; 
+import TransactionsTable from './TransactionTable';
 import { useState, useMemo, useCallback } from 'react';
 import AsyncData from '../AsyncData';
 import useSWR, { useSWRConfig } from 'swr';
@@ -10,8 +10,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Button,
-  MenuItem,
+  Button
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 
@@ -139,7 +138,7 @@ export default function TransactionList() {
 
       <div className="mt-4 mr-5">
         <AsyncData loading={isLoading} error={error}>
-          <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} />
+          <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} currentUser={user} />
         </AsyncData>
       </div>
 

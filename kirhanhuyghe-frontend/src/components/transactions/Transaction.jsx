@@ -23,6 +23,8 @@ function Transaction({
   datum, 
   bedrag, 
   userID, 
+  currentUser,
+  authorName = null,
   onDelete = () => {},
   categorieDetails = null,
   categorieKoppelingen = null,
@@ -90,10 +92,21 @@ function Transaction({
     }
   };
 
+  let displayUserName;
+  if (authorName === undefined) {
+    displayUserName = 'Laden...';
+  } else if (authorName) {
+    displayUserName = authorName;
+  } else if (currentUser && String(currentUser.userid) === String(userID)) {
+    displayUserName = `${currentUser.voornaam || ''} ${currentUser.familienaam || ''}`.trim();
+  } else {
+    displayUserName = 'Onbekend';
+  }
+
   return (
     <tr className="border-b border-gray-200">
-      <td className="py-2">{beschrijving || 'N/A'}</td>
-      <td className="py-2">
+      <td className="py-2 px-4">{beschrijving || 'N/A'}</td>
+      <td className="py-2 px-4">
         <CategoryDropdown
           value={cat1}
           onChange={(v) => handleCategoryChange(1, v)}
@@ -101,7 +114,7 @@ function Transaction({
           sx={{ width: 250 }}
         />
       </td>
-      <td className="py-2">
+      <td className="py-2 px-4">
         <CategoryDropdown
           value={cat2}
           onChange={(v) => handleCategoryChange(2, v)}
@@ -109,11 +122,11 @@ function Transaction({
           sx={{ width: 250 }}
         />
       </td>
-      <td className="py-2">{formatDate(datum)}</td>
-      <td className="py-2">User {userID}</td>
-      <td className="py-2">{amountFormat.format(bedrag || 0)}</td>
-      <td className="text-end py-2 pl-8">
-        <button className='py-2 px-2.5 rounded-md bg-gray-950' onClick={handleDelete}>
+      <td className="py-2 px-4">{formatDate(datum)}</td>
+      <td className="py-2 px-4 hidden sm:table-cell">{displayUserName}</td>
+      <td className="py-2 px-4">{amountFormat.format(bedrag || 0)}</td>
+      <td className="text-right py-2 pr-4">
+        <button className='py-2 px-2.5 rounded-md bg-gray-950' onClick={handleDelete} aria-label={`Verwijder transactie ${transactieID}`}>
           <IoTrashOutline />
         </button>
       </td>

@@ -7,6 +7,7 @@ import { ValidationError } from 'class-validator';
 import CustomLogger from '../core/customLogger';
 import { LogConfig } from './config/configuration';
 import { DrizzleQueryErrorFilter } from './drizzle/drizzle-query-error.filter';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 //TODO ZEKER DAT DIT WEKRT?
 async function bootstrap() {
@@ -57,6 +58,16 @@ async function bootstrap() {
   //LOG SHIT
   const log = config.get<LogConfig>('log')!;
   app.useLogger(new CustomLogger({ logLevels: log.levels }));
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Budget Web Services')
+    .setDescription('The Budget API application')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document);
 
   // Start de server
   await app.listen(process.env.PORT ?? 3000, () => {
