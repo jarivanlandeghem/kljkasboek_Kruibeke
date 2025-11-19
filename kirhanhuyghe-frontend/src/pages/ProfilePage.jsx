@@ -76,7 +76,7 @@ export default function ProfilePage() {
               sx={{ 
                 width: 80, 
                 height: 80, 
-                bgcolor: 'primary.main',
+                bgcolor: 'red',
                 fontSize: '2rem',
                 mr: 3
               }}
@@ -117,7 +117,7 @@ export default function ProfilePage() {
                   Achternaam
                 </Typography>
                 <Typography variant="body1">
-                  {user?.achternaam || 'Niet beschikbaar'}
+                  {user?.familienaam || 'Niet beschikbaar'}
                 </Typography>
               </Box>
 
@@ -130,13 +130,7 @@ export default function ProfilePage() {
                 </Typography>
               </Box>
 
-              <Button 
-                variant="outlined" 
-                startIcon={<Edit />}
-                sx={{ mt: 2 }}
-              >
-                Profiel bewerken
-              </Button>
+              
             </Grid>
 
             {/* Wachtwoord Wijzigen */}
