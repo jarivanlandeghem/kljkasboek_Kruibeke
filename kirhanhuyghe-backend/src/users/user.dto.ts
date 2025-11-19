@@ -205,3 +205,15 @@ export class RegisterUserRequestDto {
   })
   type?: string;
 }
+
+// paswoord aanpassen
+
+export class ChangePasswordRequestDto {
+  @IsString()
+  currentPassword: string;
+
+  @IsString()
+  @MinLength(6, { message: 'Wachtwoord moet minimaal 6 tekens lang zijn' }) // Matcht met je frontend
+  @MaxLength(128)
+  newPassword: string;
+}

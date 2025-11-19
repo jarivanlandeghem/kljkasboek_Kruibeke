@@ -27,7 +27,7 @@ import { ParseUserIdPipe } from '../auth/pipes/parseUserId.pipe';
 import { type Session } from '../types/auth';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-
+import { ChangePasswordRequestDto } from './user.dto';
 @Controller('users')
 @UseGuards(AuthGuard, RolesGuard)
 export class UserController {
@@ -50,6 +50,20 @@ export class UserController {
     const token = await this.authService.register(registerDto);
     return { token };
   }
+
+  // 👇 VERPLAATS DEZE NAAR BOVEN (Boven @Get(':id'))
+  // 👇 EN VERWIJDER @UseGuards(CheckUserAccessGuard)
+  @Put('me/password')
+  // @UseGuards(CheckUserAccessGuard) ❌ DEZE WEGHALEN!
+  async updatePassword(
+    @CurrentUser() user: Session,
+    @Body() dto: ChangePasswordRequestDto,
+  ): Promise<void> {
+    // We gebruiken de user.userId uit de JWT sessie, dus dit is veilig.
+    return this.authService.changePassword(user.userId, dto);
+  }
+
+  // 👇 Pas HIERNA komen de routes met :id params
 
   @Get(':id')
   @UseGuards(CheckUserAccessGuard)

@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     trigger: doLogin,
     isMutating: loginLoading,
     error: loginError,
-  } = useSWRMutation('session', api.post); // 👈 'sessions' gewijzigd naar 'session'
+  } = useSWRMutation('session', api.post); // 'session' of 'sessions' moet matchen met je backend controller
 
   const login = useCallback(
     async (email, password) => {
@@ -52,6 +52,19 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(JWT_TOKEN_KEY);
   }, []);
 
+  // 👇 NIEUWE FUNCTIE: Wachtwoord wijzigen
+  const updatePassword = useCallback(async (currentPassword, newPassword) => {
+    // We roepen de API direct aan.
+    // Zorg dat api.put bestaat in je '../api' bestand.
+    // Endpoint: users/me/password (komt overeen met backend @Put('me/password') in UserController)
+    await api.put('users/me/password', {
+      currentPassword,
+      newPassword,
+    });
+    
+    return true;
+  }, []);
+
   const value = useMemo(
     () => ({
       token,
@@ -62,6 +75,7 @@ export const AuthProvider = ({ children }) => {
       ready: !userLoading,
       login,
       logout,
+      updatePassword, // 👈 Toevoegen aan de export
     }),
     [
       token,
@@ -72,6 +86,7 @@ export const AuthProvider = ({ children }) => {
       userLoading,
       login,
       logout,
+      updatePassword, // 👈 Toevoegen aan dependencies
     ],
   );
 

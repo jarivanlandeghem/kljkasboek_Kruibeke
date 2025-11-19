@@ -1,5 +1,10 @@
 // src/auth/auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   type DatabaseProvider,
   InjectDrizzle,
@@ -14,7 +19,10 @@ import { LoginRequestDto } from '../session/session.dto';
 import { users } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { Role } from './roles';
-import { RegisterUserRequestDto } from '../users/user.dto';
+import {
+  RegisterUserRequestDto,
+  ChangePasswordRequestDto,
+} from '../users/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -122,5 +130,38 @@ export class AuthService {
     }
 
     return this.signJwt(user);
+  }
+
+  // PASWOORD VERANDEREN
+  async changePassword(
+    id: number,
+    dto: ChangePasswordRequestDto,
+  ): Promise<void> {
+    // 1. Haal de gebruiker op met de juiste property naam 'userid'
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.userid, id),
+    });
+
+    if (!user) {
+      throw new NotFoundException('Gebruiker niet gevonden');
+    }
+
+    // 2. Controleer of het huidige wachtwoord klopt
+    // Let op: in jouw tabel heet het veld 'paswoord' (dat mapte naar password_hash)
+    const isMatch = await argon2.verify(user.paswoord, dto.currentPassword);
+
+    if (!isMatch) {
+      // Gooi een fout als het oude wachtwoord niet klopt
+      throw new BadRequestException('Het huidige wachtwoord is onjuist');
+    }
+
+    // 3. Hash het nieuwe wachtwoord (gebruik je bestaande hash configuratie of default)
+    const newHash = await this.hashPassword(dto.newPassword);
+
+    // 4. Update de database
+    await this.db
+      .update(users)
+      .set({ paswoord: newHash }) // Gebruik de property naam 'paswoord'
+      .where(eq(users.userid, id));
   }
 }

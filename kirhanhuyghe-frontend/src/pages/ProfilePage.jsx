@@ -52,7 +52,9 @@ export default function ProfilePage() {
     setIsLoading(true);
 
     try {
+      // Deze functie roept nu de PUT /api/users/me/password endpoint aan
       await updatePassword(passwordData.currentPassword, passwordData.newPassword);
+      
       setMessage({ type: 'success', text: 'Wachtwoord succesvol gewijzigd!' });
       setPasswordData({
         currentPassword: '',
@@ -60,7 +62,8 @@ export default function ProfilePage() {
         confirmPassword: ''
       });
     } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Er is een fout opgetreden bij het wijzigen van het wachtwoord' });
+      // Zorg dat je backend errors goed doorgeeft, anders fallback tekst
+      setMessage({ type: 'error', text: error.response?.data?.message || error.message || 'Er is een fout opgetreden bij het wijzigen van het wachtwoord' });
     } finally {
       setIsLoading(false);
     }
