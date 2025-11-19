@@ -27,13 +27,17 @@ import { ParseUserIdPipe } from '../auth/pipes/parseUserId.pipe';
 import { type Session } from '../types/auth';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { ChangePasswordRequestDto } from './user.dto';
+import { ChangePasswordRequestDto, RequestAccountDto } from './user.dto';
+import { MailService } from '../mail/mail.service';
+import { Public } from '../auth/decorators/public.decorator';
+
 @Controller('users')
 @UseGuards(AuthGuard, RolesGuard)
 export class UserController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly mailService: MailService,
   ) {}
 
   @Get()
@@ -95,5 +99,15 @@ export class UserController {
     @CurrentUser() user: Session,
   ): Promise<void> {
     return await this.userService.deleteByid(id === 'me' ? user.userId : id);
+  }
+
+  @Public() // 👈 Heel belangrijk: geen login nodig
+  @Post('request-account')
+  async requestAccount(@Body() dto: RequestAccountDto): Promise<void> {
+    await this.mailService.sendAccountRequest(
+      dto.firstName,
+      dto.lastName,
+      dto.email,
+    );
   }
 }

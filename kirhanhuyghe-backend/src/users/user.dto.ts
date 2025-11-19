@@ -9,7 +9,6 @@ import {
   IsInt,
   IsOptional, // 👈 BELANGRIJK: Nodig voor updates
   IsArray, // 👈 Nodig voor rollen array
-  IsEnum, // 👈 Validatie dat het een geldige rol is
 } from 'class-validator';
 import { Role } from '../auth/roles';
 import { ApiProperty } from '@nestjs/swagger';
@@ -228,4 +227,15 @@ export class ChangePasswordRequestDto {
   @MinLength(6, { message: 'Wachtwoord moet minimaal 6 tekens lang zijn' })
   @MaxLength(128)
   newPassword: string;
+}
+
+export class RequestAccountDto {
+  @IsString()
+  firstName: string;
+
+  @IsString()
+  lastName: string;
+
+  @IsEmail()
+  email: string;
 }
