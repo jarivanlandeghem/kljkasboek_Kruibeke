@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     trigger: doLogin,
     isMutating: loginLoading,
     error: loginError,
-  } = useSWRMutation('sessions', api.post); 
+  } = useSWRMutation('session', api.post);  // moet session zijn!
 
   const login = useCallback(
     async (email, password) => {
