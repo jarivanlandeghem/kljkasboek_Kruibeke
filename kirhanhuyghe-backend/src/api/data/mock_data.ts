@@ -179,7 +179,7 @@ export const USER_DATA: User[] = [
     voornaam: 'Aykon',
     familienaam: 'Kirhan',
     email: 'aykon.kirhan@kljsgw.be',
-    paswoord: 'hashed_pw_456',
+    paswoord: 'v',
     roles: [Role.USER],
   },
   {
@@ -190,7 +190,7 @@ export const USER_DATA: User[] = [
     email: 'lotte.speleman@kljsgw.be',
     paswoord: 'hashed_pw_789',
     roles: [Role.LEIDING, Role.USER],
-  },
+  }, // ww is nu LotteSpeleman in de db
 ];
 
 // Transacties
