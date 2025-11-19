@@ -180,15 +180,7 @@ export default function Login() {
               />
               
               <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                <Button
-                  type="button"
-                  fullWidth
-                  variant="outlined"
-                  onClick={handleCancel}
-                  disabled={loading}
-                >
-                  Annuleren
-                </Button>
+                
                 <Button
                   type="submit"
                   fullWidth
