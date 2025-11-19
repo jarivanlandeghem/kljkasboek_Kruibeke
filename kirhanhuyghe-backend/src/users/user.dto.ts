@@ -1,3 +1,4 @@
+// src/users/user.dto.ts
 import { Expose } from 'class-transformer';
 import {
   IsString,
@@ -6,9 +7,14 @@ import {
   MaxLength,
   IsNotEmpty,
   IsInt,
+  IsOptional, // 👈 BELANGRIJK: Nodig voor updates
+  IsArray, // 👈 Nodig voor rollen array
+  IsEnum, // 👈 Validatie dat het een geldige rol is
 } from 'class-validator';
 import { Role } from '../auth/roles';
 import { ApiProperty } from '@nestjs/swagger';
+
+// ... (CreateUserRequestDto, UserResponseDto, UserListResponseDto blijven hetzelfde) ...
 
 export class CreateUserRequestDto {
   @IsString()
@@ -43,12 +49,13 @@ export class CreateUserRequestDto {
   })
   paswoord: string;
 
+  @IsOptional()
   @ApiProperty({
     type: [String],
     example: ['user'],
     description: 'Array van rollen toegewezen aan de gebruiker',
   })
-  roles: Role[];
+  roles?: Role[];
 }
 
 export class UserResponseDto {
@@ -88,52 +95,59 @@ export class UserListResponseDto {
   items: UserResponseDto[];
 }
 
+// 👇 HIER ZAT HET PROBLEEM
 export class updateUserDto {
-  @ApiProperty({ example: 1, description: 'Uniek ID van de gebruiker' })
-  userid: number;
+  // userid hoeft hier niet, die zit in de URL (@Param)
+
+  @IsOptional()
+  @IsString()
   @ApiProperty({
     required: false,
     example: 'Jasper',
     description: 'Optionele nieuwe voornaam',
   })
   voornaam?: string;
+
+  @IsOptional()
+  @IsString()
   @ApiProperty({
     required: false,
     example: 'Huyghe',
     description: 'Optionele nieuwe familienaam',
   })
   familienaam?: string;
+
+  @IsOptional()
+  @IsEmail()
   @ApiProperty({
     required: false,
     example: 'jasper@example.com',
     description: 'Optioneel nieuw e-mailadres',
   })
   email?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
   @ApiProperty({ required: false, description: 'Optioneel nieuw wachtwoord' })
   paswoord?: string;
-  @ApiProperty({ required: false, description: 'Optioneel type veld' })
-  type?: string;
-  @ApiProperty({ required: false, description: 'Optionele rol' })
-  role?: string;
-}
 
-export class ReadUserDto {
-  @ApiProperty({ example: 1, description: 'Uniek ID van de gebruiker' })
-  userid: number;
-  @ApiProperty({ example: 'Jasper', description: 'Voornaam van de gebruiker' })
-  voornaam: string;
-  @ApiProperty({
-    example: 'Huyghe',
-    description: 'Familienaam van de gebruiker',
-  })
-  familienaam: string;
-  @ApiProperty({
-    example: 'jasper@example.com',
-    description: 'E-mailadres van de gebruiker',
-  })
-  email: string;
+  @IsOptional()
+  @IsString()
   @ApiProperty({ required: false, description: 'Optioneel type veld' })
   type?: string;
+
+  // Legacy support (enkelvoud)
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false, description: 'Optionele rol (enkelvoud)' })
+  role?: string;
+
+  // ✅ Nieuwe support voor Admin Panel (meervoud)
+  @IsOptional()
+  @IsArray()
+  @ApiProperty({ required: false, description: 'Optionele rollen (meervoud)' })
+  roles?: Role[];
 }
 
 export class PublicUserResponseDto {
@@ -147,7 +161,7 @@ export class PublicUserResponseDto {
 
   @Expose()
   @ApiProperty({
-    example: 'Huyghe',
+    example: 'Janssens',
     description: 'Familienaam van de gebruiker',
   })
   familienaam: string;
@@ -168,14 +182,14 @@ export class RegisterUserRequestDto {
   @IsString()
   @MinLength(2)
   @MaxLength(255)
-  @ApiProperty({ example: 'Jasper', description: 'Voornaam bij registratie' })
+  @ApiProperty({ example: 'Jan', description: 'Voornaam bij registratie' })
   voornaam: string;
 
   @IsString()
   @MinLength(2)
   @MaxLength(255)
   @ApiProperty({
-    example: 'Huyghe',
+    example: 'Janssens',
     description: 'Familienaam bij registratie',
   })
   familienaam: string;
@@ -183,7 +197,7 @@ export class RegisterUserRequestDto {
   @IsString()
   @IsEmail()
   @ApiProperty({
-    example: 'jasper@example.com',
+    example: 'jan.janssens@example.com',
     description: 'E-mailadres bij registratie',
   })
   email: string;
@@ -197,8 +211,8 @@ export class RegisterUserRequestDto {
   })
   paswoord: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @ApiProperty({
     required: false,
     description: 'Optioneel type veld bij registratie',
@@ -206,14 +220,12 @@ export class RegisterUserRequestDto {
   type?: string;
 }
 
-// paswoord aanpassen
-
 export class ChangePasswordRequestDto {
   @IsString()
   currentPassword: string;
 
   @IsString()
-  @MinLength(6, { message: 'Wachtwoord moet minimaal 6 tekens lang zijn' }) // Matcht met je frontend
+  @MinLength(6, { message: 'Wachtwoord moet minimaal 6 tekens lang zijn' })
   @MaxLength(128)
   newPassword: string;
 }
