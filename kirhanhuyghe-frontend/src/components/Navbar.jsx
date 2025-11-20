@@ -52,12 +52,15 @@ export default function Navbar() {
           </Tooltip>
         </Link>
         <Link to='/logout'>
+        <Tooltip title='Log uit'>
           <img
             className="h-8 w-auto flex-shrink-0 cursor-pointer"
             src={logout}
             alt="logout"
           />
+          </Tooltip>
         </Link>
+        
       </div>
     </nav>
   );
