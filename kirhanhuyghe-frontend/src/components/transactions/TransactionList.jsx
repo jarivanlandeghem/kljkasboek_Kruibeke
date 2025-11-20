@@ -12,19 +12,23 @@ import {
   TextField,
   Button
 } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import * as api from '../../api';
+
+// --- NIEUWE IMPORTS VOOR MUI DATEPICKER ---
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+import 'dayjs/locale/nl'; // Voor Nederlandse taal in de kalender
 
 // CSV IMPORTER
 import { Importer, ImporterField } from 'react-csv-importer';
 import 'react-csv-importer/dist/index.css';
 
-// --- DEFINITIEVE VERTALING (INCLUSIEF ALLE MOGELIJKE FUNCTIES) ---
+// --- DEFINITIEVE VERTALING ---
 const nlNL = {
-  general: {
-    goToPreviousStep: 'Vorige',
-    goToNextStep: 'Volgende',
-  },
+  general: { goToPreviousStep: 'Vorige', goToNextStep: 'Volgende' },
   fileStep: {
     initialDragDropPrompt: 'Sleep het CSV bestand hierheen of klik om te selecteren',
     activeDragDropPrompt: 'Laat het bestand hier los...',
@@ -45,12 +49,10 @@ const nlNL = {
     columnTooltip: 'Sleep de kolom naar het juiste veld',
     nextButton: 'Importeren',
     backButton: 'Terug',
-    
-    // --- AL DEZE FUNCTIES ZIJN NODIG VOOR JOUW VERSIE ---
     getColumnCardHeader: (code) => `Kolom: ${code}`,
-    getDragTargetRequiredCaption: () => 'Verplicht',  // <--- DE FIX VOOR JE HUIDIGE ERROR
-    getDragTargetOptionalCaption: () => 'Optioneel',  // <--- VOORKOMT DE VOLGENDE ERROR
-    getDragTargetRemoveTooltip: () => 'Verwijder toewijzing', // <--- VOORKOMT NOG EEN ERROR
+    getDragTargetRequiredCaption: () => 'Verplicht',
+    getDragTargetOptionalCaption: () => 'Optioneel',
+    getDragTargetRemoveTooltip: () => 'Verwijder toewijzing',
     getDragSourcePageIndicator: (currentPage, pageCount) => `Pagina ${currentPage} van ${pageCount}`,
     getDragSourceNextPageTitle: (nextPage) => `Ga naar pagina ${nextPage}`,
     getDragSourcePreviousPageTitle: (previousPage) => `Ga naar pagina ${previousPage}`,
@@ -67,7 +69,6 @@ const nlNL = {
     },
   },
 };
-// ------------------------------------------------------------------
 
 export default function TransactionList() {
   const { user } = useAuth();
@@ -80,11 +81,12 @@ export default function TransactionList() {
   const [search, setSearch] = useState('');
   const { mutate } = useSWRConfig();
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+  // Gebruik useForm met dayjs() als default datum
+  const { register, control, handleSubmit, formState: { errors }, reset } = useForm({
     defaultValues: { 
       beschrijving: '', 
       bedrag: '', 
-      datum: new Date().toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('-'),
+      datum: dayjs(), // HIER GEBRUIKEN WE NU DAYJS
       categorieen: [] 
     },
   });
@@ -142,8 +144,10 @@ export default function TransactionList() {
   const onSubmit = async (data) => {
     try {
       const bedragNum = parseFloat(String(data.bedrag).replace(',', '.'));
-      const [day, month, year] = data.datum.split('-');
-      const formattedDate = `${year}-${month}-${day}`;
+      
+      // Datum formattering met dayjs is veel simpeler
+      // data.datum is een dayjs object, dus we roepen gewoon .format aan
+      const formattedDate = dayjs(data.datum).format('YYYY-MM-DD');
 
       if (!userid) {
         alert('Fout: Gebruiker niet gevonden. Probeer opnieuw in te loggen.');
@@ -285,53 +289,65 @@ export default function TransactionList() {
         </AsyncData>
       </div>
 
-      <Dialog open={openDialog === 'voegtoe'} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Transactie toevoegen</DialogTitle>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent>
-            <TextField
-              margin="dense"
-              label="Beschrijving"
-              fullWidth
-              {...register('beschrijving', { required: 'Beschrijving is verplicht' })}
-              error={Boolean(errors.beschrijving)}
-              helperText={errors.beschrijving?.message}
-            />
-            <TextField
-              margin="dense"
-              label="Bedrag"
-              type="text"
-              fullWidth
-              {...register('bedrag', {
-                required: 'Bedrag is verplicht',
-                validate: (v) => !isNaN(parseFloat(String(v).replace(',', '.'))) || 'Ongeldig getal',
-              })}
-              error={Boolean(errors.bedrag)}
-              helperText={errors.bedrag?.message}
-            />
-            <TextField
-              margin="dense"
-              label="Datum (DD-MM-YYYY)"
-              type="text"
-              fullWidth
-              placeholder="DD-MM-YYYY"
-              {...register('datum', { 
-                required: 'Datum is verplicht',
-                pattern: {
-                  value: /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/,
-                  message: 'Gebruik formaat DD-MM-YYYY'
-                }
-              })}
-              error={Boolean(errors.datum)}
-              helperText={errors.datum?.message}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="inherit">Annuleren</Button>
-            <Button type="submit" color="error" variant="contained">Opslaan</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+      {/* WRAPPER VOOR DATEPICKER SUPPORT */}
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="nl">
+        <Dialog open={openDialog === 'voegtoe'} onClose={handleClose} maxWidth="sm" fullWidth>
+            <DialogTitle>Transactie toevoegen</DialogTitle>
+            <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                
+                <TextField
+                margin="dense"
+                label="Beschrijving"
+                fullWidth
+                {...register('beschrijving', { required: 'Beschrijving is verplicht' })}
+                error={Boolean(errors.beschrijving)}
+                helperText={errors.beschrijving?.message}
+                />
+                
+                <TextField
+                margin="dense"
+                label="Bedrag"
+                type="text"
+                fullWidth
+                {...register('bedrag', {
+                    required: 'Bedrag is verplicht',
+                    validate: (v) => !isNaN(parseFloat(String(v).replace(',', '.'))) || 'Ongeldig getal',
+                })}
+                error={Boolean(errors.bedrag)}
+                helperText={errors.bedrag?.message}
+                />
+
+                {/* IMPLEMENTATIE MATERIAL UI DATEPICKER */}
+                <Controller
+                    name="datum"
+                    control={control}
+                    rules={{ required: 'Datum is verplicht' }}
+                    render={({ field }) => (
+                        <DatePicker
+                            label="Datum"
+                            value={field.value}
+                            onChange={(newValue) => field.onChange(newValue)}
+                            format="DD-MM-YYYY"
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    error: !!errors.datum,
+                                    helperText: errors.datum?.message
+                                }
+                            }}
+                        />
+                    )}
+                />
+
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose} color="inherit">Annuleren</Button>
+                <Button type="submit" color="error" variant="contained">Opslaan</Button>
+            </DialogActions>
+            </form>
+        </Dialog>
+      </LocalizationProvider>
 
       <Dialog open={openDialog === 'importcsv'} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>CSV importeren</DialogTitle>
