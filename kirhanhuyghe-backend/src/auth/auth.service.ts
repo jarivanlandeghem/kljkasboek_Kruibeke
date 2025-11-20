@@ -49,7 +49,12 @@ export class AuthService {
   private signJwt(user: User): string {
     const authConfig = this.configService.get<AuthConfig>('auth')!;
     return this.jwtService.sign(
-      { sub: user.userid, email: user.email, roles: user.roles }, // 👈 1 // TODO moet voornaam & naam ier niet?
+      {
+        sub: user.userid,
+        email: user.email,
+        roles: user.roles,
+        voornaam: user.voornaam,
+      }, // 👈 1 // TODO moet voornaam & naam ier niet?
       {
         // 👇 2
         secret: authConfig.jwt.secret,
