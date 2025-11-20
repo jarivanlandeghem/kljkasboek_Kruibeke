@@ -40,4 +40,34 @@ export class MailService {
       throw error; // Gooi de fout door zodat de frontend een 500 krijgt
     }
   }
+  async sendTransactionReport(
+    userEmail: string,
+    firstName: string,
+    pdfBuffer: Buffer,
+  ) {
+    this.logger.log(`📧 Rapport versturen naar ${userEmail}...`);
+
+    try {
+      await this.mailerService.sendMail({
+        to: userEmail,
+        subject: 'Jouw Transactie Rapport - KLJ Kasboek',
+        html: `
+          <h3>Dag ${firstName},</h3>
+          <p>In bijlage vind je het gevraagde overzicht van je transacties, opgesplitst per categorie.</p>
+          <p>Met vriendelijke groeten,<br/>Het KLJ Kasboek Team</p>
+        `,
+        attachments: [
+          {
+            filename: `Rapport-${new Date().toISOString().split('T')[0]}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      });
+      this.logger.log(`✅ Rapport verzonden naar ${userEmail}`);
+    } catch (error) {
+      this.logger.error('❌ Fout bij versturen rapport:', error);
+      throw error;
+    }
+  }
 }

@@ -13,6 +13,7 @@ import {
   Button
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
+import * as api from '../../api';
 
 // CSV IMPORTER
 import { Importer, ImporterField } from 'react-csv-importer';
@@ -85,6 +86,25 @@ export default function TransactionList() {
     }
   }, [mutate]);
 
+  // rapport genereren
+const handleGenerateReport =  async () => {
+    const confirm = window.confirm("Wil je een PDF rapport van al je transacties per categorie ontvangen via e-mail?");
+    
+    if (confirm) {
+        try {
+            console.log('Rapport aanvragen...');
+            // We roepen het nieuwe endpoint aan. 
+            // Omdat het een POST is zonder body, sturen we leeg object {}
+            // Let op: gebruik api.post helper
+            await api.post('transacties/report', { arg: {} }); 
+            
+            alert('Succes! Het rapport is verzonden naar je e-mailadres.');
+        } catch (err) {
+            console.error('Fout bij rapport:', err);
+            alert('Er ging iets mis bij het genereren van het rapport.');
+        }
+    }
+  };
   const onSubmit = async (data) => {
     try {
       const bedragNum = parseFloat(String(data.bedrag).replace(',', '.'));
@@ -125,6 +145,7 @@ export default function TransactionList() {
     setOpenDialog(null);
   };
 
+  
   // CSV import handler voor KBC data
   const handleCSVImport = async (rows) => {
     try {
@@ -250,8 +271,17 @@ export default function TransactionList() {
           <Button variant="contained" color="error" onClick={() => setOpenDialog('voegtoe')} sx={{ width: 160 }}>
             Voeg toe
           </Button>
-          <Button variant="contained" onClick={() => setOpenDialog('importcsv')} sx={{ width: 160, mr: 5 }}>
+          <Button variant="contained" onClick={() => setOpenDialog('importcsv')} sx={{ width: 160 }}>
             Importeer CSV
+          </Button>
+          {/* NIEUWE KNOP HIERONDER */}
+          <Button 
+            variant="contained" 
+            color="secondary" 
+            onClick={handleGenerateReport} 
+            sx={{ width: 180, mr: 5 }}
+          >
+            Rapport genereren
           </Button>
         </div>
       </div>

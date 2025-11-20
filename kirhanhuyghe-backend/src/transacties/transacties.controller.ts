@@ -11,7 +11,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
-
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/roles';
@@ -22,6 +21,13 @@ import {
   UpdateTransactieDto,
 } from './transacties.dto';
 import { TransactieService } from './transacties.service';
+import { CurrentUser } from '../auth/decorators/currentUser.decorator';
+
+// 👇 VERWIJDER DE REACT-ROUTER IMPORT
+// import { Session } from 'react-router';
+
+// 👇 GEBRUIK JE EIGEN TYPE (pas pad aan indien nodig)
+import type { Session } from '../types/auth';
 
 @Controller('transacties')
 @UseGuards(AuthGuard, RolesGuard)
@@ -58,7 +64,6 @@ export class TransactiesController {
     return this.transactieService.updateById(Number(id), dto);
   }
 
-  // Nieuwe endpoint om alleen categorie-koppelingen bij te werken
   @Put(':id/categorieen')
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -78,5 +83,22 @@ export class TransactiesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteTransactie(@Param('id') id: string): Promise<void> {
     await this.transactieService.deleteById(Number(id));
+  }
+
+  // rapport eindpunt
+  @Post('report')
+  async generateReport(@CurrentUser() user: Session) {
+    // 👇 Nu werkt user.userId en user.email omdat het type 'Session' dit definieert.
+
+    // Check of voornaam bestaat op het object, anders fallback.
+    // Omdat we het type Session gebruiken, geeft TS geen error meer op unknown properties
+    // als we het correct benaderen.
+    const name = user.voornaam || 'Gebruiker';
+
+    return await this.transactieService.generateAndMailReport(
+      user.userId,
+      user.email,
+      name,
+    );
   }
 }

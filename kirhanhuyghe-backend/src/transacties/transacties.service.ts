@@ -1,10 +1,6 @@
 // src/transactie/transactie.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  TRANSACTION_DATA,
-  // TRANSACTIE_CATEGORIE_DATA,
-  Transactie,
-} from '../api/data/mock_data';
+import { TRANSACTION_DATA, Transactie } from '../api/data/mock_data';
 import { eq } from 'drizzle-orm';
 import {
   CreateTransactieRequestDto,
@@ -17,21 +13,25 @@ import {
   InjectDrizzle,
 } from '../drizzle/drizzle.provider';
 import { transacties, transactieCategorie, users } from '../drizzle/schema';
+import { categorieen } from '../drizzle/schema';
+import { MailService } from '../mail/mail.service';
+// 👇 AANGEPAST: Default import gebruiken i.p.v. namespace import
+import PDFDocument from 'pdfkit';
 
 @Injectable()
 export class TransactieService {
   constructor(
     @InjectDrizzle()
     private readonly db: DatabaseProvider,
+    private readonly mailService: MailService,
   ) {}
+
   // Alle transacties ophalen
   async getAll(): Promise<TransactieListResponseDto> {
-    // Haal transacties inclusief koppelingen
     const items = await this.db.query.transacties.findMany({
       with: { categorieKoppelingen: true },
     });
 
-    // Haal alle categorieën (kleine dataset) en maak een lookup zodat we categorienamen kunnen toevoegen
     const allCategories = await this.db.query.categorieen.findMany();
     const catMap = new Map(
       allCategories.map((c) => [c.categorieID, c.categorienaam]),
@@ -49,8 +49,6 @@ export class TransactieService {
       };
     });
 
-    // Voeg auteurgegevens (voornaam, familienaam) toe bij elke transactie
-    // Verzamel unieke userIDs
     const userIds = Array.from(
       new Set(itemsWithDetails.map((it) => it.userID).filter(Boolean)),
     );
@@ -72,7 +70,7 @@ export class TransactieService {
           });
         }
       } catch (e) {
-        // ignore errors, leave user unknown
+        console.log(e);
       }
     }
 
@@ -83,9 +81,9 @@ export class TransactieService {
 
     return { items: itemsWithAuthors };
   }
+
   // Transactie op ID ophalen
   async getById(id: number): Promise<TransactieResponseDto> {
-    // DB gebruiken via drizle
     if (this.db) {
       const transactie = await this.db.query.transacties.findFirst({
         where: eq(transacties.transactieID, id),
@@ -109,7 +107,6 @@ export class TransactieService {
       };
     }
 
-    // Fallback to mock
     const transactie = TRANSACTION_DATA.find(
       (t: Transactie) => t.transactieID === id,
     );
@@ -119,45 +116,37 @@ export class TransactieService {
 
     return this.toResponseDto(transactie);
   }
+
   // Nieuwe transactie aanmaken
   async create(
     transactie: CreateTransactieRequestDto,
   ): Promise<TransactieResponseDto> {
-    // De input DTO wordt gebruikt. Door 'mode: number' in Drizzle is bedrag al correct.
     const transactieToInsert = {
-      ...transactie, // De conversie 'bedrag: transactie.bedrag.toString()' is hier NIET meer nodig.
-      // Datum is al een string (YYYY-MM-DD) volgens de DTO, dus geen conversie nodig.
-    }; // 1. Voer de INSERT uit en haal de ID op.
-    // Drizzle retourneert een array met een object dat de ID bevat: [{ transactieID: 42 }]
+      ...transactie,
+    };
 
     const [newTransactieIdObject] = await this.db
-      .insert(transacties) // Gebruik de geïmporteerde Drizzle-tabel
+      .insert(transacties)
       .values(transactieToInsert)
-      .$returningId(); // 2. Haal de ID uit het geretourneerde object.
+      .$returningId();
 
     const newTransactieId = newTransactieIdObject.transactieID;
-
-    // 3. Haal de volledige transactie op.
-    // De returnwaarde kan 'TransactieResponseDto' of 'undefined' zijn.
     const resultaat = await this.getById(newTransactieId);
-
-    // 5. Retourneer het resultaat.
     return resultaat;
   }
-  // UPDATE - niet exact volgens cursus via ai ma twerkt precies wel
+
+  // UPDATE
   async updateById(
     id: number,
     updateDto: UpdateTransactieDto,
   ): Promise<TransactieResponseDto | undefined> {
-    // Zoek de bestaande transactie
     let existingTransactie: TransactieResponseDto;
     try {
       existingTransactie = await this.getById(id);
     } catch {
-      return undefined; // Geen match gevonden
+      return undefined;
     }
 
-    // Combineer de bestaande waarden met de nieuwe updates (explicit field merge)
     const updatedTransactie: TransactieResponseDto = {
       transactieID: id,
       rekeningID: updateDto.rekeningID ?? existingTransactie.rekeningID,
@@ -173,7 +162,6 @@ export class TransactieService {
       .set(updatedTransactie)
       .where(eq(transacties.transactieID, id));
 
-    // indien categorieIDs meegegeven: update de koppeltabel (vervang alle bestaande koppelingen)
     if (updateDto.categorieIDs) {
       await this.updateCategorieKoppelingen(id, updateDto.categorieIDs);
     }
@@ -181,9 +169,7 @@ export class TransactieService {
     return updatedTransactie;
   }
 
-  // Update only the transactie-categorie koppelingen (replace existing links)
   async updateCategorieKoppelingen(id: number, categorieIDs: number[]) {
-    // Verwijder bestaande koppelingen
     await this.db
       .delete(transactieCategorie)
       .where(eq(transactieCategorie.transactieID, id));
@@ -198,7 +184,6 @@ export class TransactieService {
     }
   }
 
-  // VERWIJDER
   async deleteById(id: number): Promise<void> {
     const [result] = await this.db
       .delete(transacties)
@@ -209,12 +194,7 @@ export class TransactieService {
     }
   }
 
-  // Helper: converteer Transactie naar TransactieResponseDto
   private toResponseDto(transactie: Transactie): TransactieResponseDto {
-    // const categorieIDs = TRANSACTIE_CATEGORIE_DATA.filter(
-    //   (tc) => tc.transactieID === transactie.transactieID,
-    // ).map((tc) => tc.categorieID);
-
     return {
       transactieID: transactie.transactieID,
       rekeningID: transactie.rekeningID,
@@ -223,17 +203,190 @@ export class TransactieService {
       in_uit: transactie.in_uit,
       bedrag: transactie.bedrag,
       datum: transactie.datum,
-      // categorieIDs,
     };
   }
 
-  // tussentabel transacties en categorieen (worst practice om apparte controller en service te maken)
-  // weet niet zeker hoe ik dit implementeer
-  // async getFavoritePlacesByUserId(userId: number): Promise<TransactieResponseDto[]> {
-  //   const favoritePlaces = await this.db.query.transactieCategorie.findMany({
-  //     where: eq(transactieCategorie.transactieID, transactieID),
-  //     with: { place: true },
-  //   });
-  //   return favoritePlaces.map((fav) => fav.place);
-  // }
+  // RAPPORT GENEREREN
+  async generateAndMailReport(
+    userId: number,
+    userEmail: string,
+    firstName: string,
+  ): Promise<void> {
+    const rawData = await this.db
+      .select({
+        bedrag: transacties.bedrag,
+        datum: transacties.datum,
+        beschrijving: transacties.beschrijving,
+        in_uit: transacties.in_uit,
+        categorieNaam: categorieen.categorienaam,
+      })
+      .from(transacties)
+      .leftJoin(
+        transactieCategorie,
+        eq(transacties.transactieID, transactieCategorie.transactieID),
+      )
+      .leftJoin(
+        categorieen,
+        eq(transactieCategorie.categorieID, categorieen.categorieID),
+      )
+      .where(eq(transacties.userID, userId));
+
+    if (rawData.length === 0) {
+      throw new NotFoundException(
+        'Geen transacties gevonden om te rapporteren.',
+      );
+    }
+
+    const grouped = new Map<string, { in: any[]; out: any[] }>();
+
+    rawData.forEach((row) => {
+      const catName = row.categorieNaam || 'Overige / Geen Categorie';
+
+      if (!grouped.has(catName)) {
+        grouped.set(catName, { in: [], out: [] });
+      }
+
+      const group = grouped.get(catName);
+
+      if (group) {
+        const bedrag = Number(row.bedrag);
+
+        if (row.in_uit === 'IN') {
+          group.in.push({ ...row, bedrag });
+        } else {
+          group.out.push({ ...row, bedrag });
+        }
+      }
+    });
+
+    const pdfBuffer = await this.createPdfBuffer(grouped, firstName);
+
+    await this.mailService.sendTransactionReport(
+      userEmail,
+      firstName,
+      pdfBuffer,
+    );
+  }
+
+  // HELPER: PDF GENERATIE LOGICA
+  private createPdfBuffer(
+    groupedData: Map<string, { in: any[]; out: any[] }>,
+    name: string,
+  ): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      // 👇 Nu werkt 'new PDFDocument' omdat de import is gefixt
+      const doc = new PDFDocument({ margin: 50 });
+      const buffers: Buffer[] = [];
+
+      doc.on('data', (chunk: Buffer) => buffers.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+
+      // 👇 AANGEPAST: Zorg dat reject altijd een Error krijgt
+      doc.on('error', (err: any) => {
+        if (err instanceof Error) {
+          reject(err);
+        } else {
+          reject(new Error(String(err)));
+        }
+      });
+
+      // --- PDF CONTENT ---
+
+      doc.fontSize(20).text(`Transactie Rapport: ${name}`, { align: 'center' });
+      doc
+        .fontSize(12)
+        .text(`Gegenereerd op: ${new Date().toLocaleDateString()}`, {
+          align: 'center',
+        });
+      doc.moveDown(2);
+
+      groupedData.forEach((data, categoryName) => {
+        if (doc.y > 650) doc.addPage();
+
+        doc
+          .fontSize(16)
+          .fillColor('#2c3e50')
+          .text(categoryName, { underline: true });
+        doc.moveDown(0.5);
+
+        let totalIn = 0;
+        let totalOut = 0;
+
+        if (data.in.length > 0) {
+          doc.fontSize(12).fillColor('green').text('INKOMSTEN (IN)');
+          this.drawTable(doc, data.in);
+          totalIn = data.in.reduce((sum, t) => sum + t.bedrag, 0);
+          doc.moveDown(1);
+        }
+
+        if (data.out.length > 0) {
+          doc.fontSize(12).fillColor('red').text('UITGAVEN (UIT)');
+          this.drawTable(doc, data.out);
+          totalOut = data.out.reduce((sum, t) => sum + Math.abs(t.bedrag), 0);
+          doc.moveDown(1);
+        }
+
+        const saldo = totalIn - totalOut;
+        doc.fontSize(12).fillColor('black').font('Helvetica-Bold');
+        doc.text(`Totaal IN: € ${totalIn.toFixed(2)}`, { continued: true });
+        doc.text(` | Totaal UIT: € ${totalOut.toFixed(2)}`);
+
+        doc.fillColor(saldo >= 0 ? 'green' : 'red');
+        doc.text(`Saldo ${categoryName}: € ${saldo.toFixed(2)}`);
+
+        doc.font('Helvetica');
+        doc.moveDown(2);
+
+        doc
+          .strokeColor('#aaaaaa')
+          .lineWidth(1)
+          .moveTo(50, doc.y)
+          .lineTo(550, doc.y)
+          .stroke();
+        doc.moveDown(2);
+      });
+
+      doc.end();
+    });
+  }
+
+  // HELPER: SIMPELE TABEL TEKENEN
+  private drawTable(doc: PDFKit.PDFDocument, transactions: any[]) {
+    const startX = 50;
+    let currentY = doc.y + 5;
+
+    doc.fontSize(10).fillColor('black');
+
+    doc.text('Datum', startX, currentY, { width: 70 });
+    doc.text('Beschrijving', startX + 80, currentY, { width: 300 });
+    doc.text('Bedrag', startX + 400, currentY, { width: 80, align: 'right' });
+
+    currentY += 15;
+    doc.moveTo(startX, currentY).lineTo(550, currentY).stroke();
+    currentY += 5;
+
+    transactions.forEach((t) => {
+      if (currentY > 700) {
+        doc.addPage();
+        currentY = 50;
+      }
+
+      doc.text(t.datum, startX, currentY, { width: 70 });
+      const shortDesc =
+        t.beschrijving.length > 60
+          ? t.beschrijving.substring(0, 57) + '...'
+          : t.beschrijving;
+      doc.text(shortDesc, startX + 80, currentY, { width: 300 });
+
+      const bedragStr = `€ ${Math.abs(t.bedrag).toFixed(2)}`;
+      doc.text(bedragStr, startX + 400, currentY, {
+        width: 80,
+        align: 'right',
+      });
+
+      currentY += 15;
+    });
+
+    doc.y = currentY;
+  }
 }
