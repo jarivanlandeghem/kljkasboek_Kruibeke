@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useCallback, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
@@ -23,6 +22,9 @@ import { PersonAdd } from '@mui/icons-material';
 import KLJIcon from '../assets/KLJIcon.png';
 import PlayingKids from '../assets/PlayingKids.jpg';
 
+// --- FRAMER MOTION IMPORTS ---
+import { motion, AnimatePresence } from 'framer-motion';
+
 const validationRules = {
   email: { 
     required: 'Email is een verplicht veld!',
@@ -43,28 +45,53 @@ const validationRules = {
   }
 };
 
+// --- ANIMATIE VARIANTEN ---
+const containerVariants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: { duration: 0.6, ease: "easeOut" }
+  }
+};
+
+const formItemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { type: "spring", stiffness: 50 }
+  }
+};
+
+const staggerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+};
+
 export default function Login() {
   const { loading, login } = useAuth(); 
   const navigate = useNavigate();
   const { search } = useLocation();
   
-  // State voor dialogs
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorDialogMessage, setErrorDialogMessage] = useState('');
-  
-  // State voor account aanvragen dialog
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
-  // Formulier 1: Login
   const loginMethods = useForm({
     defaultValues: {
-      email: 'jasper.huyghe@outlook.be', // 👈 TEST WAARDE TERUGGEZET
-      password: 'hashed_pw_123',         // 👈 TEST WAARDE TERUGGEZET
+      email: 'jasper.huyghe@outlook.be',
+      password: 'hashed_pw_123',
     },
   });
 
-  // Formulier 2: Account Aanvragen
   const requestMethods = useForm({
     defaultValues: {
       firstName: '',
@@ -75,7 +102,6 @@ export default function Login() {
 
   const { handleSubmit, control, formState: { errors } } = loginMethods;
 
-  // --- Error Dialog Logic ---
   const openErrorDialog = (message) => {
     setErrorDialogMessage(message);
     setErrorDialogOpen(true);
@@ -85,7 +111,6 @@ export default function Login() {
     setErrorDialogOpen(false);
   };
 
-  // --- Request Account Logic ---
   const handleOpenRequest = () => {
     requestMethods.reset();
     setRequestDialogOpen(true);
@@ -120,7 +145,6 @@ export default function Login() {
     }
   };
 
-  // --- Login Logic ---
   const handleLogin = useCallback(
     async ({ email, password }) => {
       if (!email || !password) {
@@ -144,7 +168,6 @@ export default function Login() {
         console.error("Login error detail:", error);
 
         if (error.response) {
-            // Specifieke API foutmeldingen afhandelen
             if (error.response.status === 401 || error.response.status === 403) {
                 openErrorDialog('Het opgegeven emailadres of wachtwoord is onjuist.');
             } 
@@ -177,11 +200,17 @@ export default function Login() {
 
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
+      
+      {/* Linkerkant (Afbeelding) - Fade in */}
       <Grid
         item
         xs={false}
         sm={4}
         md={7}
+        component={motion.div}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
         sx={{
           backgroundImage: `url(${PlayingKids})`,
           backgroundRepeat: 'no-repeat',
@@ -192,93 +221,138 @@ export default function Login() {
         }}
       />
       
-      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-        <Box
-          sx={{
-            my: 8,
-            mx: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
+      {/* Rechterkant (Formulier) - Slide in */}
+      <Grid 
+        item 
+        xs={12} sm={8} md={5} 
+        component={Paper} 
+        elevation={6} 
+        square
+      >
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          style={{ height: '100%' }}
         >
-          <img src={KLJIcon} alt="KLJ Logo" style={{ width: '100px', marginBottom: '20px' }} />
-          
-          <Typography component="h1" variant="h5">
-            Welkom bij het KLJ Kasboek
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Meld je aan om verder te gaan
-          </Typography>
+            <Box
+            sx={{
+                my: 8,
+                mx: 4,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                height: '100%',
+                justifyContent: 'center' // Centreer verticaal
+            }}
+            >
+            <motion.div
+                initial={{ scale: 0, rotate: -10 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 120, delay: 0.3 }}
+            >
+                <img src={KLJIcon} alt="KLJ Logo" style={{ width: '100px', marginBottom: '20px' }} />
+            </motion.div>
+            
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+            >
+                <Typography component="h1" variant="h5" align="center">
+                    Welkom bij het KLJ Kasboek
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 3 }} align="center">
+                    Meld je aan om verder te gaan
+                </Typography>
+            </motion.div>
 
-          <FormProvider {...loginMethods}>
-            <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} sx={{ mt: 1, width: '100%' }}>
-              <Controller
-                name="email"
-                control={control}
-                rules={validationRules.email}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email"
-                    autoComplete="email"
-                    autoFocus
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                  />
-                )}
-              />
-              
-              <Controller
-                name="password"
-                control={control}
-                rules={validationRules.password}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    margin="normal"
-                    required
-                    fullWidth
-                    label="Paswoord"
-                    type="password"
-                    id="password"
-                    autoComplete="current-password"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                  />
-                )}
-              />
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  disabled={loading}
-                  size="large"
+            <FormProvider {...loginMethods}>
+                <Box 
+                    component={motion.form} 
+                    onSubmit={handleSubmit(handleFormSubmit)} 
+                    sx={{ mt: 1, width: '100%' }}
+                    variants={staggerVariants}
+                    initial="hidden"
+                    animate="visible"
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Inloggen'}
-                </Button>
+                <motion.div variants={formItemVariants}>
+                    <Controller
+                        name="email"
+                        control={control}
+                        rules={validationRules.email}
+                        render={({ field, fieldState }) => (
+                        <TextField
+                            {...field}
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="Email"
+                            autoComplete="email"
+                            autoFocus
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                        />
+                        )}
+                    />
+                </motion.div>
+                
+                <motion.div variants={formItemVariants}>
+                    <Controller
+                        name="password"
+                        control={control}
+                        rules={validationRules.password}
+                        render={({ field, fieldState }) => (
+                        <TextField
+                            {...field}
+                            margin="normal"
+                            required
+                            fullWidth
+                            label="Paswoord"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                        />
+                        )}
+                    />
+                </motion.div>
+                
+                <motion.div variants={formItemVariants}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
+                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                            <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            disabled={loading}
+                            size="large"
+                            >
+                            {loading ? <CircularProgress size={24} color="inherit" /> : 'Inloggen'}
+                            </Button>
+                        </motion.div>
 
-                <Divider>OF</Divider>
+                        <Divider>OF</Divider>
 
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  color="error" 
-                  startIcon={<PersonAdd />}
-                  onClick={handleOpenRequest}
-                >
-                  Geen account? Vraag toegang aan
-                </Button>
-              </Box>
+                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                            <Button
+                            fullWidth
+                            variant="outlined"
+                            color="error" 
+                            startIcon={<PersonAdd />}
+                            onClick={handleOpenRequest}
+                            >
+                            Geen account? Vraag toegang aan
+                            </Button>
+                        </motion.div>
+                    </Box>
+                </motion.div>
+                </Box>
+            </FormProvider>
             </Box>
-          </FormProvider>
-        </Box>
+        </motion.div>
       </Grid>
 
       {/* --- Dialog 1: Account Aanvragen --- */}
@@ -287,6 +361,8 @@ export default function Login() {
         onClose={handleCloseRequest}
         maxWidth="sm"
         fullWidth
+        // Voeg eventueel TransitionComponent toe voor Material UI animatie, 
+        // maar standaard slide-in is vaak al mooi.
       >
         <DialogTitle>Account Aanvragen</DialogTitle>
         <DialogContent>

@@ -1,5 +1,5 @@
 import TransactionsTable from './TransactionTable';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import AsyncData from '../AsyncData';
 import useSWR, { useSWRConfig } from 'swr';
 import { getAll, deleteById, post } from '../../api';
@@ -10,23 +10,33 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Button
+  Button,
+  Box,
+  Typography,
+  Paper
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import * as api from '../../api';
 
-// --- NIEUWE IMPORTS VOOR MUI DATEPICKER ---
+
+// --- ICONS ---
+import { DirectionsWalk, Add, CloudUpload, Assessment, Search } from '@mui/icons-material'; 
+
+// --- FRAMER MOTION ---
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- MUI DATEPICKER ---
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import 'dayjs/locale/nl'; // Voor Nederlandse taal in de kalender
+import 'dayjs/locale/nl'; 
 
 // CSV IMPORTER
 import { Importer, ImporterField } from 'react-csv-importer';
 import 'react-csv-importer/dist/index.css';
 
-// --- DEFINITIEVE VERTALING ---
+// --- VERTALING CSV ---
 const nlNL = {
   general: { goToPreviousStep: 'Vorige', goToNextStep: 'Volgende' },
   fileStep: {
@@ -70,29 +80,112 @@ const nlNL = {
   },
 };
 
+// --- ANIMATIE VARIANTEN ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 10, opacity: 0 },
+  visible: { y: 0, opacity: 1 }
+};
+
+// --- MODERNE BUTTON STYLE ---
+const modernButtonStyle = {
+    borderRadius: '12px', // Mooie ronde hoeken
+    textTransform: 'none', // Geen hoofdletters
+    fontWeight: 600,
+    padding: '8px 20px',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    letterSpacing: '0.5px',
+};
+
+// --- CUSTOM LOADING COMPONENT ---
+const LoadingState = () => {
+  return (
+    <Box
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '400px',
+        width: '100%',
+        bgcolor: '#ffffff',
+        borderRadius: 4,
+        zIndex: 10,
+        position: 'relative'
+      }}
+    >
+      <style>
+        {`
+          @keyframes walkAcross {
+            0% { transform: translateX(-60px); }
+            100% { transform: translateX(360px); }
+          }
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+          }
+        `}
+      </style>
+
+      <div style={{ width: '300px', height: '100px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute',
+          bottom: '10px',
+          animation: 'walkAcross 3.5s linear infinite',
+          willChange: 'transform'
+        }}>
+          <div style={{ animation: 'bounce 0.4s ease-in-out infinite' }}>
+             <DirectionsWalk sx={{ fontSize: 60, color: '#d32f2f' }} />
+          </div>
+        </div>
+        <div style={{ width: '100%', height: '2px', backgroundColor: '#e0e0e0', position: 'absolute', bottom: '10px' }}></div>
+      </div>
+      
+      <Typography variant="h5" color="text.primary" sx={{ mt: 2, fontWeight: 600 }}>
+        Gegevens ophalen...
+      </Typography>
+      <Typography variant="body1" color="text.secondary">
+        Een moment geduld alstublieft.
+      </Typography>
+    </Box>
+  );
+};
+
 export default function TransactionList() {
   const { user } = useAuth();
   const userid = user.userid;
   
-  console.log('User object:', user);
-
   const [openDialog, setOpenDialog] = useState(null);
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');
   const { mutate } = useSWRConfig();
 
-  // Gebruik useForm met dayjs() als default datum
   const { register, control, handleSubmit, formState: { errors }, reset } = useForm({
     defaultValues: { 
       beschrijving: '', 
       bedrag: '', 
-      datum: dayjs(), // HIER GEBRUIKEN WE NU DAYJS
+      datum: dayjs(), 
       categorieen: [] 
     },
   });
 
-  const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
+  const { data: transacties, isLoading, error } = useSWR('transacties', getAll);
   const { data: gebruikers = [] } = useSWR('users', getAll);
+
+  const [forceLoading, setForceLoading] = useState(true); 
+  useEffect(() => {
+    const timer = setTimeout(() => setForceLoading(false), 1500); 
+    return () => clearTimeout(timer);
+  }, []);
+
+  const showLoading = forceLoading || isLoading || (!transacties && !error);
 
   const gebruikerMapping = useMemo(() => {
     const mapping = {};
@@ -103,7 +196,7 @@ export default function TransactionList() {
   }, [gebruikers]);
 
   const verrijkteTransacties = useMemo(() => 
-    transacties.map(transactie => ({
+    (transacties || []).map(transactie => ({
       ...transactie,
       displayVoornaam: gebruikerMapping[transactie.userID] || `User ${transactie.userID}`
     })),
@@ -144,9 +237,6 @@ export default function TransactionList() {
   const onSubmit = async (data) => {
     try {
       const bedragNum = parseFloat(String(data.bedrag).replace(',', '.'));
-      
-      // Datum formattering met dayjs is veel simpeler
-      // data.datum is een dayjs object, dus we roepen gewoon .format aan
       const formattedDate = dayjs(data.datum).format('YYYY-MM-DD');
 
       if (!userid) {
@@ -244,81 +334,141 @@ export default function TransactionList() {
   };
 
   return (
-    <div className="ml-5">
-      <h1 className="text-4xl mb-4 mt-5 text-black">Transacties</h1>
+    <motion.div 
+      className="px-6 py-8"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+        <Typography variant="h3" component="h1" sx={{ fontWeight: 800, color: '#1a1a1a', letterSpacing: '-1px' }}>
+            Transacties
+        </Typography>
 
-      <div className="flex items-start justify-between mb-3 w-full">
-        <div className="input-group flex items-center gap-2">
-          <input
-            type="search"
-            className="form-control border-2 h-10 rounded text-black flex-1 min-w-50"
-            placeholder="Zoek"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button
-            className="bg-gray-950 text-white rounded min-w-30"
-            type="button"
-            onClick={() => setSearch(text)}
-          >
-            Zoek
-          </button>
+        <div className="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200 w-full md:w-auto focus-within:ring-2 focus-within:ring-red-500 transition-all">
+            <Search sx={{ color: 'gray', mr: 1 }} />
+            <input
+                type="search"
+                className="bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full"
+                placeholder="Zoek op beschrijving..."
+                value={text}
+                onChange={(e) => {
+                    setText(e.target.value);
+                    setSearch(e.target.value);
+                }}
+            />
         </div>
+      </motion.div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="contained" color="error" onClick={() => setOpenDialog('voegtoe')} sx={{ width: 160 }}>
-            Voeg toe
-          </Button>
-          <Button variant="contained" onClick={() => setOpenDialog('importcsv')} sx={{ width: 160 }}>
-            Importeer CSV
-          </Button>
-          <Button 
-            variant="contained" 
-            color="secondary" 
-            onClick={handleGenerateReport} 
-            sx={{ width: 180, mr: 5 }}
-          >
-            Rapport genereren
-          </Button>
-        </div>
+      <motion.div variants={itemVariants} className="flex flex-wrap gap-3 mb-6">
+        {/* KNOP 1: VOEG TOE (ROOD) */}
+        <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+                variant="contained" 
+                startIcon={<Add />}
+                onClick={() => setOpenDialog('voegtoe')} 
+                sx={{ ...modernButtonStyle, bgcolor: '#d32f2f', '&:hover': { bgcolor: '#b71c1c' } }}
+            >
+                Nieuwe Transactie
+            </Button>
+        </motion.div>
+
+        {/* KNOP 2: IMPORT (DONKER) */}
+        <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+                variant="contained" 
+                startIcon={<CloudUpload />}
+                onClick={() => setOpenDialog('importcsv')} 
+                sx={{ ...modernButtonStyle, bgcolor: '#263238', '&:hover': { bgcolor: '#102027' } }}
+            >
+                CSV Importeren
+            </Button>
+        </motion.div>
+
+        {/* KNOP 3: RAPPORT (PAARS/INDIGO) */}
+        <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+                variant="contained" 
+                startIcon={<Assessment />}
+                onClick={handleGenerateReport} 
+                sx={{ ...modernButtonStyle, bgcolor: '#6366f1', '&:hover': { bgcolor: '#4f46e5' } }}
+            >
+                PDF Rapport
+            </Button>
+        </motion.div>
+      </motion.div>
+
+      {/* CONTENT AREA */}
+      <div className="relative" style={{ minHeight: '500px' }}>
+         <AnimatePresence>
+            {showLoading && (
+                <motion.div 
+                    key="loader"
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    style={{ 
+                        position: 'absolute', 
+                        top: 0, 
+                        left: 0, 
+                        width: '100%', 
+                        height: '100%', 
+                        zIndex: 50,
+                        backgroundColor: 'white' 
+                    }}
+                >
+                    <LoadingState />
+                </motion.div>
+            )}
+         </AnimatePresence>
+
+         <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: !showLoading ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
+         >
+            <AsyncData loading={false} error={error}>
+                <Paper elevation={0} sx={{ borderRadius: 4, overflow: 'hidden', border: '1px solid #f0f0f0' }}>
+                    <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} />
+                </Paper>
+            </AsyncData>
+         </motion.div>
       </div>
 
-      <div className="mt-4 mr-5">
-        <AsyncData loading={isLoading} error={error}>
-          <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} />
-        </AsyncData>
-      </div>
-
-      {/* WRAPPER VOOR DATEPICKER SUPPORT */}
+      {/* MODALS */}
       <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="nl">
-        <Dialog open={openDialog === 'voegtoe'} onClose={handleClose} maxWidth="sm" fullWidth>
-            <DialogTitle>Transactie toevoegen</DialogTitle>
+        <Dialog 
+            open={openDialog === 'voegtoe'} 
+            onClose={handleClose} 
+            maxWidth="sm" 
+            fullWidth
+            PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+        >
+            <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem', textAlign: 'center' }}>
+                Transactie toevoegen
+            </DialogTitle>
             <form onSubmit={handleSubmit(onSubmit)}>
-            <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                
+            <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
                 <TextField
-                margin="dense"
-                label="Beschrijving"
-                fullWidth
-                {...register('beschrijving', { required: 'Beschrijving is verplicht' })}
-                error={Boolean(errors.beschrijving)}
-                helperText={errors.beschrijving?.message}
+                    label="Beschrijving"
+                    fullWidth
+                    variant="outlined"
+                    {...register('beschrijving', { required: 'Beschrijving is verplicht' })}
+                    error={Boolean(errors.beschrijving)}
+                    helperText={errors.beschrijving?.message}
                 />
-                
                 <TextField
-                margin="dense"
-                label="Bedrag"
-                type="text"
-                fullWidth
-                {...register('bedrag', {
-                    required: 'Bedrag is verplicht',
-                    validate: (v) => !isNaN(parseFloat(String(v).replace(',', '.'))) || 'Ongeldig getal',
-                })}
-                error={Boolean(errors.bedrag)}
-                helperText={errors.bedrag?.message}
+                    label="Bedrag (€)"
+                    type="text"
+                    fullWidth
+                    variant="outlined"
+                    {...register('bedrag', {
+                        required: 'Bedrag is verplicht',
+                        validate: (v) => !isNaN(parseFloat(String(v).replace(',', '.'))) || 'Ongeldig getal',
+                    })}
+                    error={Boolean(errors.bedrag)}
+                    helperText={errors.bedrag?.message}
                 />
-
-                {/* IMPLEMENTATIE MATERIAL UI DATEPICKER */}
                 <Controller
                     name="datum"
                     control={control}
@@ -339,18 +489,17 @@ export default function TransactionList() {
                         />
                     )}
                 />
-
             </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose} color="inherit">Annuleren</Button>
-                <Button type="submit" color="error" variant="contained">Opslaan</Button>
+            <DialogActions sx={{ px: 3, pb: 3 }}>
+                <Button onClick={handleClose} color="inherit" sx={{ borderRadius: 2 }}>Annuleren</Button>
+                <Button type="submit" variant="contained" color="error" sx={{ borderRadius: 2, px: 4 }}>Opslaan</Button>
             </DialogActions>
             </form>
         </Dialog>
       </LocalizationProvider>
 
-      <Dialog open={openDialog === 'importcsv'} onClose={handleClose} fullWidth maxWidth="md">
-        <DialogTitle>CSV importeren</DialogTitle>
+      <Dialog open={openDialog === 'importcsv'} onClose={handleClose} fullWidth maxWidth="md" PaperProps={{ sx: { borderRadius: 3 } }}>
+        <DialogTitle sx={{ fontWeight: 'bold' }}>CSV importeren</DialogTitle>
         <DialogContent>
           <Importer
             parserOptions={{
@@ -379,6 +528,6 @@ export default function TransactionList() {
           </Importer>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

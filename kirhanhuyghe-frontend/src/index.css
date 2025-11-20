@@ -1,278 +1,78 @@
-@import 'tailwindcss';
+/* 2. Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* 1. Tailwind V4 Import (Vervangt @tailwind base/components/utilities) */
+@import "tailwindcss";
 
 
-/*Implementatie darkmode - via cursus en geimplementeerd tijdens de les*/
-@layer base {
-  html, body {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-black;
+
+/* 3. Theme Configuratie (Vervangt tailwind.config.js deels) */
+@theme {
+  --font-sans: 'Poppins', sans-serif;
+  --color-klj-red: #d32f2f;
+}
+
+/* 4. Base Styles */
+/* We gebruiken hier standaard CSS om de "@apply unknown utility" error te voorkomen */
+html, body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9fafb; /* Dit is de hex code voor bg-gray-50 */
+  color: #111827;            /* Dit is de hex code voor text-gray-900 */
   min-height: 100vh;
-  }
-  h1 {
-    @apply text-4xl mb-4;
-  }
+  margin: 0;
+  padding: 0;
 }
 
-/* TODO @AYKON klopt dit een beetje met onze appl */
-/* EINDE */
-
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-button {
-  color:white;
-}
-
+/* Zorg dat links en knoppen er modern uitzien */
 a {
   font-weight: 500;
-  color: #646cff;
+  /* color: var(--color-klj-red); Gebruik de variabele die we hierboven maakten */
   text-decoration: inherit;
+  transition: color 0.2s;
 }
 
 a:hover {
-  color: #535bf2;
-}
-/* testpush */
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background: #fff !important;
+  color: #b71c1c;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+/* 5. CSV IMPORTER OVERRIDES */
+/* Dit zorgt dat de teksten in je CSV importer Nederlands zijn */
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-
-button:hover {
-  border-color: #646cff;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-
-}
-
-/* Theme Switch (compacte versie) */
-/* Container */
-.switch {
-  font-size: 15px;
-  position: relative;
-  display: inline-block;
-  width: 3.4em;
-  height: 1.9em;
-  border-radius: 30px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Verborgen checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* Slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #2a2a2a;
-  transition: 0.4s;
-  border-radius: 30px;
-  overflow: hidden;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 1em;
-  width: 1em;
-  border-radius: 20px;
-  left: 0.4em;
-  bottom: 0.45em;
-  transition: 0.4s;
-  transition-timing-function: cubic-bezier(0.81, -0.04, 0.38, 1.5);
-  box-shadow: inset 6px -3px 0px 0px #fff;
-}
-
-/* Ingeschakelde toestand */
-.switch input:checked + .slider {
-  background-color: #00a6ff;
-}
-
-.switch input:checked + .slider:before {
-  transform: translateX(1.5em);
-  box-shadow: inset 12px -3px 0px 12px #ffcf48;
-}
-
-/* Sterren */
-.star {
-  background-color: #fff;
-  border-radius: 50%;
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  transition: all 0.4s;
-}
-
-.star_1 {
-  left: 2.1em;
-  top: 0.45em;
-}
-
-.star_2 {
-  left: 1.9em;
-  top: 1.05em;
-}
-
-.star_3 {
-  left: 2.6em;
-  top: 0.8em;
-}
-
-.switch input:checked ~ .slider .star {
-  opacity: 0;
-}
-
-/* Wolkje */
-.cloud {
-  width: 3em;
-  position: absolute;
-  bottom: -1.2em;
-  left: -0.9em;
-  opacity: 0;
-  transition: all 0.4s;
-}
-
-.switch input:checked ~ .slider .cloud {
-  opacity: 1;
-}
-
-/* CSS voor de CSV parser */
-/* Nederlandse vertaling voor react-csv-importer */
-.CSVImporter_FileSelector::before {
-  content: "";
-}
-
-.CSVImporter_FileSelectorLabel {
-  font-weight: bold;
-  color: #333;
-}
-
-.CSVImporter_HeaderTitle {
-  color: #1976d2;
-}
-
-.CSVImporter_ColumnMapping h3::before {
-  content: "Velden toewijzen";
-}
-
-.CSVImporter_ColumnMapping p::before {
-  content: "Wijs de kolommen uit je CSV-bestand toe aan de juiste velden:";
-}
-
-.CSVImporter_ColumnMappingRow label::before {
-  content: "Kolom ";
-}
-
-.CSVImporter_ProcessButton::before {
-  content: "Start importeren";
-}
-
-/* --- VERTALING HACKS VOOR REACT-CSV-IMPORTER --- */
-
-/* 1. Vertaal "has headers" (het vinkje) */
-/* We zoeken de label tekst naast de checkbox */
-label > span:contains("has headers"), /* Oude browsers */
-label > span {
-    font-size: 0 !important; /* Verberg Engelse tekst */
-}
-
-/* Omdat we de span hierboven verbergen, moeten we specifiek zijn */
-/* Dit is vaak de structuur voor de toggle */
-div[role="dialog"] label span:last-child {
-    font-size: 0;
-    color: transparent;
-}
-
-div[role="dialog"] label span:last-child::after {
-    content: "Bevat kopteksten"; /* Jouw vertaling */
-    font-size: 16px; /* Herstel grootte */
-    color: black; /* Of jouw tekstkleur */
-    visibility: visible;
-    margin-left: 5px;
-}
-
-/* 2. Vertaal "Raw File Contents" */
-/* Dit is vaak een header boven de preview */
-div[role="dialog"] section > div > div > div > span {
-    font-size: 0;
-}
-/* We moeten de specifieke container targeten waar "Raw File Contents" in staat. 
-   Dit kan lastig zijn zonder specifieke classes, maar vaak werkt dit: */
-div > span:contains("Raw File Contents") { /* Werkt niet in pure CSS, maar ter illustratie */
-   font-size: 0;
-}
-
-/* DE BETERE MANIER VOOR TITELS (Target op volgorde) */
-
-/* "Raw File Contents" is vaak de EERSTE titel in de preview sectie */
-/* Pas deze selector aan als hij niet pakt, inspecteer element in browser */
+/* Verberg de Engelse "Raw File Contents" en vervang door NL */
 .csv-importer-file-step-content > div > div:first-child > span {
     font-size: 0 !important;
 }
 .csv-importer-file-step-content > div > div:first-child > span::after {
     content: "Ruwe bestandsinhoud";
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
+    color: #374151;
 }
 
-/* "Preview Import Data" is vaak de TWEEDE titel */
+/* Verberg de Engelse "Preview Import Data" en vervang door NL */
 .csv-importer-file-step-content > div > div:nth-child(2) > span {
     font-size: 0 !important;
 }
 .csv-importer-file-step-content > div > div:nth-child(2) > span::after {
     content: "Voorbeeld import data";
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Vertaal "has headers" (het vinkje) */
+div[role="dialog"] label span:last-child {
+    font-size: 0;
+}
+div[role="dialog"] label span:last-child::after {
+    content: "Bevat kopteksten";
+    font-size: 1rem;
+    color: #1f2937;
+    visibility: visible;
+    margin-left: 5px;
+}
+
+/* Styling voor de CSV Importer headers */
+.CSVImporter_HeaderTitle {
+  color: var(--color-klj-red) !important;
 }
