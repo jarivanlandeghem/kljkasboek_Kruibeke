@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
 import { useAuth } from '../contexts/auth';
 import Error from '../components/Error';
+import * as api from '../api'; // 👈 1. API Import toegevoegd
 import { 
   Box, 
   Button, 
@@ -15,18 +16,26 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions 
+  DialogActions,
+  Divider,
+  CircularProgress // Voor laad-icoon in de knop
 } from '@mui/material';
+import { PersonAdd } from '@mui/icons-material';
 import KLJIcon from '../assets/KLJIcon.png';
 import PlayingKids from '../assets/PlayingKids.jpg';
 
 const validationRules = {
-  email: {
-    required: 'Email is een verplicht veld!',
-  },
-  password: {
-    required: 'Paswoord is een verplicht veld!',
-  },
+  email: { required: 'Email is een verplicht veld!' },
+  password: { required: 'Paswoord is een verplicht veld!' },
+  firstName: { required: 'Voornaam is verplicht' },
+  lastName: { required: 'Achternaam is verplicht' },
+  requestEmail: { 
+    required: 'Email is verplicht',
+    pattern: {
+      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+      message: "Ongeldig emailadres"
+    }
+  }
 };
 
 export default function Login() {
@@ -34,37 +43,87 @@ export default function Login() {
   const navigate = useNavigate();
   const { search } = useLocation();
   
-  // State voor de foutmelding popup
+  // State voor dialogs
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorDialogMessage, setErrorDialogMessage] = useState('');
+  
+  // State voor account aanvragen dialog
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  // 👈 2. Extra laad-state specifiek voor het versturen van de mail
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
-  const methods = useForm({
+  // Formulier 1: Login
+  const loginMethods = useForm({
     defaultValues: {
       email: 'jasper.huyghe@outlook.be',
       password: 'hashed_pw_123',
     },
   });
 
-  const { handleSubmit, reset, control, formState: { errors } } = methods;
+  // Formulier 2: Account Aanvragen
+  const requestMethods = useForm({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: ''
+    }
+  });
 
-  const handleCancel = useCallback(() => {
-    reset();
-  }, [reset]);
+  const { handleSubmit, control, formState: { errors } } = loginMethods;
 
-  // Functie om de foutdialog te openen
+  // --- Error Dialog Logic ---
   const openErrorDialog = (message) => {
     setErrorDialogMessage(message);
     setErrorDialogOpen(true);
   };
 
-  // Functie om de foutdialog te sluiten
   const closeErrorDialog = () => {
     setErrorDialogOpen(false);
   };
 
+  // --- Request Account Logic ---
+  const handleOpenRequest = () => {
+    requestMethods.reset();
+    setRequestDialogOpen(true);
+  };
+
+  const handleCloseRequest = () => {
+    if (!isSubmittingRequest) { // Niet sluiten als hij bezig is
+      setRequestDialogOpen(false);
+    }
+  };
+
+  const handleRequestSubmit = async (data) => {
+    console.log("Account aanvraag ingediend:", data);
+    setIsSubmittingRequest(true); // Start laden
+
+    try {
+      // 👈 3. DE ECHTE API CALL
+      // We sturen de data naar de backend.
+      // Omdat 'api.post' in jouw index.js waarschijnlijk { arg } verwacht (SWR stijl):
+      await api.post('users/request-account', { 
+        arg: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email // Dit is 'requestEmail' in je form
+        }
+      });
+      
+      handleCloseRequest();
+      openErrorDialog(`Bedankt ${data.firstName}, je aanvraag is succesvol verstuurd! Een beheerder kijkt er naar.`);
+    
+    } catch (err) {
+      console.error("Fout bij aanvragen:", err);
+      // Laat de dialog open zodat ze het opnieuw kunnen proberen, maar toon foutmelding
+      openErrorDialog("Er ging iets mis bij het versturen van de aanvraag. Probeer het later opnieuw.");
+    } finally {
+      setIsSubmittingRequest(false); // Stop laden
+    }
+  };
+
+  // --- Login Logic ---
   const handleLogin = useCallback(
     async ({ email, password }) => {
-      // Controleer of alle velden zijn ingevuld
       if (!email || !password) {
         openErrorDialog('Gelieve zowel email als wachtwoord in te vullen.');
         return;
@@ -78,18 +137,14 @@ export default function Login() {
           replace: true,
         });
       } else {
-        // Toon foutmelding in popup als login mislukt
         openErrorDialog('Ongeldige email of wachtwoord. Probeer opnieuw.');
       }
     },
     [login, navigate, search],
   );
 
-  // Effect voor form validation errors
-  const hasValidationErrors = Object.keys(errors).length > 0;
-
   const handleFormSubmit = (data) => {
-    if (hasValidationErrors) {
+    if (Object.keys(errors).length > 0) {
       openErrorDialog('Gelieve alle verplichte velden correct in te vullen.');
       return;
     }
@@ -137,7 +192,7 @@ export default function Login() {
 
           {error && <Error message={error} />}
 
-          <FormProvider {...methods}>
+          <FormProvider {...loginMethods}>
             <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} sx={{ mt: 1, width: '100%' }}>
               <Controller
                 name="email"
@@ -179,23 +234,28 @@ export default function Login() {
                 )}
               />
               
-              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                <Button
-                  type="button"
-                  fullWidth
-                  variant="outlined"
-                  onClick={handleCancel}
-                  disabled={loading}
-                >
-                  Annuleren
-                </Button>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
                   disabled={loading}
+                  size="large"
                 >
                   Inloggen
+                </Button>
+
+                <Divider>OF</Divider>
+
+                {/* Account Aanvragen Knop */}
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  color="error" 
+                  startIcon={<PersonAdd />}
+                  onClick={handleOpenRequest}
+                >
+                  Geen account? Vraag toegang aan
                 </Button>
               </Box>
             </Box>
@@ -203,15 +263,89 @@ export default function Login() {
         </Box>
       </Grid>
 
-      {/* Foutmelding Dialog */}
+      {/* --- Dialog 1: Account Aanvragen --- */}
+      <Dialog 
+        open={requestDialogOpen} 
+        onClose={handleCloseRequest}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Account Aanvragen</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Vul onderstaande gegevens in. Een beheerder zal je aanvraag beoordelen.
+          </DialogContentText>
+          
+          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Controller
+              name="firstName"
+              control={requestMethods.control}
+              rules={validationRules.firstName}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Voornaam"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+            <Controller
+              name="lastName"
+              control={requestMethods.control}
+              rules={validationRules.lastName}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Achternaam"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+            <Controller
+              name="email"
+              control={requestMethods.control}
+              rules={validationRules.requestEmail}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Emailadres"
+                  type="email"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCloseRequest} color="inherit" disabled={isSubmittingRequest}>
+            Annuleren
+          </Button>
+          <Button 
+            onClick={requestMethods.handleSubmit(handleRequestSubmit)} 
+            variant="contained"
+            disabled={isSubmittingRequest}
+            startIcon={isSubmittingRequest ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            {isSubmittingRequest ? 'Versturen...' : 'Vraag aan'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* --- Dialog 2: Foutmeldingen/Succes --- */}
       <Dialog
         open={errorDialogOpen}
         onClose={closeErrorDialog}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title" sx={{ color: 'error.main' }}>
-          Inlogfout
+        <DialogTitle id="alert-dialog-title" sx={{ color: errorDialogMessage.includes('Bedankt') ? 'success.main' : 'error.main' }}>
+          {errorDialogMessage.includes('Bedankt') ? 'Succes' : 'Foutmelding'}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">

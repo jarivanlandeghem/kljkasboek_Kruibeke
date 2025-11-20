@@ -1,3 +1,4 @@
+// src/users/user.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { DatabaseProvider } from '../drizzle/drizzle.provider';
 import { InjectDrizzle } from '../drizzle/drizzle.provider';
@@ -22,25 +23,21 @@ export class UserService {
     private readonly db: DatabaseProvider,
   ) {}
 
-  // 🔹 1. Alle users ophalen + mappen naar DTO's
+  // ... (getAll, getById, create blijven hetzelfde) ...
+
   async getAll(): Promise<UserListResponseDto> {
     const dbUsers = this.db ? await this.db.query.users.findMany() : USER_DATA;
-
     const items = dbUsers.map((user) =>
       plainToInstance(UserResponseDto, user, {
         excludeExtraneousValues: true,
       }),
     );
-
     return { items };
   }
 
-  // 🔹 2. Enkel user ophalen + via DTO teruggeven
   async getById(id: number): Promise<UserResponseDto> {
     let user;
-
     if (this.db) {
-      // ✅ Gebruik select().from() voor meer controle
       const [dbUser] = await this.db
         .select()
         .from(users)
@@ -60,16 +57,19 @@ export class UserService {
     });
   }
 
-  // 🔹 3. User aanmaken en DTO teruggeven
   async create(dto: CreateUserRequestDto): Promise<UserResponseDto> {
     const hashedPassword = dto.paswoord ? await argon2.hash(dto.paswoord) : '';
 
-    dto.paswoord = hashedPassword;
-    dto.roles = ['user' as Role];
+    // Cast naar any of proper type om validatie te passeren bij insert
+    const userToInsert: any = {
+      ...dto,
+      paswoord: hashedPassword,
+      roles: ['user'],
+    };
 
     const [newUserIdObject] = await this.db
       .insert(users)
-      .values(dto)
+      .values(userToInsert)
       .$returningId();
 
     const newUserId = newUserIdObject.userid;
@@ -83,7 +83,7 @@ export class UserService {
     });
   }
 
-  // 🔹 4. User bijwerken en DTO teruggeven
+  // 🔹 4. User bijwerken
   async updateById(
     id: number,
     updateDto: updateUserDto,
@@ -100,11 +100,19 @@ export class UserService {
       ? await argon2.hash(updateDto.paswoord)
       : undefined;
 
+    // LOGICA AANGEPAST: Kijk eerst naar 'roles' (array), dan naar 'role' (string), anders behoud oude.
+    let newRoles = existing.roles;
+    if (updateDto.roles) {
+      newRoles = updateDto.roles;
+    } else if (updateDto.role) {
+      newRoles = [updateDto.role as Role];
+    }
+
     const updatedUserData: Partial<UserDbRow> = {
       voornaam: updateDto.voornaam ?? existing.voornaam,
       familienaam: updateDto.familienaam ?? existing.familienaam,
       email: updateDto.email ?? existing.email,
-      roles: updateDto.role ? [updateDto.role as Role] : existing.roles,
+      roles: newRoles, // ✅ Gebruik de berekende roles
       ...(hashedPassword && { paswoord: hashedPassword }),
     };
 
@@ -126,7 +134,6 @@ export class UserService {
     });
   }
 
-  // 🔹 5. User verwijderen
   async deleteByid(id: number): Promise<void> {
     const [result] = await this.db.delete(users).where(eq(users.userid, id));
 

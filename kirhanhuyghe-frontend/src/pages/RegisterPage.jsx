@@ -1,3 +1,4 @@
+// src/pages/RegisterPage.jsx
 import React, { useState } from 'react';
 import {
   Box,
@@ -8,22 +9,19 @@ import {
   Button,
   Grid,
   Alert,
-  Link,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip
+  CircularProgress
 } from '@mui/material';
-import { Person, Lock } from '@mui/icons-material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Person, Lock, ErrorOutline } from '@mui/icons-material';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/auth';
 import AlgemeneLayout from "../components/AlgemeneLayout";
 import kidsPlaying from "../assets/PlayingKids.jpg";
+import UserManagementDialog from '../components/UserManagementDialog';
 
 export default function RegisterPage() {
-  const { register } = useAuth();
-  const navigate = useNavigate();
+  // 1. Haal user en ready status op
+  const { register, user, ready } = useAuth(); 
+  // const navigate = useNavigate();
   const [message, setMessage] = useState({ type: '', text: '' });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,31 +31,60 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    roles: ['user'] // Default role
   });
 
-  const availableRoles = [
-    { value: 'user', label: 'Gebruiker' },
-    { value: 'admin', label: 'Beheerder' },
-    { value: 'parent', label: 'Ouder' },
-    { value: 'child', label: 'Kind' }
-  ];
+  // ---------------------------------------------------------
+  // BEVEILIGING LOGICA
+  // ---------------------------------------------------------
+  
+  // 1. Wachten tot we weten of de gebruiker is ingelogd
+  if (!ready) {
+    return (
+      <AlgemeneLayout image={kidsPlaying}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+          <CircularProgress />
+        </Box>
+      </AlgemeneLayout>
+    );
+  }
+
+  // 2. Controleer of het een admin is
+  const isAdmin = user && user.roles && user.roles.includes('admin');
+
+  if (!isAdmin) {
+    return (
+      <AlgemeneLayout image={kidsPlaying}>
+        <Container maxWidth="sm" sx={{ py: 10 }}>
+          <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
+            <ErrorOutline color="error" sx={{ fontSize: 60, mb: 2 }} />
+            <Typography variant="h4" gutterBottom color="error">
+              Geen Toegang
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              U heeft beheerdersrechten nodig om deze pagina te bekijken.
+            </Typography>
+            <Button 
+              variant="contained" 
+              component={RouterLink} 
+              to="/"
+            >
+              Terug naar Home
+            </Button>
+          </Paper>
+        </Container>
+      </AlgemeneLayout>
+    );
+  }
+
+  // ---------------------------------------------------------
+  // REGISTRATIE LOGICA (Alleen zichtbaar voor admins)
+  // ---------------------------------------------------------
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }));
-  };
-
-  const handleRoleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setFormData(prev => ({
-      ...prev,
-      roles: typeof value === 'string' ? value.split(',') : value,
     }));
   };
 
@@ -73,8 +100,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setMessage({ type: 'error', text: 'Wachtwoord moet minimaal 6 tekens lang zijn' });
+    if (formData.password.length < 8) {
+      setMessage({ type: 'error', text: 'Wachtwoord moet minimaal 8 tekens lang zijn' });
       setIsLoading(false);
       return;
     }
@@ -85,27 +112,44 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!formData.roles.length) {
-      setMessage({ type: 'error', text: 'Selecteer minimaal één rol' });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await register(formData);
+      const dataToSend = {
+        voornaam: formData.voornaam,
+        familienaam: formData.familienaam,
+        email: formData.email,
+        paswoord: formData.password, 
+      };
+
+      // Omdat we al admin zijn, maken we hier een nieuwe user aan.
+      // Let op: Je backend 'register' functie logt de nieuwe gebruiker misschien automatisch in 
+      // en geeft een token terug. Als admin wil je waarschijnlijk NIET uitgelogd worden.
+      // Als je backend 'register' puur een user aanmaakt is het goed. 
+      // Als 'register' in je AuthContext de token vervangt, wordt de admin uitgelogd.
+      
+      await register(dataToSend);
+      
       setMessage({ 
         type: 'success', 
-        text: 'Account succesvol aangemaakt! Je wordt doorgestuurd...' 
+        text: 'Nieuwe gebruiker succesvol aangemaakt!' 
       });
       
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      // Reset formulier zodat admin nog iemand kan toevoegen
+      setFormData({
+        voornaam: '',
+        familienaam: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
+      
+      // We navigeren NIET weg, want de admin wil misschien nog iemand toevoegen
+      // of rollen aanpassen.
       
     } catch (error) {
+      console.error(error);
       setMessage({ 
         type: 'error', 
-        text: error.message || 'Er is een fout opgetreden bij het aanmaken van het account' 
+        text: error.response?.data?.message || 'Er is een fout opgetreden bij het aanmaken van het account' 
       });
     } finally {
       setIsLoading(false);
@@ -120,10 +164,10 @@ export default function RegisterPage() {
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Person sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography variant="h4" component="h1" gutterBottom>
-              Account aanmaken
+              Nieuwe Gebruiker Registreren
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Maak een account aan om gebruik te maken van de applicatie
+              (Alleen voor beheerders)
             </Typography>
           </Box>
 
@@ -143,7 +187,6 @@ export default function RegisterPage() {
                   name="voornaam"
                   value={formData.voornaam}
                   onChange={handleChange}
-                  margin="normal"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -153,11 +196,10 @@ export default function RegisterPage() {
                   name="familienaam"
                   value={formData.familienaam}
                   onChange={handleChange}
-                  margin="normal"
                 />
               </Grid>
 
-              {/* Account Gegevens */}
+              {/* Email */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -166,10 +208,11 @@ export default function RegisterPage() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+
+              {/* Wachtwoorden */}
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Wachtwoord *"
@@ -177,11 +220,10 @@ export default function RegisterPage() {
                   type="password"
                   value={formData.password}
                   onChange={handleChange}
-                  margin="normal"
-                  helperText="Minimaal 6 tekens"
+                  helperText="Minimaal 8 tekens"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Bevestig wachtwoord *"
@@ -189,46 +231,10 @@ export default function RegisterPage() {
                   type="password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  margin="normal"
                 />
-              </Grid>
-
-              {/* Rollen Selectie */}
-              <Grid item xs={12}>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Rollen *</InputLabel>
-                  <Select
-                    multiple
-                    name="roles"
-                    value={formData.roles}
-                    onChange={handleRoleChange}
-                    label="Rollen *"
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip 
-                            key={value} 
-                            label={availableRoles.find(role => role.value === value)?.label || value}
-                            size="small"
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    {availableRoles.map((role) => (
-                      <MenuItem key={role.value} value={role.value}>
-                        {role.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  Selecteer de rollen voor deze gebruiker (meerdere mogelijk)
-                </Typography>
               </Grid>
             </Grid>
 
-            {/* Submit Knop */}
             <Button
               type="submit"
               fullWidth
@@ -238,19 +244,13 @@ export default function RegisterPage() {
               sx={{ mt: 4, mb: 2 }}
               startIcon={<Lock />}
             >
-              {isLoading ? 'Account aanmaken...' : 'Account aanmaken'}
+              {isLoading ? 'Aanmaken...' : 'Gebruiker Aanmaken'}
             </Button>
           </Box>
 
-          {/* Login Link */}
-          <Box sx={{ textAlign: 'center', mt: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Heb je al een account?{' '}
-              <Link component={RouterLink} to="/login" underline="hover">
-                Inloggen
-              </Link>
-            </Typography>
-          </Box>
+          {/* Admin beheer knop */}
+          <UserManagementDialog />
+
         </Paper>
       </Container>
     </AlgemeneLayout>

@@ -52,7 +52,9 @@ export default function ProfilePage() {
     setIsLoading(true);
 
     try {
+      // Deze functie roept nu de PUT /api/users/me/password endpoint aan
       await updatePassword(passwordData.currentPassword, passwordData.newPassword);
+      
       setMessage({ type: 'success', text: 'Wachtwoord succesvol gewijzigd!' });
       setPasswordData({
         currentPassword: '',
@@ -60,7 +62,8 @@ export default function ProfilePage() {
         confirmPassword: ''
       });
     } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Er is een fout opgetreden bij het wijzigen van het wachtwoord' });
+      // Zorg dat je backend errors goed doorgeeft, anders fallback tekst
+      setMessage({ type: 'error', text: error.response?.data?.message || error.message || 'Er is een fout opgetreden bij het wijzigen van het wachtwoord' });
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +79,7 @@ export default function ProfilePage() {
               sx={{ 
                 width: 80, 
                 height: 80, 
-                bgcolor: 'primary.main',
+                bgcolor: 'red',
                 fontSize: '2rem',
                 mr: 3
               }}
@@ -117,7 +120,7 @@ export default function ProfilePage() {
                   Achternaam
                 </Typography>
                 <Typography variant="body1">
-                  {user?.achternaam || 'Niet beschikbaar'}
+                  {user?.familienaam || 'Niet beschikbaar'}
                 </Typography>
               </Box>
 
@@ -130,13 +133,7 @@ export default function ProfilePage() {
                 </Typography>
               </Box>
 
-              <Button 
-                variant="outlined" 
-                startIcon={<Edit />}
-                sx={{ mt: 2 }}
-              >
-                Profiel bewerken
-              </Button>
+              
             </Grid>
 
             {/* Wachtwoord Wijzigen */}

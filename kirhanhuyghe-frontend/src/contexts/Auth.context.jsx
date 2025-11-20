@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     trigger: doLogin,
     isMutating: loginLoading,
     error: loginError,
-  } = useSWRMutation('session', api.post); // 👈 'sessions' gewijzigd naar 'session'
+  } = useSWRMutation('session', api.post);  // moet session zijn!
 
   const login = useCallback(
     async (email, password) => {
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
         return true;
       } catch (error) {
         console.error('Auth.login: login error', error);
-        return false;
+        throw error; // Fout doorgooien zodat frontend het kan tonen
       }
     },
     [doLogin],
@@ -50,6 +50,24 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     setToken(null);
     localStorage.removeItem(JWT_TOKEN_KEY);
+  }, []);
+
+  // 👇 1. NIEUWE FUNCTIE: REGISTER
+  // Deze functie maakt de user aan, maar logt NIET in (zodat admin ingelogd blijft)
+  const register = useCallback(async (data) => {
+    // We gebruiken api.post die we in api/index.js hebben gemaakt
+    // api.post verwacht (url, { arg: body })
+    await api.post('users', { arg: data });
+    return true;
+  }, []);
+
+  // 👇 2. BESTAANDE FUNCTIE: UPDATE PASSWORD
+  const updatePassword = useCallback(async (currentPassword, newPassword) => {
+    await api.put('users/me/password', {
+      currentPassword,
+      newPassword,
+    });
+    return true;
   }, []);
 
   const value = useMemo(
@@ -62,6 +80,8 @@ export const AuthProvider = ({ children }) => {
       ready: !userLoading,
       login,
       logout,
+      register,       // 👈 3. TOEVOEGEN AAN EXPORT
+      updatePassword, // 👈 3. TOEVOEGEN AAN EXPORT
     }),
     [
       token,
@@ -72,6 +92,8 @@ export const AuthProvider = ({ children }) => {
       userLoading,
       login,
       logout,
+      register,       // 👈 4. TOEVOEGEN AAN DEPENDENCIES
+      updatePassword, // 👈 4. TOEVOEGEN AAN DEPENDENCIES
     ],
   );
 
