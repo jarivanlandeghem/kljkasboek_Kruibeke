@@ -8,22 +8,54 @@ import {
   Button,
   Grid,
   Alert,
-  Link,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip
+  CircularProgress
 } from '@mui/material';
-import { Person, Lock } from '@mui/icons-material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Person, Lock, ErrorOutline } from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/auth';
 import AlgemeneLayout from "../components/AlgemeneLayout";
 import kidsPlaying from "../assets/PlayingKids.jpg";
+import UserManagementDialog from '../components/UserManagementDialog';
+
+// --- FRAMER MOTION IMPORTS ---
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- ANIMATIE VARIANTEN ---
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.5, ease: "easeOut" } 
+  },
+  exit: { opacity: 0, y: -20 }
+};
+
+const formContainerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 50 } }
+};
+
+const shakeVariants = {
+  initial: { x: 0 },
+  animate: { 
+    x: [-10, 10, -10, 10, 0],
+    transition: { duration: 0.4 }
+  }
+};
 
 export default function RegisterPage() {
-  const { register } = useAuth();
-  const navigate = useNavigate();
+  const { register, user, ready } = useAuth(); 
   const [message, setMessage] = useState({ type: '', text: '' });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,15 +65,70 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    roles: ['user'] // Default role
   });
 
-  const availableRoles = [
-    { value: 'user', label: 'Gebruiker' },
-    { value: 'admin', label: 'Beheerder' },
-    { value: 'parent', label: 'Ouder' },
-    { value: 'child', label: 'Kind' }
-  ];
+  // ---------------------------------------------------------
+  // BEVEILIGING LOGICA
+  // ---------------------------------------------------------
+  
+  if (!ready) {
+    return (
+      <AlgemeneLayout image={kidsPlaying}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+          <CircularProgress />
+        </Box>
+      </AlgemeneLayout>
+    );
+  }
+
+  const isAdmin = user && user.roles && user.roles.includes('admin');
+
+  if (!isAdmin) {
+    return (
+      <AlgemeneLayout image={kidsPlaying}>
+        <Container maxWidth="sm" sx={{ py: 10 }}>
+          <Paper 
+            component={motion.div}
+            variants={shakeVariants}
+            initial="initial"
+            animate="animate"
+            elevation={3} 
+            sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}
+          >
+            <motion.div 
+              initial={{ scale: 0 }} 
+              animate={{ scale: 1 }} 
+              transition={{ type: "spring", stiffness: 200, damping: 10 }}
+            >
+              <ErrorOutline color="error" sx={{ fontSize: 60, mb: 2 }} />
+            </motion.div>
+            
+            <Typography variant="h4" gutterBottom color="error" sx={{ fontWeight: 'bold' }}>
+              Geen Toegang
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+              U heeft beheerdersrechten nodig om deze pagina te bekijken.
+            </Typography>
+            
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                variant="contained" 
+                component={RouterLink} 
+                to="/"
+                color="error"
+              >
+                Terug naar Home
+              </Button>
+            </motion.div>
+          </Paper>
+        </Container>
+      </AlgemeneLayout>
+    );
+  }
+
+  // ---------------------------------------------------------
+  // REGISTRATIE LOGICA
+  // ---------------------------------------------------------
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,30 +138,19 @@ export default function RegisterPage() {
     }));
   };
 
-  const handleRoleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setFormData(prev => ({
-      ...prev,
-      roles: typeof value === 'string' ? value.split(',') : value,
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage({ type: '', text: '' });
 
-    // Validatie
     if (!formData.voornaam || !formData.familienaam || !formData.email || !formData.password) {
       setMessage({ type: 'error', text: 'Vul alle verplichte velden in' });
       setIsLoading(false);
       return;
     }
 
-    if (formData.password.length < 6) {
-      setMessage({ type: 'error', text: 'Wachtwoord moet minimaal 6 tekens lang zijn' });
+    if (formData.password.length < 8) {
+      setMessage({ type: 'error', text: 'Wachtwoord moet minimaal 8 tekens lang zijn' });
       setIsLoading(false);
       return;
     }
@@ -85,27 +161,34 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!formData.roles.length) {
-      setMessage({ type: 'error', text: 'Selecteer minimaal één rol' });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await register(formData);
+      const dataToSend = {
+        voornaam: formData.voornaam,
+        familienaam: formData.familienaam,
+        email: formData.email,
+        paswoord: formData.password, 
+      };
+      
+      await register(dataToSend);
+      
       setMessage({ 
         type: 'success', 
-        text: 'Account succesvol aangemaakt! Je wordt doorgestuurd...' 
+        text: 'Nieuwe gebruiker succesvol aangemaakt!' 
       });
       
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      setFormData({
+        voornaam: '',
+        familienaam: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
       
     } catch (error) {
+      console.error(error);
       setMessage({ 
         type: 'error', 
-        text: error.message || 'Er is een fout opgetreden bij het aanmaken van het account' 
+        text: error.response?.data?.message || 'Er is een fout opgetreden bij het aanmaken van het account' 
       });
     } finally {
       setIsLoading(false);
@@ -115,143 +198,150 @@ export default function RegisterPage() {
   return (
     <AlgemeneLayout image={kidsPlaying}>
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          {/* Header */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Person sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-            <Typography variant="h4" component="h1" gutterBottom>
-              Account aanmaken
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Maak een account aan om gebruik te maken van de applicatie
-            </Typography>
-          </Box>
+        
+        <motion.div
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+            
+            {/* Header */}
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+              <motion.div 
+                initial={{ scale: 0, rotate: -180 }} 
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 100 }}
+              >
+                <Person sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              </motion.div>
+              
+              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
+                Nieuwe Gebruiker Registreren
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                (Alleen voor beheerders)
+              </Typography>
+            </Box>
 
-          {message.text && (
-            <Alert severity={message.type} sx={{ mb: 3 }}>
-              {message.text}
-            </Alert>
-          )}
+            <AnimatePresence mode='wait'>
+              {message.text && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Alert severity={message.type} sx={{ mb: 3 }}>
+                    {message.text}
+                  </Alert>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <Box component="form" onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              {/* Persoonlijke Gegevens */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Voornaam *"
-                  name="voornaam"
-                  value={formData.voornaam}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Familienaam *"
-                  name="familienaam"
-                  value={formData.familienaam}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-              </Grid>
-
-              {/* Account Gegevens */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="E-mailadres *"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Wachtwoord *"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  margin="normal"
-                  helperText="Minimaal 6 tekens"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Bevestig wachtwoord *"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  margin="normal"
-                />
-              </Grid>
-
-              {/* Rollen Selectie */}
-              <Grid item xs={12}>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Rollen *</InputLabel>
-                  <Select
-                    multiple
-                    name="roles"
-                    value={formData.roles}
-                    onChange={handleRoleChange}
-                    label="Rollen *"
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip 
-                            key={value} 
-                            label={availableRoles.find(role => role.value === value)?.label || value}
-                            size="small"
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    {availableRoles.map((role) => (
-                      <MenuItem key={role.value} value={role.value}>
-                        {role.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  Selecteer de rollen voor deze gebruiker (meerdere mogelijk)
-                </Typography>
-              </Grid>
-            </Grid>
-
-            {/* Submit Knop */}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={isLoading}
-              sx={{ mt: 4, mb: 2 }}
-              startIcon={<Lock />}
+            <Box 
+              component={motion.form} 
+              onSubmit={handleSubmit}
+              variants={formContainerVariants}
+              initial="hidden"
+              animate="show"
             >
-              {isLoading ? 'Account aanmaken...' : 'Account aanmaken'}
-            </Button>
-          </Box>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <motion.div variants={itemVariants}>
+                    <TextField
+                      fullWidth
+                      label="Voornaam *"
+                      name="voornaam"
+                      value={formData.voornaam}
+                      onChange={handleChange}
+                    />
+                  </motion.div>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <motion.div variants={itemVariants}>
+                    <TextField
+                      fullWidth
+                      label="Familienaam *"
+                      name="familienaam"
+                      value={formData.familienaam}
+                      onChange={handleChange}
+                    />
+                  </motion.div>
+                </Grid>
 
-          {/* Login Link */}
-          <Box sx={{ textAlign: 'center', mt: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Heb je al een account?{' '}
-              <Link component={RouterLink} to="/login" underline="hover">
-                Inloggen
-              </Link>
-            </Typography>
-          </Box>
-        </Paper>
+                <Grid item xs={12}>
+                  <motion.div variants={itemVariants}>
+                    <TextField
+                      fullWidth
+                      label="E-mailadres *"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </motion.div>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <motion.div variants={itemVariants}>
+                    <TextField
+                      fullWidth
+                      label="Wachtwoord *"
+                      name="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      helperText="Minimaal 8 tekens"
+                    />
+                  </motion.div>
+                </Grid>
+                <Grid item xs={12}>
+                  <motion.div variants={itemVariants}>
+                    <TextField
+                      fullWidth
+                      label="Bevestig wachtwoord *"
+                      name="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                    />
+                  </motion.div>
+                </Grid>
+              </Grid>
+
+              <motion.div 
+                variants={itemVariants} 
+                className="mt-6"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  disabled={isLoading}
+                  sx={{ mt: 4, mb: 2, py: 1.5, fontWeight: 'bold', fontSize: '1rem' }}
+                  startIcon={<Lock />}
+                >
+                  {isLoading ? 'Aanmaken...' : 'Gebruiker Aanmaken'}
+                </Button>
+              </motion.div>
+            </Box>
+
+            {/* Admin beheer knop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
+              <UserManagementDialog />
+            </motion.div>
+
+          </Paper>
+        </motion.div>
       </Container>
     </AlgemeneLayout>
   );

@@ -3,9 +3,10 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { AuthModule } from '../auth/auth.module';
 import { DrizzleModule } from '../drizzle/drizzle.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [AuthModule, DrizzleModule],
+  imports: [AuthModule, DrizzleModule, MailModule],
   controllers: [UserController],
   providers: [UserService],
 })

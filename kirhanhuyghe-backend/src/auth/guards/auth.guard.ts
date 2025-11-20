@@ -47,6 +47,7 @@ export class AuthGuard implements CanActivate {
         userId: payload.sub, // 👈 MOET userId zijn (niet id!)
         email: payload.email,
         roles: payload.roles || [],
+        voornaam: payload['voornaam'],
       };
       console.log('✅ request.user set:', request.user);
     } catch (err) {

@@ -27,6 +27,9 @@ import { ParseUserIdPipe } from '../auth/pipes/parseUserId.pipe';
 import { type Session } from '../types/auth';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { ChangePasswordRequestDto, RequestAccountDto } from './user.dto';
+import { MailService } from '../mail/mail.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('users')
 @UseGuards(AuthGuard, RolesGuard)
@@ -34,6 +37,7 @@ export class UserController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly mailService: MailService,
   ) {}
 
   @Get()
@@ -50,6 +54,20 @@ export class UserController {
     const token = await this.authService.register(registerDto);
     return { token };
   }
+
+  // 👇 VERPLAATS DEZE NAAR BOVEN (Boven @Get(':id'))
+  // 👇 EN VERWIJDER @UseGuards(CheckUserAccessGuard)
+  @Put('me/password')
+  // @UseGuards(CheckUserAccessGuard) ❌ DEZE WEGHALEN!
+  async updatePassword(
+    @CurrentUser() user: Session,
+    @Body() dto: ChangePasswordRequestDto,
+  ): Promise<void> {
+    // We gebruiken de user.userId uit de JWT sessie, dus dit is veilig.
+    return this.authService.changePassword(user.userId, dto);
+  }
+
+  // 👇 Pas HIERNA komen de routes met :id params
 
   @Get(':id')
   @UseGuards(CheckUserAccessGuard)
@@ -81,5 +99,15 @@ export class UserController {
     @CurrentUser() user: Session,
   ): Promise<void> {
     return await this.userService.deleteByid(id === 'me' ? user.userId : id);
+  }
+
+  @Public() // 👈 Heel belangrijk: geen login nodig
+  @Post('request-account')
+  async requestAccount(@Body() dto: RequestAccountDto): Promise<void> {
+    await this.mailService.sendAccountRequest(
+      dto.firstName,
+      dto.lastName,
+      dto.email,
+    );
   }
 }

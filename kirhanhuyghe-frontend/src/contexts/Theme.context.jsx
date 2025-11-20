@@ -1,36 +1,45 @@
-//src/contexts/theme.context.jsx
-// uit cursus, gevolgd & aangevuld tijdens de les
+// src/contexts/theme.context.jsx
+import { createTheme, ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import {ThemeContext} from './'; // als je ./ doet zoekt hij naar de index.js
+// We maken een statisch thema aan (altijd Light mode)
+const theme = createTheme({
+  typography: {
+    fontFamily: "'Poppins', 'Roboto', 'Helvetica', 'Arial', sans-serif",
+    button: {
+      textTransform: 'none', // Geen hoofdletters
+      fontWeight: 600,
+    },
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 600 },
+  },
+  palette: {
+    mode: 'light', // Forceer light mode
+    primary: {
+      main: '#1a1a1a', // Zwart/Donkergrijs voor primaire acties
+    },
+    error: {
+      main: '#d32f2f', // KLJ Rood
+    },
+    background: {
+      default: '#f5f5f5', // Lichte achtergrond
+      paper: '#ffffff',   // Witte kaarten
+    },
+  },
+  shape: {
+    borderRadius: 12, // Moderne ronde hoeken
+  },
+});
 
-
-const ThemeProvider = ({ children }) => {
-  
-  const [darkmode, setDarkmode] = useState(Boolean(localStorage.getItem('darkmode')));
-
-  
-  useEffect(() => {
-    if (darkmode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    // mag normaal nooit maar dit is de enigste toegestane manier met combinatie react & tailwind css
-    localStorage.setItem('darkmode', darkmode);
-  }, [darkmode]);
-
-  // toggle methode om manueel aan te passen
-  // TODO dit moet gelijklopen met de button!
-  const toggleDarkmode = useCallback(() => setDarkmode((prev) => !prev), []);
-  // ? value om te zien wate de staat is?
-  const value = useMemo(() => ({ darkmode, toggleDarkmode }), [darkmode, toggleDarkmode]);
-
+export const ThemeProvider = ({ children }) => {
   return (
-    <ThemeContext.Provider value={value}>
+    <MUIThemeProvider theme={theme}>
+      {/* CssBaseline zorgt voor een consistente basisstijl (reset) */}
+      <CssBaseline /> 
       {children}
-    </ThemeContext.Provider>
+    </MUIThemeProvider>
   );
 };
 
+// Export default voor consistentie met je imports
 export default ThemeProvider;
