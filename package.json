@@ -1,7 +1,12 @@
 {
 	"dependencies": {
 		"@headlessui/react": "^2.2.9",
+		"@mui/x-date-pickers": "^8.19.0",
 		"@nestjs/swagger": "^11.2.3",
+		"dayjs": "^1.11.19",
+		"framer-motion": "^12.23.24",
+		"motion": "^12.23.24",
+		"mui": "^0.0.1",
 		"nestjs-swagger-dto": "^3.8.5",
 		"react": "^19.2.0",
 		"react-dom": "^19.2.0",
