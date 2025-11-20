@@ -218,3 +218,61 @@ button:focus-visible {
 .CSVImporter_ProcessButton::before {
   content: "Start importeren";
 }
+
+/* --- VERTALING HACKS VOOR REACT-CSV-IMPORTER --- */
+
+/* 1. Vertaal "has headers" (het vinkje) */
+/* We zoeken de label tekst naast de checkbox */
+label > span:contains("has headers"), /* Oude browsers */
+label > span {
+    font-size: 0 !important; /* Verberg Engelse tekst */
+}
+
+/* Omdat we de span hierboven verbergen, moeten we specifiek zijn */
+/* Dit is vaak de structuur voor de toggle */
+div[role="dialog"] label span:last-child {
+    font-size: 0;
+    color: transparent;
+}
+
+div[role="dialog"] label span:last-child::after {
+    content: "Bevat kopteksten"; /* Jouw vertaling */
+    font-size: 16px; /* Herstel grootte */
+    color: black; /* Of jouw tekstkleur */
+    visibility: visible;
+    margin-left: 5px;
+}
+
+/* 2. Vertaal "Raw File Contents" */
+/* Dit is vaak een header boven de preview */
+div[role="dialog"] section > div > div > div > span {
+    font-size: 0;
+}
+/* We moeten de specifieke container targeten waar "Raw File Contents" in staat. 
+   Dit kan lastig zijn zonder specifieke classes, maar vaak werkt dit: */
+div > span:contains("Raw File Contents") { /* Werkt niet in pure CSS, maar ter illustratie */
+   font-size: 0;
+}
+
+/* DE BETERE MANIER VOOR TITELS (Target op volgorde) */
+
+/* "Raw File Contents" is vaak de EERSTE titel in de preview sectie */
+/* Pas deze selector aan als hij niet pakt, inspecteer element in browser */
+.csv-importer-file-step-content > div > div:first-child > span {
+    font-size: 0 !important;
+}
+.csv-importer-file-step-content > div > div:first-child > span::after {
+    content: "Ruwe bestandsinhoud";
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* "Preview Import Data" is vaak de TWEEDE titel */
+.csv-importer-file-step-content > div > div:nth-child(2) > span {
+    font-size: 0 !important;
+}
+.csv-importer-file-step-content > div > div:nth-child(2) > span::after {
+    content: "Voorbeeld import data";
+    font-size: 14px;
+    font-weight: bold;
+}
