@@ -11,10 +11,54 @@ import {
   Alert,
   Divider
 } from '@mui/material';
-import { Lock, Person, Edit } from '@mui/icons-material';
+import { Lock, Person } from '@mui/icons-material';
 import { useAuth } from '../contexts/auth';
 import AlgemeneLayout from "../components/AlgemeneLayout";
 import kidsPlaying from "../assets/PlayingKids.jpg";
+
+// --- FRAMER MOTION IMPORTS ---
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- ANIMATIE VARIANTEN ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.15,
+      when: "beforeChildren"
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { y: 30, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 50, damping: 20 }
+  }
+};
+
+const itemVariants = {
+  hidden: { x: -20, opacity: 0 },
+  visible: { 
+    x: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 60 }
+  }
+};
+
+const alertVariants = {
+  hidden: { opacity: 0, y: -10, height: 0 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    height: 'auto',
+    transition: { duration: 0.3 }
+  },
+  exit: { opacity: 0, y: -10, height: 0, transition: { duration: 0.2 } }
+};
 
 export default function ProfilePage() {
   const { user, updatePassword } = useAuth();
@@ -52,7 +96,6 @@ export default function ProfilePage() {
     setIsLoading(true);
 
     try {
-      // Deze functie roept nu de PUT /api/users/me/password endpoint aan
       await updatePassword(passwordData.currentPassword, passwordData.newPassword);
       
       setMessage({ type: 'success', text: 'Wachtwoord succesvol gewijzigd!' });
@@ -62,7 +105,6 @@ export default function ProfilePage() {
         confirmPassword: ''
       });
     } catch (error) {
-      // Zorg dat je backend errors goed doorgeeft, anders fallback tekst
       setMessage({ type: 'error', text: error.response?.data?.message || error.message || 'Er is een fout opgetreden bij het wijzigen van het wachtwoord' });
     } finally {
       setIsLoading(false);
@@ -72,134 +114,191 @@ export default function ProfilePage() {
   return (
     <AlgemeneLayout image={kidsPlaying}>
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          {/* Profiel Header */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-            <Avatar
-              sx={{ 
-                width: 80, 
-                height: 80, 
-                bgcolor: 'red',
-                fontSize: '2rem',
-                mr: 3
-              }}
-            >
-              {user?.voornaam?.charAt(0).toUpperCase() || 'G'}
-            </Avatar>
-            <Box>
-              <Typography variant="h4" component="h1" gutterBottom>
-                Welkom, {user?.voornaam || 'Gebruiker'}!
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Beheer uw accountinstellingen en wachtwoord
-              </Typography>
+        {/* Wrap Paper in motion.div voor het 'opkomen' effect */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <Paper 
+            component={motion.div} // Laat MUI Paper zich gedragen als een motion div
+            variants={cardVariants}
+            elevation={3} 
+            sx={{ p: 4, borderRadius: 2, overflow: 'hidden' }}
+          >
+            
+            {/* Profiel Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+              <motion.div 
+                initial={{ scale: 0 }} 
+                animate={{ scale: 1 }} 
+                transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
+              >
+                <Avatar
+                  sx={{ 
+                    width: 80, 
+                    height: 80, 
+                    bgcolor: 'error.main', // KLJ Rood
+                    fontSize: '2rem',
+                    mr: 3,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}
+                >
+                  {user?.voornaam?.charAt(0).toUpperCase() || 'G'}
+                </Avatar>
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
+                  Welkom, {user?.voornaam || 'Gebruiker'}!
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Beheer uw accountinstellingen en wachtwoord
+                </Typography>
+              </motion.div>
             </Box>
-          </Box>
 
-          <Divider sx={{ mb: 4 }} />
+            <motion.div variants={itemVariants}>
+              <Divider sx={{ mb: 4 }} />
+            </motion.div>
 
-          <Grid container spacing={4}>
-            {/* Profiel Informatie */}
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Person sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6">Profielinformatie</Typography>
-              </Box>
+            <Grid container spacing={6}>
               
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Voornaam
-                </Typography>
-                <Typography variant="body1">
-                  {user?.voornaam || 'Niet beschikbaar'}
-                </Typography>
-              </Box>
+              {/* Linkerkant: Profiel Informatie */}
+              <Grid item xs={12} md={6}>
+                <motion.div variants={itemVariants}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <Person sx={{ mr: 1, color: 'error.main' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>Profielinformatie</Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+                        Voornaam
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                        {user?.voornaam || 'Niet beschikbaar'}
+                      </Typography>
+                    </Box>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Achternaam
-                </Typography>
-                <Typography variant="body1">
-                  {user?.familienaam || 'Niet beschikbaar'}
-                </Typography>
-              </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+                        Achternaam
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                        {user?.familienaam || 'Niet beschikbaar'}
+                      </Typography>
+                    </Box>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  E-mail
-                </Typography>
-                <Typography variant="body1">
-                  {user?.email || 'Niet beschikbaar'}
-                </Typography>
-              </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+                        E-mail
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                        {user?.email || 'Niet beschikbaar'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </motion.div>
+              </Grid>
 
-              
+              {/* Rechterkant: Wachtwoord Wijzigen */}
+              <Grid item xs={12} md={6}>
+                <motion.div variants={itemVariants} custom={1}> {/* custom delay mogelijkheid */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Lock sx={{ mr: 1, color: 'error.main' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>Wachtwoord wijzigen</Typography>
+                  </Box>
+
+                  {/* Animated Alert Message */}
+                  <Box sx={{ minHeight: '50px', mb: 1 }}>
+                    <AnimatePresence mode='wait'>
+                      {message.text && (
+                        <motion.div
+                          key="alert"
+                          variants={alertVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="exit"
+                        >
+                          <Alert severity={message.type} sx={{ mb: 2 }}>
+                            {message.text}
+                          </Alert>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Box>
+
+                  <Box component="form" onSubmit={handleSubmit}>
+                    <TextField
+                      fullWidth
+                      label="Huidig wachtwoord"
+                      name="currentPassword"
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      margin="normal"
+                      required
+                      variant="outlined"
+                      size="small"
+                    />
+                    
+                    <TextField
+                      fullWidth
+                      label="Nieuw wachtwoord"
+                      name="newPassword"
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      margin="normal"
+                      required
+                      variant="outlined"
+                      size="small"
+                      helperText="Minimaal 6 tekens"
+                    />
+                    
+                    <TextField
+                      fullWidth
+                      label="Bevestig nieuw wachtwoord"
+                      name="confirmPassword"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      margin="normal"
+                      required
+                      variant="outlined"
+                      size="small"
+                    />
+
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="error" // KLJ kleur
+                        disabled={isLoading}
+                        sx={{ 
+                          mt: 3, 
+                          mb: 2, 
+                          py: 1.2, 
+                          fontWeight: 'bold',
+                          textTransform: 'none',
+                          fontSize: '1rem'
+                        }}
+                      >
+                        {isLoading ? 'Wijzigen...' : 'Wachtwoord wijzigen'}
+                      </Button>
+                    </motion.div>
+                  </Box>
+                </motion.div>
+              </Grid>
             </Grid>
-
-            {/* Wachtwoord Wijzigen */}
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Lock sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6">Wachtwoord wijzigen</Typography>
-              </Box>
-
-              {message.text && (
-                <Alert 
-                  severity={message.type} 
-                  sx={{ mb: 2 }}
-                >
-                  {message.text}
-                </Alert>
-              )}
-
-              <Box component="form" onSubmit={handleSubmit}>
-                <TextField
-                  fullWidth
-                  label="Huidig wachtwoord"
-                  name="currentPassword"
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  margin="normal"
-                  required
-                />
-                
-                <TextField
-                  fullWidth
-                  label="Nieuw wachtwoord"
-                  name="newPassword"
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  margin="normal"
-                  required
-                  helperText="Minimaal 6 tekens"
-                />
-                
-                <TextField
-                  fullWidth
-                  label="Bevestig nieuw wachtwoord"
-                  name="confirmPassword"
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  margin="normal"
-                  required
-                />
-
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  disabled={isLoading}
-                  sx={{ mt: 3, mb: 2 }}
-                >
-                  {isLoading ? 'Wijzigen...' : 'Wachtwoord wijzigen'}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
+          </Paper>
+        </motion.div>
       </Container>
     </AlgemeneLayout>
   );
