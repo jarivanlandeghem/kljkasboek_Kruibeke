@@ -44,6 +44,9 @@ export default function CategoriesPage() {
 
   const [selected, setSelected] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  
+  // --- NIEUW: Hier ontbrak de state voor de weergave modus ---
+  const [viewMode, setViewMode] = useState('table'); // 'table' of 'charts'
 
   const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
 
@@ -179,7 +182,6 @@ export default function CategoriesPage() {
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    // 1. Voeg padding toe zodat labels niet worden afgesneden
     layout: {
         padding: {
             bottom: 20,
@@ -198,10 +200,9 @@ const chartOptions = {
        },
        x: { 
            grid: { display: false },
-           // 2. Zorg dat labels goed gedragen
            ticks: {
-               autoSkip: false, // Forceer dat ALLE categorieën getoond worden
-               maxRotation: 45, // Sta toe dat tekst schuin staat als het te lang is
+               autoSkip: false, 
+               maxRotation: 45, 
                minRotation: 0
            }
        }
@@ -213,20 +214,43 @@ const chartOptions = {
       <Navbar />
       <div className="p-4">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="mr-4 flex-1">
+          
+          {/* --- HEADER CONTROLS --- */}
+          <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Dropdown */}
+            <div className="flex-1 min-w-[250px]">
               <CategoryDropdown value={selected} onChange={setSelected} />
             </div>
-            {user && user.roles && user.roles.includes('admin') && (
-              <div className="ml-4">
+
+            <div className="flex items-center gap-3">
+                {/* --- NIEUW: KNOPPEN OM TE WISSELEN TUSSEN TABEL EN GRAFIEK --- */}
+                <ButtonGroup variant="outlined" aria-label="view mode" size="medium">
+                    <Button 
+                        onClick={() => setViewMode('table')}
+                        variant={viewMode === 'table' ? 'contained' : 'outlined'}
+                        startIcon={<TableChart />}
+                    >
+                        Tabel
+                    </Button>
+                    <Button 
+                        onClick={() => setViewMode('charts')}
+                        variant={viewMode === 'charts' ? 'contained' : 'outlined'}
+                        startIcon={<Assessment />}
+                    >
+                        Grafieken
+                    </Button>
+                </ButtonGroup>
+
+                {user && user.roles && user.roles.includes('admin') && (
                 <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
-                  onClick={() => setShowAddDialog(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"
+                    onClick={() => setShowAddDialog(true)}
                 >
-                  Nieuwe categorie
+                    + Categorie
                 </button>
-              </div>
-            )}
+                )}
+            </div>
+            
             <AddCategoryDialog
               open={showAddDialog}
               onClose={() => setShowAddDialog(false)}
@@ -317,9 +341,9 @@ const chartOptions = {
                     transition={{ duration: 0.4 }}
                     className="grid grid-cols-1 md:grid-cols-2 gap-6"
                   >
-                     <div className="col-span-1 md:col-span-2 mb-2">
+                      <div className="col-span-1 md:col-span-2 mb-2">
                         <h2 className="text-2xl font-bold text-gray-800">Analyse: {selected.categorienaam}</h2>
-                     </div>
+                      </div>
 
                     {/* Specifieke Bar Chart */}
                     <div className="bg-white p-6 rounded-xl shadow-md h-80">
