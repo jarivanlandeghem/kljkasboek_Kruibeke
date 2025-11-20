@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { getAll, deleteById } from '../api';
 import CategoryDropdown from "../components/categories/CategoryDropdown";
+import AddCategoryDialog from "../components/categories/AddCategoryDialog";
 import Navbar from "../components/Navbar";
 import TransactionsTable from '../components/transactions/TransactionTable';
 import AsyncData from '../components/AsyncData';
@@ -12,6 +13,7 @@ export default function CategoriesPage() {
   const { mutate } = useSWRConfig();
 
   const [selected, setSelected] = useState(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
 
@@ -52,8 +54,25 @@ export default function CategoriesPage() {
       <Navbar />
       <div className="p-4">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-4">
-            <CategoryDropdown value={selected} onChange={setSelected} />
+          <div className="mb-4 flex items-center justify-between">
+            <div className="mr-4 flex-1">
+              <CategoryDropdown value={selected} onChange={setSelected} />
+            </div>
+            {user && user.roles && user.roles.includes('admin') && (
+              <div className="ml-4">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  onClick={() => setShowAddDialog(true)}
+                >
+                  Nieuwe categorie
+                </button>
+              </div>
+            )}
+            <AddCategoryDialog
+              open={showAddDialog}
+              onClose={() => setShowAddDialog(false)}
+              onSaved={() => mutate('categorieen')}
+            />
           </div>
 
           <AsyncData loading={isLoading} error={error}>
