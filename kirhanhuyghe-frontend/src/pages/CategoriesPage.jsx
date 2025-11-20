@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { getAll, deleteById } from '../api';
 import CategoryDropdown from "../components/categories/CategoryDropdown";
+import AddCategoryDialog from "../components/categories/AddCategoryDialog";
 import Navbar from "../components/Navbar";
 import TransactionsTable from '../components/transactions/TransactionTable';
 import AsyncData from '../components/AsyncData';
@@ -42,7 +43,7 @@ export default function CategoriesPage() {
   const { mutate } = useSWRConfig();
 
   const [selected, setSelected] = useState(null);
-  const [viewMode, setViewMode] = useState('charts'); // Standaard op charts gezet voor demo
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
 
@@ -210,35 +211,27 @@ const chartOptions = {
   return (
     <div className="bg-gray-50 min-h-screen">
       <Navbar />
-      <div className="p-6">
-        <div className="max-w-7xl mx-auto">
-          
-          {/* Header Sectie */}
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-            <div className="w-full sm:w-1/3">
-               <CategoryDropdown value={selected} onChange={setSelected} />
+      <div className="p-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="mr-4 flex-1">
+              <CategoryDropdown value={selected} onChange={setSelected} />
             </div>
-            
-            <Paper elevation={0} className="border border-gray-200 rounded-lg overflow-hidden">
-                <ButtonGroup variant="text" aria-label="view mode">
-                    <Button 
-                        onClick={() => setViewMode('table')}
-                        color={viewMode === 'table' ? 'primary' : 'inherit'}
-                        variant={viewMode === 'table' ? 'contained' : 'text'}
-                        startIcon={<TableChart />}
-                    >
-                        Tabel
-                    </Button>
-                    <Button 
-                        onClick={() => setViewMode('charts')}
-                        color={viewMode === 'charts' ? 'primary' : 'inherit'}
-                        variant={viewMode === 'charts' ? 'contained' : 'text'}
-                        startIcon={<Assessment />}
-                    >
-                        Grafieken
-                    </Button>
-                </ButtonGroup>
-            </Paper>
+            {user && user.roles && user.roles.includes('admin') && (
+              <div className="ml-4">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  onClick={() => setShowAddDialog(true)}
+                >
+                  Nieuwe categorie
+                </button>
+              </div>
+            )}
+            <AddCategoryDialog
+              open={showAddDialog}
+              onClose={() => setShowAddDialog(false)}
+              onSaved={() => mutate('categorieen')}
+            />
           </div>
 
           <AsyncData loading={isLoading} error={error}>
