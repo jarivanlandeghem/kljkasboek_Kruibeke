@@ -9,16 +9,16 @@ import AsyncData from '../components/AsyncData';
 import { useAuth } from '../contexts/auth';
 
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-    ArcElement,
-    PointElement,
-    LineElement,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,6 +37,13 @@ ChartJS.register(
   PointElement,
   LineElement
 );
+
+const amountFormat = new Intl.NumberFormat('nl-BE', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 export default function CategoriesPage() {
   const { user } = useAuth();
@@ -81,8 +88,8 @@ export default function CategoriesPage() {
 
   // --- DATA VOOR GESELECTEERDE CATEGORIE GRAFIEKEN ---
   const specificChartData = useMemo(() => {
-    const totalIn = inTransacties.reduce((acc, curr) => acc + Number(curr.bedrag), 0);
-    const totalUit = uitTransacties.reduce((acc, curr) => acc + Number(curr.bedrag), 0);
+    const totalIn = inTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
+    const totalUit = uitTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
 
     return {
       comparison: {
@@ -104,11 +111,11 @@ export default function CategoriesPage() {
           borderWidth: 0,
         }],
       },
-      timeline: {
+        timeline: {
         labels: filtered.map(t => new Date(t.datum).toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit' })),
         datasets: [{
           label: 'Verloop',
-          data: filtered.map(t => String(t.in_uit).toUpperCase() === 'UIT' ? -Math.abs(t.bedrag) : t.bedrag),
+          data: filtered.map(t => String(t.in_uit).toUpperCase() === 'UIT' ? -Math.abs(Number(t.bedrag || 0)) : Math.abs(Number(t.bedrag || 0))),
           borderColor: 'rgb(59, 130, 246)',
           backgroundColor: 'rgba(59, 130, 246, 0.5)',
           tension: 0.4,
@@ -116,6 +123,14 @@ export default function CategoriesPage() {
       }
     };
   }, [inTransacties, uitTransacties, filtered]);
+
+  // totals = total IN and total UIT for the selected category
+  const totals = useMemo(() => {
+    const totalIn = inTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
+    const totalUit = uitTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
+    const saldoValue = totalIn - totalUit;
+    return { totalIn, totalUit, saldo: saldoValue };
+  }, [inTransacties, uitTransacties]);
 
   // --- DATA VOOR GLOBALE GRAFIEKEN (ALLE CATEGORIEËN) ---
   const globalChartData = useMemo(() => {
@@ -130,11 +145,11 @@ export default function CategoriesPage() {
             categoryStats[catName] = { in: 0, uit: 0 };
         }
 
-        const bedrag = Number(t.bedrag);
+        const bedrag = Math.abs(Number(t.bedrag || 0));
         if (String(t.in_uit).toUpperCase() === 'IN') {
-            categoryStats[catName].in += bedrag;
+          categoryStats[catName].in += bedrag;
         } else {
-            categoryStats[catName].uit += bedrag;
+          categoryStats[catName].uit += bedrag;
         }
     });
 
@@ -369,6 +384,17 @@ const chartOptions = {
 
               </AnimatePresence>
           </AsyncData>
+             {/* Bottom-centered balance for selected category */}
+             {selected && (
+               <div className="fixed bottom-6 left-0 right-0 pointer-events-none">
+                 <div className="max-w-3xl mx-auto flex justify-center">
+                         <div className={`pointer-events-auto px-6 py-3 rounded-lg shadow-lg text-white font-semibold ${totals.saldo >= 0 ? 'bg-green-600' : 'bg-red-600'}`}>
+                           <div className="text-sm opacity-90">IN: {amountFormat.format(totals.totalIn)} — UIT: {amountFormat.format(totals.totalUit)}</div>
+                           <div className="text-lg font-bold">Saldo {selected.categorienaam}: {totals.saldo < 0 ? `-${amountFormat.format(Math.abs(totals.saldo))}` : amountFormat.format(totals.saldo)}</div>
+                         </div>
+                 </div>
+               </div>
+             )}
         </div>
       </div>
     </div>
