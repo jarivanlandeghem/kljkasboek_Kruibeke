@@ -1,27 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Transaction from './Transaction';
 import { getById } from '../../api';
+import {
+    useReactTable,
+    getCoreRowModel,
+    getSortedRowModel,
+    flexRender,
+} from '@tanstack/react-table';
 
 function TransactionsTable({ transacties, onDelete, currentUser, compact = false }) {
   const [userMap, setUserMap] = useState({});
+  // default sorting: newest first (datum desc)
+  const [sorting, setSorting] = useState([{ id: 'datum', desc: true }]);
 
   useEffect(() => {
-    // collect unique userIDs from transactions where the server did NOT already attach an author
     const ids = Array.from(
       new Set(
-        transacties
+        (transacties || [])
           .filter((t) => !t.author)
           .map((t) => t.userID)
           .filter(Boolean),
       ),
     );
-    // find which ids are missing from the map
     const missing = ids.filter((id) => !(String(id) in userMap));
     if (missing.length === 0) return;
 
-    // fetch missing user details
     let cancelled = false;
-    // mark missing ids as loading (undefined) so UI can show a placeholder
     const loadingMap = { ...userMap };
     missing.forEach((id) => {
       loadingMap[String(id)] = undefined;
@@ -33,7 +37,6 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
       const next = { ...loadingMap };
       missing.forEach((id, idx) => {
         const user = results[idx];
-        // if API returned a user object, store it; if failed, store null (meaning unknown)
         next[String(id)] = user || null;
       });
       setUserMap(next);
@@ -42,76 +45,119 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
       cancelled = true;
     };
   }, [transacties]);
-  if (transacties.length === 0) {
+
+  const rows = useMemo(() => {
+    return (transacties || []).map((transaction) => {
+      let authorName;
+      if (transaction.author) {
+        authorName = `${transaction.author.voornaam || ''} ${transaction.author.familienaam || ''}`.trim();
+      } else {
+        const entry = userMap[String(transaction.userID)];
+        if (entry === undefined) authorName = undefined;
+        else if (entry === null) authorName = null;
+        else authorName = `${entry.voornaam || ''} ${entry.familienaam || ''}`.trim();
+      }
+      return { ...transaction, authorName };
+    });
+  }, [transacties, userMap]);
+
+  const columns = useMemo(() => {
+    if (compact) {
+      return [
+        { accessorKey: 'beschrijving', header: 'Beschrijving', enableColumnFilter: true },
+        { accessorKey: 'datum', header: 'Datum', cell: (info) => new Date(info.getValue() || '').toLocaleDateString('nl-BE'), enableColumnFilter: true, enableSorting: true },
+        { accessorKey: 'bedrag', header: 'Bedrag', cell: (info) => {
+            const v = Number(info.getValue() || 0);
+            return new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(v < 0 ? v : Math.abs(v));
+          }, enableSorting: true },
+      ];
+    }
+
+    return [
+      { accessorKey: 'beschrijving', header: 'Beschrijving', enableColumnFilter: true },
+      { accessorFn: (row) => (row.categorieDetails?.[0]?.categorienaam || row.categorienaam || ''), id: 'cat1', header: 'Categorie 1', enableColumnFilter: true },
+      { accessorFn: (row) => (row.categorieDetails?.[1]?.categorienaam || ''), id: 'cat2', header: 'Categorie 2', enableColumnFilter: true },
+      { accessorKey: 'datum', header: 'Datum', cell: (info) => new Date(info.getValue() || '').toLocaleDateString('nl-BE'), enableColumnFilter: true, enableSorting: true },
+      { accessorKey: 'authorName', header: 'Gebruiker', cell: (info) => info.getValue(), enableColumnFilter: true },
+      { accessorKey: 'bedrag', header: 'Bedrag', cell: (info) => {
+          const v = Number(info.getValue() || 0);
+          return new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(v < 0 ? v : Math.abs(v));
+        }, enableSorting: true },
+    ];
+  }, [compact]);
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    state: { sorting },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+  });
+
+  if ((transacties || []).length === 0) {
     return (
       <div className='p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-100'>Er zijn nog geen transacties toegevoegd.</div>
     );
   }
-  return (
-    <div className="overflow-x-auto w-full">
-      <table className='min-w-full table-auto border-collapse'>
-        <thead className='text-black'>
-          <tr className="border-b-2 border-gray-300">
-            {compact ? (
-              <>
-                <th className="text-start py-2 px-4">Beschrijving</th>
-                <th className="text-start py-2 px-4">Datum</th>
-                <th className='text-start py-2 px-4'>Bedrag</th>
-              </>
-            ) : (
-              <>
-                <th className="text-start py-2 px-4 min-w-[220px]">Beschrijving</th>
-                <th className='text-start py-2 px-4 min-w-[160px]'>Categorie 1</th>
-                <th className='text-start py-2 px-4 min-w-[160px]'>Categorie 2</th>
-                <th className="text-start py-2 px-4 min-w-[120px]">Datum</th>
-                <th className="text-start py-2 px-4 min-w-[140px] hidden sm:table-cell">Gebruiker</th>
-                <th className='text-start py-2 px-4 min-w-[120px]'>Bedrag</th>
-                <th className='py-2 px-4 w-24 text-right'></th>
-              </>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-        {transacties.map((transaction) => {
-          // Prefer server-provided author if present
-          if (transaction.author) {
-            const authorName = `${transaction.author.voornaam || ''} ${transaction.author.familienaam || ''}`.trim();
-            return (
-              <Transaction
-                key={transaction.transactieID}
-                {...transaction}
-                onDelete={onDelete}
-                currentUser={currentUser}
-                authorName={authorName}
-                compact={compact}
-              />
-            );
-          }
 
-          const entry = userMap[String(transaction.userID)];
-          let authorName;
-          if (entry === undefined) {
-            // still loading
-            authorName = undefined;
-          } else if (entry === null) {
-            // fetch failed or user unknown
-            authorName = null;
-          } else {
-            authorName = `${entry.voornaam || ''} ${entry.familienaam || ''}`.trim();
-          }
-          return (
-            <Transaction
-              key={transaction.transactieID}
-              {...transaction}
-              onDelete={onDelete}
-              currentUser={currentUser}
-              authorName={authorName}
-              compact={compact}
-            />
-          );
-        })}
-        </tbody>
-      </table>
+  return (
+    <div className="w-full">
+      {/* Controls: sort-by-date dropdown + column filters are under headers */}
+      <div className="flex justify-end mb-2">
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <span>Sorteer op datum:</span>
+          <select
+            value={sorting.find(s => s.id === 'datum') ? (sorting.find(s => s.id === 'datum').desc ? 'new' : 'old') : 'new'}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === 'new') setSorting([{ id: 'datum', desc: true }]);
+              else if (v === 'old') setSorting([{ id: 'datum', desc: false }]);
+            }}
+            className="px-2 py-1 border rounded bg-white"
+          >
+            <option value="new">Nieuw → Oud</option>
+            <option value="old">Oud → Nieuw</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="overflow-x-auto w-full">
+        <table className='min-w-full table-auto border-collapse'>
+          <thead className='text-black'>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="border-b-2 border-gray-300">
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id} className="text-start py-2 px-4 align-top">
+                    <div className="flex items-center gap-2">
+                      <div>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </div>
+                    </div>
+                    {/* no column filter inputs (removed per request) */}
+                  </th>
+                ))}
+                {!compact && <th className='py-2 px-4 w-24 text-right'></th>}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => {
+              const data = row.original;
+              return (
+                <Transaction
+                  key={data.transactieID}
+                  {...data}
+                  onDelete={onDelete}
+                  currentUser={currentUser}
+                  authorName={data.authorName}
+                  compact={compact}
+                />
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

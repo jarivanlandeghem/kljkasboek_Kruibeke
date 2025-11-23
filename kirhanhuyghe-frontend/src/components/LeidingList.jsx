@@ -1,4 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { FiEdit } from 'react-icons/fi';
+import { IoTrash } from 'react-icons/io5';
 import {
   useReactTable,
   getCoreRowModel,
@@ -41,10 +43,7 @@ import {
 // Icons
 import {
   Search,
-  Add,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  DirectionsWalk,
+  Add, DirectionsWalk
 } from '@mui/icons-material';
 
 // 👇 HIER ZAT DE FOUT: Named imports gebruiken!
@@ -142,16 +141,16 @@ export default function LeidingList() {
 
   // --- HANDLERS ---
 
-  const handleEditClick = (row) => {
+  const handleEditClick = useCallback((row) => {
     setEditingId(row.profielID);
     setValue('telnr', row.telnr);
     setValue('leeftijdsgroep', row.leeftijdsgroep);
     setValue('functies', row.functies || []);
     setValue('userID', row.userID);
     setOpenDialog('edit');
-  };
+  }, [setValue]);
 
-  const handleDeleteClick = async (id, naam) => {
+  const handleDeleteClick = useCallback(async (id, naam) => {
     if (window.confirm(`Ben je zeker dat je ${naam} wilt verwijderen als leiding?`)) {
       try {
         await deleteById('leiding-profiel', { arg: id });
@@ -161,7 +160,7 @@ export default function LeidingList() {
         alert('Fout bij verwijderen');
       }
     }
-  };
+  }, [mutate]);
 
   const onSubmit = async (data) => {
     try {
@@ -234,19 +233,27 @@ export default function LeidingList() {
       cell: info => (
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
           <Tooltip title="Bewerken">
-            <IconButton size="small" onClick={() => handleEditClick(info.row.original)}>
-              <EditIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+            <IconButton
+              size="small"
+              onClick={() => handleEditClick(info.row.original)}
+              sx={{ bgcolor: 'black', color: 'white', '&:hover': { bgcolor: 'gray.800' }, width: 36, height: 36 }}
+            >
+              <FiEdit size={16} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Verwijderen">
-            <IconButton size="small" onClick={() => handleDeleteClick(info.row.original.profielID, info.row.original.voornaam)}>
-              <DeleteIcon fontSize="small" color="error" />
+            <IconButton
+              size="small"
+              onClick={() => handleDeleteClick(info.row.original.profielID, info.row.original.voornaam)}
+              sx={{ bgcolor: 'black', color: 'white', '&:hover': { bgcolor: 'gray.800' }, width: 36, height: 36 }}
+            >
+              <IoTrash size={16} />
             </IconButton>
           </Tooltip>
         </Box>
       )
     }] : [])
-  ], [isAdmin]);
+  ], [isAdmin, handleEditClick, handleDeleteClick]);
 
   const table = useReactTable({
     data: leidingProfielen || [],

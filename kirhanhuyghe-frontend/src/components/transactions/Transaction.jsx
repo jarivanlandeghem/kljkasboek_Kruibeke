@@ -1,5 +1,5 @@
-import { Edit } from '@mui/icons-material';
-import { Delete } from '@mui/icons-material';
+import { FiEdit } from 'react-icons/fi';
+import { IoTrash } from 'react-icons/io5';
 import CategoryDropdown from '../categories/CategoryDropdown';
 import { useState, useEffect } from 'react';
 import { put, putById } from '../../api';
@@ -177,13 +177,21 @@ function Transaction({
       <td className="py-2 px-4 hidden sm:table-cell">{displayUserName}</td>
       <td className="py-2 px-4">{amountFormat.format(in_uit === 'UIT' ? -Math.abs(bedrag || 0) : Math.abs(bedrag || 0))}</td>
       <td className='text-right py-2 pr-4'>
-        <button className='py-2 px-2.5 rounded-md mr-2' onClick={() => { setForm({ beschrijving: beschrijving || '', datum: datum ? new Date(datum).toISOString().slice(0,10) : '', bedrag: typeof bedrag === 'number' ? String(in_uit === 'UIT' ? -Math.abs(bedrag) : Math.abs(bedrag)) : (bedrag || '') }); setEditError(''); setEditOpen(true); }} aria-label={`Bewerk transactie ${transactieID}`}>
-          <Edit/>
+        <button
+          className='inline-flex items-center justify-center w-9 h-9 bg-black text-white rounded-full mr-2'
+          onClick={() => { setForm({ beschrijving: beschrijving || '', datum: datum ? new Date(datum).toISOString().slice(0,10) : '', bedrag: typeof bedrag === 'number' ? String(in_uit === 'UIT' ? -Math.abs(bedrag) : Math.abs(bedrag)) : (bedrag || '') }); setEditError(''); setEditOpen(true); }}
+          aria-label={`Bewerk transactie ${transactieID}`}
+        >
+          <FiEdit size={16} />
         </button>
       </td>
       <td>
-        <button className='py-2 px-2.5 rounded-md' onClick={handleDelete} aria-label={`Verwijder transactie ${transactieID}`}>
-          <Delete />
+        <button
+          className='inline-flex items-center justify-center w-9 h-9 bg-black text-white rounded-full'
+          onClick={handleDelete}
+          aria-label={`Verwijder transactie ${transactieID}`}
+        >
+          <IoTrash size={16} />
         </button>
       </td>
     </tr>
