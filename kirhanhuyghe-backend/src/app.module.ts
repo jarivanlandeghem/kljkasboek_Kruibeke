@@ -11,6 +11,9 @@ import { SessionModule } from './session/session.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { MailModule } from './mail/mail.module';
+import { LeidingprofielModule } from './leidingprofiel/leidingprofiel.module';
+import { EvenementenModule } from './evenementen/evenementen.module';
+import { AanwezighedenModule } from './aanwezigheden/aanwezigheden.module';
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import { MailModule } from './mail/mail.module';
     AuthModule,
     SessionModule,
     MailModule,
+    LeidingprofielModule,
+    EvenementenModule,
+    AanwezighedenModule,
   ],
   providers: [
     {
