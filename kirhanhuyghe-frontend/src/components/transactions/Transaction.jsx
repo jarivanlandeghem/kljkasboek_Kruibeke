@@ -1,8 +1,10 @@
-import { IoTrashOutline } from 'react-icons/io5';
+import { Edit } from '@mui/icons-material';
+import { Delete } from '@mui/icons-material';
 import CategoryDropdown from '../categories/CategoryDropdown';
 import { useState, useEffect } from 'react';
-import { put } from '../../api';
+import { put, putById } from '../../api';
 import { useSWRConfig } from 'swr';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Alert } from '@mui/material';
 
 const dateFormat = new Intl.DateTimeFormat('nl-BE', {
   day: '2-digit',
@@ -22,6 +24,7 @@ function Transaction({
   beschrijving, 
   datum, 
   bedrag, 
+  in_uit,
   userID, 
   currentUser,
   authorName = null,
@@ -60,6 +63,41 @@ function Transaction({
 
   const handleDelete = () => {
     onDelete(transactieID);
+  };
+
+  // Edit dialog state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [form, setForm] = useState({ beschrijving: '', datum: '', bedrag: '' });
+
+  
+
+  const handleEditSave = async () => {
+    setEditError('');
+    const amt = Number(form.bedrag);
+    if (Number.isNaN(amt)) {
+      setEditError('Ongeldig bedrag');
+      return;
+    }
+    const in_uit = amt < 0 ? 'UIT' : 'IN';
+    // Build payload with only fields that exist to avoid sending nulls
+    const payload = {};
+    if (form.beschrijving !== undefined) payload.beschrijving = form.beschrijving;
+    if (form.datum) payload.datum = form.datum; // only include if non-empty
+    payload.bedrag = Math.abs(amt);
+    payload.in_uit = in_uit;
+    try {
+      console.log('Updating transaction payload:', payload);
+      // Use putById helper to call PUT /transacties/:id
+      await putById('transacties', { id: transactieID, arg: payload });
+      mutate('transacties');
+      setEditOpen(false);
+    } catch (err) {
+      // Try to log server response body if available for easier debugging
+      console.error('Error updating transaction', err?.response?.data || err.message || err);
+      const serverMsg = err?.response?.data?.message || err?.response?.data || err.message;
+      setEditError(serverMsg || 'Kon transactie niet opslaan');
+    }
   };
 
   const saveCategories = async (newCat1, newCat2) => {
@@ -105,16 +143,18 @@ function Transaction({
   }
 
   if (compact) {
+    const signed = in_uit === 'UIT' ? -Math.abs(bedrag || 0) : Math.abs(bedrag || 0);
     return (
       <tr className="border-b border-gray-200">
         <td className="py-2 px-4">{beschrijving || 'N/A'}</td>
         <td className="py-2 px-4">{formatDate(datum)}</td>
-        <td className="py-2 px-4">{amountFormat.format(bedrag || 0)}</td>
+        <td className="py-2 px-4">{amountFormat.format(signed)}</td>
       </tr>
     );
   }
 
   return (
+    <>
     <tr className="border-b border-gray-200">
       <td className="py-2 px-4">{beschrijving || 'N/A'}</td>
       <td className="py-2 px-4">
@@ -135,13 +175,53 @@ function Transaction({
       </td>
       <td className="py-2 px-4">{formatDate(datum)}</td>
       <td className="py-2 px-4 hidden sm:table-cell">{displayUserName}</td>
-      <td className="py-2 px-4">{amountFormat.format(bedrag || 0)}</td>
-      <td className="text-right py-2 pr-4">
-        <button className='py-2 px-2.5 rounded-md bg-gray-950' onClick={handleDelete} aria-label={`Verwijder transactie ${transactieID}`}>
-          <IoTrashOutline />
+      <td className="py-2 px-4">{amountFormat.format(in_uit === 'UIT' ? -Math.abs(bedrag || 0) : Math.abs(bedrag || 0))}</td>
+      <td className='text-right py-2 pr-4'>
+        <button className='py-2 px-2.5 rounded-md mr-2' onClick={() => { setForm({ beschrijving: beschrijving || '', datum: datum ? new Date(datum).toISOString().slice(0,10) : '', bedrag: typeof bedrag === 'number' ? String(in_uit === 'UIT' ? -Math.abs(bedrag) : Math.abs(bedrag)) : (bedrag || '') }); setEditError(''); setEditOpen(true); }} aria-label={`Bewerk transactie ${transactieID}`}>
+          <Edit/>
+        </button>
+      </td>
+      <td>
+        <button className='py-2 px-2.5 rounded-md' onClick={handleDelete} aria-label={`Verwijder transactie ${transactieID}`}>
+          <Delete />
         </button>
       </td>
     </tr>
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Bewerk transactie</DialogTitle>
+        <DialogContent>
+          {editError && <Alert severity="error" sx={{ mb: 2 }}>{editError}</Alert>}
+          <TextField
+            label="Beschrijving"
+            fullWidth
+            margin="normal"
+            value={form.beschrijving}
+            onChange={(e) => setForm((s) => ({ ...s, beschrijving: e.target.value }))}
+          />
+          <TextField
+            label="Datum"
+            type="date"
+            fullWidth
+            margin="normal"
+            value={form.datum}
+            onChange={(e) => setForm((s) => ({ ...s, datum: e.target.value }))}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="Bedrag"
+            type="number"
+            fullWidth
+            margin="normal"
+            value={form.bedrag}
+            onChange={(e) => setForm((s) => ({ ...s, bedrag: e.target.value }))}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>Annuleer</Button>
+          <Button onClick={handleEditSave} variant="contained">Opslaan</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 

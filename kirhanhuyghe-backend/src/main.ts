@@ -17,7 +17,10 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      forbidUnknownValues: true,
+      // Allow unknown values here to avoid class-validator 'unknownValue' errors
+      // when validating incoming plain objects from the frontend. This is
+      // relaxed for development; consider stricter settings for production.
+      forbidUnknownValues: false,
       transform: true,
 
       exceptionFactory: (errors: ValidationError[] = []) => {

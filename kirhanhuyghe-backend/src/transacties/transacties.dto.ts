@@ -2,12 +2,15 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsInt,
-  IsNotEmpty,
-  IsString,
-  MaxLength,
-  IsIn,
-  Length,
+    IsInt,
+    IsNotEmpty,
+    IsString,
+    MaxLength,
+    IsIn,
+    Length,
+    IsOptional,
+    IsNumber,
+    IsArray,
 } from 'class-validator';
 
 /**
@@ -153,36 +156,49 @@ export class UpdateTransactieDto {
     example: 1,
     description: 'Optionele rekeningID voor update',
   })
+  @IsOptional()
+  @IsInt()
   rekeningID?: number;
   @ApiProperty({
     required: false,
     example: 1,
     description: 'Optionele userID voor update',
   })
+  @IsOptional()
+  @IsInt()
   userID?: number;
   @ApiProperty({
     required: false,
     example: 'Aangepaste beschrijving',
     description: 'Optionele nieuwe beschrijving',
   })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
   beschrijving?: string;
   @ApiProperty({
     required: false,
     enum: ['IN', 'UIT'],
     description: 'Optioneel type: IN of UIT',
   })
+  @IsOptional()
+  @IsIn(['IN', 'UIT'])
   in_uit?: 'IN' | 'UIT';
   @ApiProperty({
     required: false,
     example: 10.0,
     description: 'Optioneel nieuw bedrag',
   })
+  @IsOptional()
+  @IsNumber()
   bedrag?: number;
   @ApiProperty({
     required: false,
     example: '2025-05-25',
     description: 'Optionele nieuwe datum (YYYY-MM-DD)',
   })
+  @IsOptional()
+  @IsString()
   datum?: string; // YYYY-MM-DD
   // Optionele lijst met categorieIDs voor koppeling
   @ApiProperty({
@@ -190,6 +206,9 @@ export class UpdateTransactieDto {
     type: [Number],
     description: 'Lijst met categorieIDs om te koppelen',
   })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
   categorieIDs?: number[];
 }
 
