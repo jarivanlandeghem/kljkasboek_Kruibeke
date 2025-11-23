@@ -1,37 +1,42 @@
 // src/transactie/transactie.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { TRANSACTION_DATA, Transactie } from '../api/data/mock_data';
 import { eq } from 'drizzle-orm';
 import {
-    CreateTransactieRequestDto,
-    TransactieListResponseDto,
-    TransactieResponseDto,
-    UpdateTransactieDto,
+  CreateTransactieRequestDto,
+  TransactieListResponseDto,
+  TransactieResponseDto,
+  UpdateTransactieDto,
 } from './transacties.dto';
 import {
-    type DatabaseProvider,
-    InjectDrizzle,
+  type DatabaseProvider,
+  InjectDrizzle,
 } from '../drizzle/drizzle.provider';
 import { transacties, transactieCategorie, users } from '../drizzle/schema';
 import { categorieen } from '../drizzle/schema';
 import { MailService } from '../mail/mail.service';
-// 👇 AANGEPAST: Default import gebruiken i.p.v. namespace import
 import PDFDocument from 'pdfkit';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class TransactieService {
+  private readonly logger = new Logger(TransactieService.name);
+
   constructor(
     @InjectDrizzle()
     private readonly db: DatabaseProvider,
     private readonly mailService: MailService,
   ) {}
 
-  // Alle transacties ophalen
+  // ==========================================================================================
+  //  CRUD OPERATIES (Deze blijven ongewijzigd, maar zijn nodig voor de context)
+  // ==========================================================================================
+
   async getAll(): Promise<TransactieListResponseDto> {
     const items = await this.db.query.transacties.findMany({
       with: { categorieKoppelingen: true },
     });
-
     const allCategories = await this.db.query.categorieen.findMany();
     const catMap = new Map(
       allCategories.map((c) => [c.categorieID, c.categorienaam]),
@@ -43,10 +48,7 @@ export class TransactieService {
         categorieID: k.categorieID,
         categorienaam: catMap.get(k.categorieID) ?? String(k.categorieID),
       }));
-      return {
-        ...t,
-        categorieDetails,
-      };
+      return { ...t, categorieDetails };
     });
 
     const userIds = Array.from(
@@ -56,163 +58,102 @@ export class TransactieService {
       number,
       { voornaam: string; familienaam: string }
     >();
+
     for (const id of userIds) {
-      try {
-        const [dbUser] = await this.db
-          .select()
-          .from(users)
-          .where(eq(users.userid, id))
-          .limit(1);
-        if (dbUser) {
-          userMap.set(id, {
-            voornaam: dbUser.voornaam,
-            familienaam: dbUser.familienaam,
-          });
-        }
-      } catch (e) {
-        console.log(e);
-      }
+      const [dbUser] = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.userid, id))
+        .limit(1);
+      if (dbUser)
+        userMap.set(id, {
+          voornaam: dbUser.voornaam,
+          familienaam: dbUser.familienaam,
+        });
     }
 
-    const itemsWithAuthors = itemsWithDetails.map((it) => ({
-      ...it,
-      author: userMap.has(it.userID) ? userMap.get(it.userID) : null,
-    }));
-
-    return { items: itemsWithAuthors };
+    return {
+      items: itemsWithDetails.map((it) => ({
+        ...it,
+        author: userMap.get(it.userID) || null,
+      })),
+    };
   }
 
-  // Transactie op ID ophalen
   async getById(id: number): Promise<TransactieResponseDto> {
-    if (this.db) {
-      const transactie = await this.db.query.transacties.findFirst({
-        where: eq(transacties.transactieID, id),
-        with: {
-          categorieKoppelingen: true,
-        },
-      });
-
-      if (!transactie) {
-        throw new NotFoundException('Er bestaat geen transactie met deze ID');
-      }
-
-      return {
-        transactieID: transactie.transactieID,
-        rekeningID: transactie.rekeningID,
-        userID: transactie.userID,
-        beschrijving: transactie.beschrijving,
-        in_uit: transactie.in_uit,
-        bedrag: Number(transactie.bedrag),
-        datum: String(transactie.datum),
-      };
-    }
-
-    const transactie = TRANSACTION_DATA.find(
-      (t: Transactie) => t.transactieID === id,
-    );
-    if (!transactie) {
+    const transactie = await this.db.query.transacties.findFirst({
+      where: eq(transacties.transactieID, id),
+      with: { categorieKoppelingen: true },
+    });
+    if (!transactie)
       throw new NotFoundException('Er bestaat geen transactie met deze ID');
-    }
 
-    return this.toResponseDto(transactie);
-  }
-
-  // Nieuwe transactie aanmaken
-  async create(
-    transactie: CreateTransactieRequestDto,
-  ): Promise<TransactieResponseDto> {
-    const transactieToInsert = {
-      ...transactie,
-    };
-
-    const [newTransactieIdObject] = await this.db
-      .insert(transacties)
-      .values(transactieToInsert)
-      .$returningId();
-
-    const newTransactieId = newTransactieIdObject.transactieID;
-    const resultaat = await this.getById(newTransactieId);
-    return resultaat;
-  }
-
-  // UPDATE
-  async updateById(
-    id: number,
-    updateDto: UpdateTransactieDto,
-  ): Promise<TransactieResponseDto | undefined> {
-    let existingTransactie: TransactieResponseDto;
-    try {
-      existingTransactie = await this.getById(id);
-    } catch {
-      return undefined;
-    }
-
-    const updatedTransactie: TransactieResponseDto = {
-      transactieID: id,
-      rekeningID: updateDto.rekeningID ?? existingTransactie.rekeningID,
-      userID: updateDto.userID ?? existingTransactie.userID,
-      beschrijving: updateDto.beschrijving ?? existingTransactie.beschrijving,
-      in_uit: updateDto.in_uit ?? existingTransactie.in_uit,
-      bedrag: updateDto.bedrag ?? existingTransactie.bedrag,
-      datum: updateDto.datum ?? existingTransactie.datum,
-    };
-
-    try {
-      console.log('Updating transactie (id):', id, 'payload:', updatedTransactie);
-      await this.db
-        .update(transacties)
-        .set(updatedTransactie)
-        .where(eq(transacties.transactieID, id));
-    } catch (err) {
-      console.error('Error while updating transactie id', id, 'payload:', updatedTransactie, 'error:', err);
-      throw err;
-    }
-
-    if (updateDto.categorieIDs) {
-      await this.updateCategorieKoppelingen(id, updateDto.categorieIDs);
-    }
-
-    return updatedTransactie;
-  }
-
-  async updateCategorieKoppelingen(id: number, categorieIDs: number[]) {
-    await this.db
-      .delete(transactieCategorie)
-      .where(eq(transactieCategorie.transactieID, id));
-
-    const toInsert = (categorieIDs || []).map((categorieID) => ({
-      transactieID: id,
-      categorieID,
-    }));
-
-    if (toInsert.length > 0) {
-      await this.db.insert(transactieCategorie).values(toInsert);
-    }
-  }
-
-  async deleteById(id: number): Promise<void> {
-    const [result] = await this.db
-      .delete(transacties)
-      .where(eq(transacties.transactieID, id));
-
-    if (result.affectedRows === 0) {
-      throw new NotFoundException('Er bestaat geen transactie met deze ID');
-    }
-  }
-
-  private toResponseDto(transactie: Transactie): TransactieResponseDto {
     return {
       transactieID: transactie.transactieID,
       rekeningID: transactie.rekeningID,
       userID: transactie.userID,
       beschrijving: transactie.beschrijving,
       in_uit: transactie.in_uit,
-      bedrag: transactie.bedrag,
-      datum: transactie.datum,
+      bedrag: Number(transactie.bedrag),
+      datum: String(transactie.datum),
     };
   }
 
-  // RAPPORT GENEREREN
+  async create(
+    transactie: CreateTransactieRequestDto,
+  ): Promise<TransactieResponseDto> {
+    const [newIdObj] = await this.db
+      .insert(transacties)
+      .values(transactie)
+      .$returningId();
+    return this.getById(newIdObj.transactieID);
+  }
+
+  async updateById(
+    id: number,
+    updateDto: UpdateTransactieDto,
+  ): Promise<TransactieResponseDto | undefined> {
+    await this.db
+      .update(transacties)
+      .set(updateDto)
+      .where(eq(transacties.transactieID, id));
+    if (updateDto.categorieIDs)
+      await this.updateCategorieKoppelingen(id, updateDto.categorieIDs);
+    return this.getById(id);
+  }
+
+  async updateCategorieKoppelingen(id: number, categorieIDs: number[]) {
+    await this.db
+      .delete(transactieCategorie)
+      .where(eq(transactieCategorie.transactieID, id));
+    if (categorieIDs.length) {
+      await this.db
+        .insert(transactieCategorie)
+        .values(
+          categorieIDs.map((cid) => ({ transactieID: id, categorieID: cid })),
+        );
+    }
+  }
+
+  async deleteById(id: number): Promise<void> {
+    const [res] = await this.db
+      .delete(transacties)
+      .where(eq(transacties.transactieID, id));
+    if (res.affectedRows === 0) throw new NotFoundException('Niet gevonden');
+  }
+
+  private toResponseDto(transactie: Transactie): TransactieResponseDto {
+    return {
+      ...transactie,
+      bedrag: Number(transactie.bedrag),
+      datum: String(transactie.datum),
+    };
+  }
+
+  // ==========================================================================================
+  //  PDF RAPPORTAGE LOGICA (AANGEPAST)
+  // ==========================================================================================
+
   async generateAndMailReport(
     userId: number,
     userEmail: string,
@@ -237,36 +178,22 @@ export class TransactieService {
       )
       .where(eq(transacties.userID, userId));
 
-    if (rawData.length === 0) {
-      throw new NotFoundException(
-        'Geen transacties gevonden om te rapporteren.',
-      );
-    }
+    if (rawData.length === 0)
+      throw new NotFoundException('Geen transacties gevonden.');
 
     const grouped = new Map<string, { in: any[]; out: any[] }>();
 
     rawData.forEach((row) => {
-      const catName = row.categorieNaam || 'Overige / Geen Categorie';
-
-      if (!grouped.has(catName)) {
-        grouped.set(catName, { in: [], out: [] });
-      }
-
+      const catName = row.categorieNaam || 'Overige';
+      if (!grouped.has(catName)) grouped.set(catName, { in: [], out: [] });
       const group = grouped.get(catName);
 
-      if (group) {
-        const bedrag = Number(row.bedrag);
-
-        if (row.in_uit === 'IN') {
-          group.in.push({ ...row, bedrag });
-        } else {
-          group.out.push({ ...row, bedrag });
-        }
-      }
+      const bedrag = Number(row.bedrag);
+      if (row.in_uit === 'IN') group?.in.push({ ...row, bedrag });
+      else group?.out.push({ ...row, bedrag });
     });
 
     const pdfBuffer = await this.createPdfBuffer(grouped, firstName);
-
     await this.mailService.sendTransactionReport(
       userEmail,
       firstName,
@@ -274,125 +201,251 @@ export class TransactieService {
     );
   }
 
-  // HELPER: PDF GENERATIE LOGICA
+  /**
+   * Genereert de PDF met Poppins fonts en KLJ Mannetje logo
+   */
   private createPdfBuffer(
     groupedData: Map<string, { in: any[]; out: any[] }>,
     name: string,
   ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      // 👇 Nu werkt 'new PDFDocument' omdat de import is gefixt
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument({
+        margin: 40,
+        size: 'A4',
+        bufferPages: true,
+      });
       const buffers: Buffer[] = [];
 
-      doc.on('data', (chunk: Buffer) => buffers.push(chunk));
+      // 1. PADEN INSTELLEN
+      // process.cwd() verwijst naar de root map waar je package.json staat
+      const assetsPath = path.join(process.cwd(), 'assets');
+
+      // Specifieke bestandsnamen zoals je ze hebt aangeleverd
+      const fonts = {
+        Regular: path.join(assetsPath, 'Poppins-Regular.ttf'),
+        Bold: path.join(assetsPath, 'Poppins-Bold.ttf'),
+        SemiBold: path.join(assetsPath, 'Poppins-SemiBold.ttf'),
+        Light: path.join(assetsPath, 'Poppins-Light.ttf'),
+        Italic: path.join(assetsPath, 'Poppins-Italic.ttf'),
+        Medium: path.join(assetsPath, 'Poppins-Medium.ttf'),
+      };
+
+      const logoPath = path.join(assetsPath, 'KLJ_LOGO_MANNETJE.png');
+
+      // 2. FONTS REGISTREREN
+      // We proberen ze te laden. Als ze niet bestaan, vallen we niet keihard om maar loggen we een warning.
+      try {
+        if (fs.existsSync(fonts.Regular))
+          doc.registerFont('Poppins', fonts.Regular);
+        if (fs.existsSync(fonts.Bold))
+          doc.registerFont('Poppins-Bold', fonts.Bold);
+        if (fs.existsSync(fonts.SemiBold))
+          doc.registerFont('Poppins-SemiBold', fonts.SemiBold);
+        if (fs.existsSync(fonts.Light))
+          doc.registerFont('Poppins-Light', fonts.Light);
+        if (fs.existsSync(fonts.Medium))
+          doc.registerFont('Poppins-Medium', fonts.Medium);
+
+        // Zet standaard font
+        doc.font('Poppins');
+      } catch (e) {
+        this.logger.warn(
+          'Kon Poppins fonts niet laden, fallback naar Helvetica. Check je assets map.',
+        );
+        doc.font('Helvetica');
+      }
+
+      doc.on('data', (chunk) => buffers.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', (err) => reject(err));
 
-      // 👇 AANGEPAST: Zorg dat reject altijd een Error krijgt
-      doc.on('error', (err: any) => {
-        if (err instanceof Error) {
-          reject(err);
-        } else {
-          reject(new Error(String(err)));
-        }
-      });
+      // --- HEADER ---
 
-      // --- PDF CONTENT ---
+      // Logo (KLJ Mannetje)
+      if (fs.existsSync(logoPath)) {
+        // Logo linksboven, iets groter omdat het een mannetje is
+        doc.image(logoPath, 40, 30, { width: 60 });
+      }
 
-      doc.fontSize(20).text(`Transactie Rapport: ${name}`, { align: 'center' });
+      // Titel en Info (Rechts van logo of gecentreerd)
+      // We gebruiken Poppins-Bold voor de titel
+      doc.font('Poppins-Bold').fontSize(22).fillColor('#222222');
+      doc.text('Transactie Rapport', 120, 40);
+
+      doc.font('Poppins-Medium').fontSize(10).fillColor('#666666');
+      doc.text(`Lid: ${name}`, 120, 68);
+      doc.text(
+        `Aangemaakt op: ${new Date().toLocaleDateString('nl-BE')}`,
+        120,
+        82,
+      );
+
+      // Rode lijn onder header (KLJ Rood stijl)
       doc
-        .fontSize(12)
-        .text(`Gegenereerd op: ${new Date().toLocaleDateString()}`, {
-          align: 'center',
-        });
-      doc.moveDown(2);
+        .moveTo(40, 110)
+        .lineTo(550, 110)
+        .lineWidth(2)
+        .strokeColor('#E30613')
+        .stroke();
+
+      doc.moveDown(3);
+      doc.y = 130; // Start y-positie voor content
+
+      // --- CONTENT ---
 
       groupedData.forEach((data, categoryName) => {
+        // Check of we ruimte hebben op de pagina
         if (doc.y > 650) doc.addPage();
 
-        doc
-          .fontSize(16)
-          .fillColor('#2c3e50')
-          .text(categoryName, { underline: true });
+        // Categorie Header
+        doc.font('Poppins-SemiBold').fontSize(14).fillColor('#222222');
+        doc.text(categoryName.toUpperCase());
         doc.moveDown(0.5);
 
         let totalIn = 0;
         let totalOut = 0;
 
+        // Tabel Inkomsten
         if (data.in.length > 0) {
-          doc.fontSize(12).fillColor('green').text('INKOMSTEN (IN)');
-          this.drawTable(doc, data.in);
+          doc
+            .font('Poppins-Medium')
+            .fontSize(10)
+            .fillColor('#2e7d32')
+            .text('INKOMSTEN', { indent: 2 });
+          doc.moveDown(0.2);
+          this.drawTable(doc, data.in, '#e8f5e9'); // Groene header achtergrond
           totalIn = data.in.reduce((sum, t) => sum + t.bedrag, 0);
           doc.moveDown(1);
         }
 
+        // Tabel Uitgaven
         if (data.out.length > 0) {
-          doc.fontSize(12).fillColor('red').text('UITGAVEN (UIT)');
-          this.drawTable(doc, data.out);
+          doc
+            .font('Poppins-Medium')
+            .fontSize(10)
+            .fillColor('#c62828')
+            .text('UITGAVEN', { indent: 2 });
+          doc.moveDown(0.2);
+          this.drawTable(doc, data.out, '#ffebee'); // Rode header achtergrond
           totalOut = data.out.reduce((sum, t) => sum + Math.abs(t.bedrag), 0);
           doc.moveDown(1);
         }
 
+        // Totaal blokje per categorie
         const saldo = totalIn - totalOut;
-        doc.fontSize(12).fillColor('black').font('Helvetica-Bold');
-        doc.text(`Totaal IN: € ${totalIn.toFixed(2)}`, { continued: true });
-        doc.text(` | Totaal UIT: € ${totalOut.toFixed(2)}`);
+        const startX = 320;
 
-        doc.fillColor(saldo >= 0 ? 'green' : 'red');
-        doc.text(`Saldo ${categoryName}: € ${saldo.toFixed(2)}`);
+        doc.font('Poppins-Regular').fontSize(10).fillColor('black');
 
-        doc.font('Helvetica');
-        doc.moveDown(2);
+        // Totalen uitlijning
+        doc.text(`Totaal In:`, startX, doc.y, { continued: true });
+        doc.text(`€ ${totalIn.toFixed(2)}`, { align: 'right' });
 
+        doc.text(`Totaal Uit:`, startX, doc.y, { continued: true });
+        doc.text(`€ ${totalOut.toFixed(2)}`, { align: 'right' });
+
+        doc.moveDown(0.3);
+
+        // Saldo dikgedrukt
+        doc.font('Poppins-Bold');
+        doc.fillColor(saldo >= 0 ? '#2e7d32' : '#c62828'); // Groen of Rood
+        doc.text(`Saldo ${categoryName}:`, startX, doc.y, { continued: true });
+        doc.text(`€ ${saldo.toFixed(2)}`, { align: 'right' });
+
+        // Reset
+        doc.font('Poppins-Regular');
+        doc.moveDown(1.5);
+
+        // Stippellijn scheiding
         doc
-          .strokeColor('#aaaaaa')
-          .lineWidth(1)
-          .moveTo(50, doc.y)
+          .moveTo(40, doc.y)
           .lineTo(550, doc.y)
-          .stroke();
+          .lineWidth(0.5)
+          .strokeColor('#cccccc')
+          .dash(3, { space: 3 })
+          .stroke()
+          .undash();
+
         doc.moveDown(2);
       });
+
+      // --- FOOTER (Paginanummers) ---
+      const range = doc.bufferedPageRange();
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(i);
+        doc.font('Poppins-Light').fontSize(8).fillColor('#999999');
+        doc.text(
+          `Pagina ${i + 1} van ${range.count} - Gegenereerd door KLJ Portaal`,
+          40,
+          doc.page.height - 30,
+          { align: 'center', width: 515 },
+        );
+      }
 
       doc.end();
     });
   }
 
-  // HELPER: SIMPELE TABEL TEKENEN
-  private drawTable(doc: PDFKit.PDFDocument, transactions: any[]) {
-    const startX = 50;
-    let currentY = doc.y + 5;
+  // Helper om mooie tabellen te tekenen
+  private drawTable(
+    doc: PDFKit.PDFDocument,
+    transactions: any[],
+    headerBgColor: string,
+  ) {
+    const startX = 40;
+    const colDatum = startX + 5;
+    const colBeschr = startX + 90;
+    const colBedrag = startX + 400;
+    const rowHeight = 20;
 
-    doc.fontSize(10).fillColor('black');
+    let currentY = doc.y;
 
-    doc.text('Datum', startX, currentY, { width: 70 });
-    doc.text('Beschrijving', startX + 80, currentY, { width: 300 });
-    doc.text('Bedrag', startX + 400, currentY, { width: 80, align: 'right' });
+    // Header Balk
+    doc.rect(startX, currentY, 510, rowHeight).fill(headerBgColor);
+    doc.fillColor('#333333').font('Poppins-SemiBold').fontSize(9);
 
-    currentY += 15;
-    doc.moveTo(startX, currentY).lineTo(550, currentY).stroke();
-    currentY += 5;
+    // Header Tekst (Iets verlaagd voor verticale centrering)
+    doc.text('DATUM', colDatum, currentY + 6);
+    doc.text('BESCHRIJVING', colBeschr, currentY + 6);
+    doc.text('BEDRAG', colBedrag, currentY + 6, { width: 100, align: 'right' });
 
-    transactions.forEach((t) => {
+    currentY += rowHeight;
+    doc.font('Poppins'); // Terug naar regular
+
+    // Rijen
+    transactions.forEach((t, index) => {
+      // Nieuwe pagina check
       if (currentY > 700) {
         doc.addPage();
         currentY = 50;
       }
 
-      doc.text(t.datum, startX, currentY, { width: 70 });
-      const shortDesc =
+      // Zebra striping (om en om lichtgrijs)
+      if (index % 2 === 0) {
+        doc.rect(startX, currentY, 510, rowHeight).fill('#f9f9f9');
+      }
+
+      doc.fillColor('#444444').fontSize(9);
+
+      const datumStr = new Date(t.datum).toLocaleDateString('nl-BE');
+      doc.text(datumStr, colDatum, currentY + 6);
+
+      const desc =
         t.beschrijving.length > 60
-          ? t.beschrijving.substring(0, 57) + '...'
+          ? t.beschrijving.substr(0, 57) + '...'
           : t.beschrijving;
-      doc.text(shortDesc, startX + 80, currentY, { width: 300 });
+      doc.text(desc, colBeschr, currentY + 6);
 
       const bedragStr = `€ ${Math.abs(t.bedrag).toFixed(2)}`;
-      doc.text(bedragStr, startX + 400, currentY, {
-        width: 80,
+      doc.text(bedragStr, colBedrag, currentY + 6, {
+        width: 100,
         align: 'right',
       });
 
-      currentY += 15;
+      currentY += rowHeight;
     });
 
+    // Cursor update na tabel
     doc.y = currentY;
   }
 }

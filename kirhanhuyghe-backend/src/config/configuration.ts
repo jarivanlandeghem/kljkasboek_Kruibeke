@@ -80,8 +80,8 @@ export default (): ServerConfig => ({
       expirationInterval:
         Number(process.env.AUTH_JWT_EXPIRATION_INTERVAL) || 3600,
       secret: process.env.AUTH_JWT_SECRET || '',
-      audience: process.env.AUTH_JWT_AUDIENCE || 'budget.hogent.be',
-      issuer: process.env.AUTH_JWT_ISSUER || 'budget.hogent.be',
+      audience: process.env.AUTH_JWT_AUDIENCE || 'www.kljsgw.be',
+      issuer: process.env.AUTH_JWT_ISSUER || 'www.kljsgw.be',
     },
   },
 });
