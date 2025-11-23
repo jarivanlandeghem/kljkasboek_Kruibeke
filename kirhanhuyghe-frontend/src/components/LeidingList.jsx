@@ -9,7 +9,6 @@ import {
 import useSWR, { useSWRConfig } from 'swr';
 import { useForm, Controller } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
-// dayjs import verwijderd want je gebruikte het niet in dit bestand
 
 // MUI Imports
 import {
@@ -36,6 +35,7 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
+  Stack
 } from '@mui/material';
 
 // Icons
@@ -45,12 +45,13 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   DirectionsWalk,
+  ArrowUpward,   // NIEUW
+  ArrowDownward, // NIEUW
+  FilterAlt,     // NIEUW
+  Clear          // NIEUW
 } from '@mui/icons-material';
 
 import { getAll, post, deleteById, update } from '../api';
-
-
-
 import { useAuth } from '../contexts/auth';
 import AsyncData from './AsyncData';
 
@@ -77,7 +78,7 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-// --- CUSTOM LOADING COMPONENT ---
+// --- LOADING COMPONENT ---
 const LoadingState = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', width: '100%', bgcolor: '#ffffff', borderRadius: 4 }}>
     <style>{`
@@ -96,13 +97,13 @@ const LoadingState = () => (
   </Box>
 );
 
-// --- KLEUREN VOOR TAGS ---
+// --- KLEUREN HELPER ---
 const getGroupColor = (group) => {
   switch (group) {
-    case '-8': return 'info';     // Blauw
-    case '-12': return 'success'; // Groen
-    case '-16': return 'warning'; // Oranje
-    case '+16': return 'error';   // Rood
+    case '-8': return 'info';
+    case '-12': return 'success';
+    case '-16': return 'warning';
+    case '+16': return 'error';
     default: return 'default';
   }
 };
@@ -115,10 +116,22 @@ export default function LeidingList() {
 
   const [openDialog, setOpenDialog] = useState(null); 
   const [editingId, setEditingId] = useState(null);
+  
+  // --- NIEUWE STATE VOOR SORTEREN & FILTEREN ---
   const [globalFilter, setGlobalFilter] = useState('');
+  const [sorting, setSorting] = useState([]); // Voor sorteren
+  const [columnFilters, setColumnFilters] = useState([]); // Voor dropdown filters
+  // ---------------------------------------------
   
   const { data: leidingProfielen, isLoading: loadingProfielen, error } = useSWR('leiding-profiel', getAll);
   const { data: users } = useSWR(isAdmin ? 'users' : null, getAll); 
+
+  // Filter logic (voor 409 preventie)
+  const availableUsers = useMemo(() => {
+    if (!users || !leidingProfielen) return [];
+    const existingIds = leidingProfielen.map((p) => p.userID);
+    return users.filter((u) => !existingIds.includes(u.userid));
+  }, [users, leidingProfielen]);
 
   const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm({
     defaultValues: {
@@ -138,7 +151,6 @@ export default function LeidingList() {
   const showLoading = forceLoading || loadingProfielen || (!leidingProfielen && !error);
 
   // --- HANDLERS ---
-
   const handleEditClick = (row) => {
     setEditingId(row.profielID);
     setValue('telnr', row.telnr);
@@ -155,26 +167,22 @@ export default function LeidingList() {
         mutate('leiding-profiel');
       } catch (err) {
         console.error(err);
-        alert('Fout bij verwijderen');
+        if (err.response && err.response.status === 409) {
+            alert("Kan niet verwijderen: leiding gekoppeld aan andere data.");
+        } else {
+            alert('Fout bij verwijderen');
+        }
       }
     }
   };
 
-const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
     try {
       if (openDialog === 'create') {
         await post('leiding-profiel', { arg: data });
       } else if (openDialog === 'edit') {
         const { userID, ...updateData } = data;
-        
-        // 👇 DEBUG: Kijk in je browser console (F12) wat hier staat!
-        console.log("UPDATING:", `leiding-profiel/${editingId}`, updateData);
-
-        if (!editingId) {
-            alert("Fout: Geen ID gevonden om te updaten!");
-            return;
-        }
-
+        if (!editingId) return alert("Geen ID");
         await update(`leiding-profiel/${editingId}`, { arg: updateData });
       }
       mutate('leiding-profiel');
@@ -182,16 +190,19 @@ const onSubmit = async (data) => {
       reset();
     } catch (err) {
       console.error(err);
-      alert('Er ging iets mis bij het opslaan.');
+      if (err.response && err.response.status === 409) {
+          alert("Fout: Conflict (dubbele leiding of database error).");
+      } else {
+          alert('Er ging iets mis bij het opslaan.');
+      }
     }
   };
 
   // --- TANSTACK TABLE CONFIG ---
-
   const columns = useMemo(() => [
     {
       header: 'Naam',
-      accessorFn: row => `${row.voornaam} ${row.familienaam}`,
+      accessorFn: row => `${row.voornaam} ${row.familienaam}`, // Combineer voor betere sortering
       cell: info => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
@@ -214,6 +225,7 @@ const onSubmit = async (data) => {
     {
       header: 'Tak',
       accessorKey: 'leeftijdsgroep',
+      id: 'tak', // Nodig voor filtering
       cell: info => (
         <Chip 
           label={info.getValue()} 
@@ -226,6 +238,12 @@ const onSubmit = async (data) => {
     {
       header: 'Functies',
       accessorKey: 'functies',
+      id: 'functies',
+      // Specifieke filterfunctie omdat functies een ARRAY is
+      filterFn: (row, id, filterValue) => {
+         const functies = row.getValue(id);
+         return functies.includes(filterValue);
+      },
       cell: info => (
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
           {info.getValue().map((f, i) => (
@@ -237,6 +255,7 @@ const onSubmit = async (data) => {
     ...(isAdmin ? [{
       id: 'actions',
       header: '',
+      enableSorting: false, // Acties niet sorteren
       cell: info => (
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
           <Tooltip title="Bewerken">
@@ -257,8 +276,14 @@ const onSubmit = async (data) => {
   const table = useReactTable({
     data: leidingProfielen || [],
     columns,
-    state: { globalFilter },
+    state: { 
+        globalFilter,
+        sorting,       // Koppel state
+        columnFilters  // Koppel state
+    },
     onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,             // Update state
+    onColumnFiltersChange: setColumnFilters, // Update state
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -276,28 +301,63 @@ const onSubmit = async (data) => {
             Leiding Overzicht
         </Typography>
 
-        <div className="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200 w-full md:w-auto focus-within:ring-2 focus-within:ring-red-500 transition-all">
-            <Search sx={{ color: 'gray', mr: 1 }} />
-            <input
-                type="search"
-                className="bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full"
-                placeholder="Zoek op naam, tak of functie..."
-                value={globalFilter ?? ''}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-            />
-        </div>
+        {/* --- FILTERS EN ZOEKEN --- */}
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
+            
+            {/* Filter: Tak */}
+            <FormControl size="small" sx={{ minWidth: 120, bgcolor: 'white', borderRadius: 2 }}>
+                <InputLabel>Tak</InputLabel>
+                <Select
+                    value={table.getColumn('tak')?.getFilterValue() || ''}
+                    label="Tak"
+                    onChange={(e) => table.getColumn('tak')?.setFilterValue(e.target.value || undefined)}
+                    startAdornment={<FilterAlt sx={{ color: 'gray', mr: 1, fontSize: 20 }} />}
+                >
+                    <MenuItem value=""><em>Alles</em></MenuItem>
+                    {LEEFTIJDSGROEPEN.map(tak => (
+                        <MenuItem key={tak} value={tak}>{tak}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+
+            {/* Filter: Functie */}
+            <FormControl size="small" sx={{ minWidth: 150, bgcolor: 'white', borderRadius: 2 }}>
+                <InputLabel>Functie</InputLabel>
+                <Select
+                    value={table.getColumn('functies')?.getFilterValue() || ''}
+                    label="Functie"
+                    onChange={(e) => table.getColumn('functies')?.setFilterValue(e.target.value || undefined)}
+                    startAdornment={<FilterAlt sx={{ color: 'gray', mr: 1, fontSize: 20 }} />}
+                >
+                    <MenuItem value=""><em>Alles</em></MenuItem>
+                    {FUNCTIES_OPTIES.map(func => (
+                        <MenuItem key={func} value={func}>{func}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+
+            {/* Global Search */}
+            <div className="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200 w-full md:w-auto focus-within:ring-2 focus-within:ring-red-500 transition-all">
+                <Search sx={{ color: 'gray', mr: 1 }} />
+                <input
+                    type="search"
+                    className="bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full"
+                    placeholder="Zoek op naam..."
+                    value={globalFilter ?? ''}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
+                />
+            </div>
+        </Stack>
       </motion.div>
 
+      {/* --- ADD BUTTON --- */}
       {isAdmin && (
         <motion.div variants={itemVariants} className="flex justify-end mb-6">
              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                     variant="contained" 
                     startIcon={<Add />}
-                    onClick={() => {
-                        reset(); 
-                        setOpenDialog('create');
-                    }} 
+                    onClick={() => { reset(); setOpenDialog('create'); }} 
                     sx={{ ...modernButtonStyle, bgcolor: '#d32f2f', '&:hover': { bgcolor: '#b71c1c' } }}
                 >
                     Leiding Toevoegen
@@ -333,11 +393,31 @@ const onSubmit = async (data) => {
                             <TableHead sx={{ bgcolor: '#fafafa' }}>
                                 {table.getHeaderGroups().map(headerGroup => (
                                     <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map(header => (
-                                            <TableCell key={header.id} sx={{ fontWeight: 700, color: '#616161', borderBottom: '2px solid #f0f0f0' }}>
-                                                {flexRender(header.column.columnDef.header, header.getContext())}
-                                            </TableCell>
-                                        ))}
+                                        {headerGroup.headers.map(header => {
+                                            // SORTEREN LOGICA
+                                            const isSortable = header.column.getCanSort();
+                                            return (
+                                                <TableCell 
+                                                    key={header.id} 
+                                                    onClick={header.column.getToggleSortingHandler()} // Klik om te sorteren
+                                                    sx={{ 
+                                                        fontWeight: 700, 
+                                                        color: '#616161', 
+                                                        borderBottom: '2px solid #f0f0f0',
+                                                        cursor: isSortable ? 'pointer' : 'default', // Handje als cursor
+                                                        userSelect: 'none'
+                                                    }}
+                                                >
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                                        
+                                                        {/* PIJLTJES TONEN BIJ SORTEREN */}
+                                                        {header.column.getIsSorted() === 'asc' && <ArrowUpward fontSize="small" sx={{ color: '#d32f2f' }} />}
+                                                        {header.column.getIsSorted() === 'desc' && <ArrowDownward fontSize="small" sx={{ color: '#d32f2f' }} />}
+                                                    </Box>
+                                                </TableCell>
+                                            )
+                                        })}
                                     </TableRow>
                                 ))}
                             </TableHead>
@@ -355,7 +435,7 @@ const onSubmit = async (data) => {
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={columns.length} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                                            Geen leiding gevonden.
+                                            Geen leiding gevonden met deze filters.
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -367,6 +447,7 @@ const onSubmit = async (data) => {
          </motion.div>
       </div>
 
+      {/* --- DIALOG COMPONENT (Ongewijzigd, maar nodig voor context) --- */}
       <Dialog 
         open={!!openDialog} 
         onClose={() => setOpenDialog(null)} 
@@ -377,10 +458,8 @@ const onSubmit = async (data) => {
         <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem', textAlign: 'center' }}>
             {openDialog === 'create' ? 'Nieuwe Leiding' : 'Profiel Bewerken'}
         </DialogTitle>
-
         <form onSubmit={handleSubmit(onSubmit)}>
             <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
-                
                 {openDialog === 'create' && (
                    <Controller
                         name="userID"
@@ -390,50 +469,32 @@ const onSubmit = async (data) => {
                             <FormControl fullWidth error={!!errors.userID}>
                                 <InputLabel>Selecteer Gebruiker (Lid)</InputLabel>
                                 <Select {...field} label="Selecteer Gebruiker (Lid)">
-                                    {(users || []).map((u) => (
-                                        <MenuItem key={u.userid} value={u.userid}>
-                                            {u.voornaam} {u.familienaam} ({u.email})
-                                        </MenuItem>
+                                    {(availableUsers || []).map((u) => (
+                                        <MenuItem key={u.userid} value={u.userid}>{u.voornaam} {u.familienaam} ({u.email})</MenuItem>
                                     ))}
+                                    {availableUsers.length === 0 && <MenuItem disabled><em>Alle gebruikers zijn al leiding</em></MenuItem>}
                                 </Select>
                             </FormControl>
                         )}
                    />
                 )}
-
                 <Controller
                     name="telnr"
                     control={control}
                     rules={{ required: 'Telefoonnummer is verplicht' }}
                     render={({ field }) => (
-                        <TextField 
-                            {...field} 
-                            label="Telefoonnummer" 
-                            variant="outlined" 
-                            fullWidth 
-                            error={!!errors.telnr}
-                            helperText={errors.telnr?.message}
-                        />
+                        <TextField {...field} label="Telefoonnummer" variant="outlined" fullWidth error={!!errors.telnr} helperText={errors.telnr?.message} />
                     )}
                 />
-
                 <Controller
                     name="leeftijdsgroep"
                     control={control}
                     render={({ field }) => (
-                        <TextField 
-                            {...field} 
-                            select 
-                            label="Tak / Leeftijdsgroep" 
-                            fullWidth
-                        >
-                            {LEEFTIJDSGROEPEN.map((opt) => (
-                                <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                            ))}
+                        <TextField {...field} select label="Tak / Leeftijdsgroep" fullWidth>
+                            {LEEFTIJDSGROEPEN.map((opt) => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
                         </TextField>
                     )}
                 />
-
                 <Controller
                     name="functies"
                     control={control}
@@ -444,24 +505,13 @@ const onSubmit = async (data) => {
                                 {...field}
                                 multiple
                                 input={<OutlinedInput label="Functies" />}
-                                renderValue={(selected) => (
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {selected.map((value) => (
-                                            <Chip key={value} label={value} size="small" />
-                                        ))}
-                                    </Box>
-                                )}
+                                renderValue={(selected) => <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>{selected.map((value) => <Chip key={value} label={value} size="small" />)}</Box>}
                             >
-                                {FUNCTIES_OPTIES.map((func) => (
-                                    <MenuItem key={func} value={func}>
-                                        {func}
-                                    </MenuItem>
-                                ))}
+                                {FUNCTIES_OPTIES.map((func) => <MenuItem key={func} value={func}>{func}</MenuItem>)}
                             </Select>
                         </FormControl>
                     )}
                 />
-
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 3 }}>
                 <Button onClick={() => setOpenDialog(null)} color="inherit" sx={{ borderRadius: 2 }}>Annuleren</Button>
