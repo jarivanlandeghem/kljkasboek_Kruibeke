@@ -19,6 +19,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Logout from './pages/Logout.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import LeidingPage from './pages/LeidingPage.jsx'
+import AanwezighedenPage from './pages/AanwezighedenPage.jsx';
 
 
 const router = createBrowserRouter([
@@ -76,7 +77,7 @@ const router = createBrowserRouter([
       },
       { path: 'leiding', element: <LeidingPage /> }, 
       { path: 'logout', element: <Logout /> },
-     
+     { path: 'aanwezigheden', element: <AanwezighedenPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

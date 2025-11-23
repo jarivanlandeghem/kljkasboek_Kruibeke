@@ -33,7 +33,6 @@ export class EvenementenService {
       orderBy: (evenementen, { desc }) => [desc(evenementen.datum)],
     });
 
-    // Mappen naar DTO
     const responseItems: EvenementResponseDto[] = items.map((e) => ({
       evenementID: e.evenementID,
       type: e.type,
@@ -60,24 +59,42 @@ export class EvenementenService {
     return this.toResponseDto(evenement);
   }
 
-  // Nieuw evenement aanmaken
+  // ---------------------------------------------------------
+  // 👇 AANGEPASTE CREATE METHODE (FIX VOOR 'GEEN RECORD')
+  // ---------------------------------------------------------
   async create(dto: CreateEvenementRequestDto): Promise<EvenementResponseDto> {
-    // 👇 FIX: Datum string converteren naar Date object voor Drizzle
+    // 1. Evenement data voorbereiden
     const evenementToInsert = {
       ...dto,
       datum: new Date(dto.datum),
     };
 
+    // 2. Evenement invoegen
     const [newEvenementIdObject] = await this.db
       .insert(evenementen)
       .values(evenementToInsert)
       .$returningId();
 
-    const newEvenementId = newEvenementIdObject.evenementID;
+    const newEventId = newEvenementIdObject.evenementID;
 
-    // Ophalen om zeker te zijn van de formaten
-    const resultaat = await this.getById(newEvenementId);
-    return resultaat;
+    // 3. 👇 AUTOMATISCH AANWEZIGHEDEN AANMAKEN
+    // We halen alle users op om voor iedereen een 'UNKNOWN' record te maken
+    const allUsers = await this.db.select().from(users);
+
+    if (allUsers.length > 0) {
+      const emptyAttendances = allUsers.map((user) => ({
+        evenementID: newEventId,
+        userID: user.userid,
+        status: 'UNKNOWN' as const, // Default status
+        reminder_sent: false,
+      }));
+
+      // Bulk insert in aanwezigheden tabel
+      await this.db.insert(aanwezigheden).values(emptyAttendances);
+    }
+
+    // 4. Resultaat ophalen en terugsturen
+    return await this.getById(newEventId);
   }
 
   // UPDATE
@@ -92,17 +109,12 @@ export class EvenementenService {
       return undefined;
     }
 
-    // 👇 FIX: We bouwen een object op dat enkel de gewijzigde velden bevat
-    // We gebruiken 'any' hier even om dynamisch de datum te kunnen overschrijven
     const dataToUpdate: any = { ...updateDto };
 
-    // Als er een datum in de update zit, converteer deze naar een Date object
     if (updateDto.datum) {
       dataToUpdate.datum = new Date(updateDto.datum);
     }
 
-    // We voeren de update uit. Drizzle negeert velden die niet in 'dataToUpdate' zitten,
-    // dus we hoeven de oude waarden niet op te halen en terug te sturen.
     await this.db
       .update(evenementen)
       .set(dataToUpdate)
@@ -140,7 +152,7 @@ export class EvenementenService {
   }
 
   // ---------------------------------------------------------
-  // PDF RAPPORTAGE: AANWEZIGHEIDSLIJST
+  // PDF RAPPORTAGE
   // ---------------------------------------------------------
 
   async generateAndMailAttendanceList(
@@ -148,10 +160,8 @@ export class EvenementenService {
     userEmail: string,
     receiverName: string,
   ): Promise<void> {
-    // 1. Haal evenement info op
     const evenementInfo = await this.getById(evenementID);
 
-    // 2. Haal aanwezigheden op met user details
     const rawAanwezigheden = await this.db
       .select({
         voornaam: users.voornaam,
@@ -169,13 +179,11 @@ export class EvenementenService {
       console.warn('Geen aanwezigheden gevonden, PDF zal leeg zijn.');
     }
 
-    // 3. Genereer PDF
     const pdfBuffer = await this.createPdfBuffer(
       evenementInfo,
       rawAanwezigheden,
     );
 
-    // 4. Verstuur mail
     await this.mailService.sendTransactionReport(
       userEmail,
       receiverName,
@@ -183,7 +191,6 @@ export class EvenementenService {
     );
   }
 
-  // HELPER: PDF GENERATIE LOGICA
   private createPdfBuffer(
     eventInfo: EvenementResponseDto,
     attendees: any[],
@@ -203,9 +210,6 @@ export class EvenementenService {
         }
       });
 
-      // --- PDF CONTENT ---
-
-      // Header
       doc.fontSize(20).text(`Aanwezigheidslijst`, { align: 'center' });
       doc
         .fontSize(14)
@@ -214,13 +218,10 @@ export class EvenementenService {
         .fontSize(10)
         .text(
           `Datum: ${eventInfo.datum} | Tijd: ${eventInfo.startuur} - ${eventInfo.einduur}`,
-          {
-            align: 'center',
-          },
+          { align: 'center' },
         );
       doc.moveDown(2);
 
-      // Statistieken
       const presentCount = attendees.filter(
         (a) => a.status === 'PRESENT',
       ).length;
@@ -244,21 +245,18 @@ export class EvenementenService {
         .stroke();
       doc.moveDown(1);
 
-      // Tabel tekenen
       this.drawAttendanceTable(doc, attendees);
 
       doc.end();
     });
   }
 
-  // HELPER: TABEL VOOR AANWEZIGHEID
   private drawAttendanceTable(doc: PDFKit.PDFDocument, attendees: any[]) {
     const startX = 50;
     let currentY = doc.y + 5;
 
     doc.fontSize(10).fillColor('black').font('Helvetica-Bold');
 
-    // Headers
     doc.text('Naam', startX, currentY, { width: 150 });
     doc.text('Status', startX + 160, currentY, { width: 80 });
     doc.text('Info / Reden', startX + 250, currentY, { width: 200 });
