@@ -29,6 +29,13 @@
       "when": 1762880284892,
       "tag": "0005_rainy_maddog",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1763911061622,
+      "tag": "0006_lucky_chimera",
+      "breakpoints": true
     }
   ]
 }
