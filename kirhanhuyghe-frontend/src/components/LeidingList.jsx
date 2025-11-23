@@ -275,7 +275,7 @@ export default function LeidingList() {
             <input
                 type="search"
                 className="bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full"
-                placeholder="Zoek op naam, tak of functie..."
+                placeholder="Zoek op naam."
                 value={globalFilter ?? ''}
                 onChange={(e) => setGlobalFilter(e.target.value)}
             />
