@@ -3,14 +3,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TRANSACTION_DATA, Transactie } from '../api/data/mock_data';
 import { eq } from 'drizzle-orm';
 import {
-  CreateTransactieRequestDto,
-  TransactieListResponseDto,
-  TransactieResponseDto,
-  UpdateTransactieDto,
+    CreateTransactieRequestDto,
+    TransactieListResponseDto,
+    TransactieResponseDto,
+    UpdateTransactieDto,
 } from './transacties.dto';
 import {
-  type DatabaseProvider,
-  InjectDrizzle,
+    type DatabaseProvider,
+    InjectDrizzle,
 } from '../drizzle/drizzle.provider';
 import { transacties, transactieCategorie, users } from '../drizzle/schema';
 import { categorieen } from '../drizzle/schema';
@@ -157,10 +157,16 @@ export class TransactieService {
       datum: updateDto.datum ?? existingTransactie.datum,
     };
 
-    await this.db
-      .update(transacties)
-      .set(updatedTransactie)
-      .where(eq(transacties.transactieID, id));
+    try {
+      console.log('Updating transactie (id):', id, 'payload:', updatedTransactie);
+      await this.db
+        .update(transacties)
+        .set(updatedTransactie)
+        .where(eq(transacties.transactieID, id));
+    } catch (err) {
+      console.error('Error while updating transactie id', id, 'payload:', updatedTransactie, 'error:', err);
+      throw err;
+    }
 
     if (updateDto.categorieIDs) {
       await this.updateCategorieKoppelingen(id, updateDto.categorieIDs);
