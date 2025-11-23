@@ -28,6 +28,7 @@ function Transaction({
   onDelete = () => {},
   categorieDetails = null,
   categorieKoppelingen = null,
+  compact = false,
 }) {
   const { mutate } = useSWRConfig();
 
@@ -101,6 +102,16 @@ function Transaction({
     displayUserName = `${currentUser.voornaam || ''} ${currentUser.familienaam || ''}`.trim();
   } else {
     displayUserName = 'Onbekend';
+  }
+
+  if (compact) {
+    return (
+      <tr className="border-b border-gray-200">
+        <td className="py-2 px-4">{beschrijving || 'N/A'}</td>
+        <td className="py-2 px-4">{formatDate(datum)}</td>
+        <td className="py-2 px-4">{amountFormat.format(bedrag || 0)}</td>
+      </tr>
+    );
   }
 
   return (
