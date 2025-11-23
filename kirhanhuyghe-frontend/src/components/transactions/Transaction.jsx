@@ -24,6 +24,7 @@ function Transaction({
   beschrijving, 
   datum, 
   bedrag, 
+  in_uit,
   userID, 
   currentUser,
   authorName = null,
@@ -142,11 +143,12 @@ function Transaction({
   }
 
   if (compact) {
+    const signed = in_uit === 'UIT' ? -Math.abs(bedrag || 0) : Math.abs(bedrag || 0);
     return (
       <tr className="border-b border-gray-200">
         <td className="py-2 px-4">{beschrijving || 'N/A'}</td>
         <td className="py-2 px-4">{formatDate(datum)}</td>
-        <td className="py-2 px-4">{amountFormat.format(bedrag || 0)}</td>
+        <td className="py-2 px-4">{amountFormat.format(signed)}</td>
       </tr>
     );
   }
@@ -173,9 +175,9 @@ function Transaction({
       </td>
       <td className="py-2 px-4">{formatDate(datum)}</td>
       <td className="py-2 px-4 hidden sm:table-cell">{displayUserName}</td>
-      <td className="py-2 px-4">{amountFormat.format(bedrag || 0)}</td>
+      <td className="py-2 px-4">{amountFormat.format(in_uit === 'UIT' ? -Math.abs(bedrag || 0) : Math.abs(bedrag || 0))}</td>
       <td className='text-right py-2 pr-4'>
-        <button className='py-2 px-2.5 rounded-md mr-2' onClick={() => { setForm({ beschrijving: beschrijving || '', datum: datum ? new Date(datum).toISOString().slice(0,10) : '', bedrag: typeof bedrag === 'number' ? String(bedrag) : (bedrag || '') }); setEditError(''); setEditOpen(true); }} aria-label={`Bewerk transactie ${transactieID}`}>
+        <button className='py-2 px-2.5 rounded-md mr-2' onClick={() => { setForm({ beschrijving: beschrijving || '', datum: datum ? new Date(datum).toISOString().slice(0,10) : '', bedrag: typeof bedrag === 'number' ? String(in_uit === 'UIT' ? -Math.abs(bedrag) : Math.abs(bedrag)) : (bedrag || '') }); setEditError(''); setEditOpen(true); }} aria-label={`Bewerk transactie ${transactieID}`}>
           <Edit/>
         </button>
       </td>
