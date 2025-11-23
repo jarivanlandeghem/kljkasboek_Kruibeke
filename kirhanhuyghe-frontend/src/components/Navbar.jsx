@@ -106,6 +106,8 @@ export default function Navbar() {
                 <Link to='/home' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Home</Link>
                 <Link to='/transactions' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Transacties</Link>
                 <Link to='/categories' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Categorieën</Link>
+                <Link to='/leiding' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Leiding</Link>
+                <Link to='/aanwezigheden' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Aanwezigheden</Link>
                 <Link to='/profile' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Profiel</Link>
                 <Link to='/logout' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Log uit</Link>
               </div>
