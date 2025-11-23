@@ -9,21 +9,21 @@ import AsyncData from '../components/AsyncData';
 import { useAuth } from '../contexts/auth';
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement,
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+    PointElement,
+    LineElement,
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Assessment, TableChart, PieChart } from '@mui/icons-material';
-import { Button, ButtonGroup, Paper } from '@mui/material';
+import { Button, ButtonGroup } from '@mui/material';
 
 // Registreer ChartJS componenten
 ChartJS.register(
@@ -285,13 +285,13 @@ const chartOptions = {
                         <h2 className="text-xl font-bold mb-4 text-green-700 flex items-center gap-2">
                            <span>⬇️</span> Inkomsten: {selected.categorienaam}
                         </h2>
-                        <TransactionsTable transacties={inTransacties} onDelete={handleDelete} currentUser={user} />
+                        <TransactionsTable transacties={inTransacties} onDelete={handleDelete} currentUser={user} compact={true} />
                       </div>
                       <div className="md:w-1/2 w-full bg-white p-4 rounded-xl shadow-sm border border-red-100">
                         <h2 className="text-xl font-bold mb-4 text-red-700 flex items-center gap-2">
                            <span>⬆️</span> Uitgaven: {selected.categorienaam}
                         </h2>
-                        <TransactionsTable transacties={uitTransacties} onDelete={handleDelete} currentUser={user} />
+                        <TransactionsTable transacties={uitTransacties} onDelete={handleDelete} currentUser={user} compact={true} />
                       </div>
                     </div>
                   </motion.div>

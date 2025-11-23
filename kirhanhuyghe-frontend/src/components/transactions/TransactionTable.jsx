@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Transaction from './Transaction';
 import { getById } from '../../api';
 
-function TransactionsTable({ transacties, onDelete, currentUser }) {
+function TransactionsTable({ transacties, onDelete, currentUser, compact = false }) {
   const [userMap, setUserMap] = useState({});
 
   useEffect(() => {
@@ -52,13 +52,23 @@ function TransactionsTable({ transacties, onDelete, currentUser }) {
       <table className='min-w-full table-auto border-collapse'>
         <thead className='text-black'>
           <tr className="border-b-2 border-gray-300">
-            <th className="text-start py-2 px-4 min-w-[220px]">Beschrijving</th>
-            <th className='text-start py-2 px-4 min-w-[160px]'>Categorie 1</th>
-            <th className='text-start py-2 px-4 min-w-[160px]'>Categorie 2</th>
-            <th className="text-start py-2 px-4 min-w-[120px]">Datum</th>
-            <th className="text-start py-2 px-4 min-w-[140px] hidden sm:table-cell">Gebruiker</th>
-            <th className='text-start py-2 px-4 min-w-[120px]'>Bedrag</th>
-            <th className='py-2 px-4 w-24 text-right'></th>
+            {compact ? (
+              <>
+                <th className="text-start py-2 px-4">Beschrijving</th>
+                <th className="text-start py-2 px-4">Datum</th>
+                <th className='text-start py-2 px-4'>Bedrag</th>
+              </>
+            ) : (
+              <>
+                <th className="text-start py-2 px-4 min-w-[220px]">Beschrijving</th>
+                <th className='text-start py-2 px-4 min-w-[160px]'>Categorie 1</th>
+                <th className='text-start py-2 px-4 min-w-[160px]'>Categorie 2</th>
+                <th className="text-start py-2 px-4 min-w-[120px]">Datum</th>
+                <th className="text-start py-2 px-4 min-w-[140px] hidden sm:table-cell">Gebruiker</th>
+                <th className='text-start py-2 px-4 min-w-[120px]'>Bedrag</th>
+                <th className='py-2 px-4 w-24 text-right'></th>
+              </>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -73,6 +83,7 @@ function TransactionsTable({ transacties, onDelete, currentUser }) {
                 onDelete={onDelete}
                 currentUser={currentUser}
                 authorName={authorName}
+                compact={compact}
               />
             );
           }
@@ -95,6 +106,7 @@ function TransactionsTable({ transacties, onDelete, currentUser }) {
               onDelete={onDelete}
               currentUser={currentUser}
               authorName={authorName}
+              compact={compact}
             />
           );
         })}
