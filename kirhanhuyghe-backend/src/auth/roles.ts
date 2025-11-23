@@ -3,4 +3,6 @@ export enum Role {
   USER = 'user',
   ADMIN = 'admin',
   LEIDING = 'leiding',
+  HOOFDLEIDING = 'hoofdleiding',
+  GROEPSVERANTWOORDELIJKE = 'groepsverantwoordelijke',
 }

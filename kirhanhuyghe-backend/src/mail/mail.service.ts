@@ -70,4 +70,25 @@ export class MailService {
       throw error;
     }
   }
+  async sendNotification(to: string, subject: string, message: string) {
+    this.logger.log(`🔔 Notificatie sturen naar ${to}`);
+
+    try {
+      await this.mailerService.sendMail({
+        to: to,
+        subject: subject,
+
+        html: `
+          <h3>KLJ Systeem Melding</h3>
+          <p>${message.replace(/\n/g, '<br>')}</p> 
+          <br/>
+          <small>Dit is een geautomatiseerd bericht.</small>
+        `,
+      });
+      this.logger.log(`✅ Notificatie verzonden naar ${to}`);
+    } catch (error) {
+      this.logger.error(`❌ Fout bij sturen notificatie naar ${to}`, error);
+      // We throwen hier niet per se, zodat de cronjob door kan gaan naar de volgende persoon
+    }
+  }
 }

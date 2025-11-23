@@ -36,6 +36,11 @@ export const put = async (path, arg) => {
   return data;
 };
 
+export const update = async (url, { arg }) => {
+  const { data } = await api.patch(`/${url}`, arg); 
+  return data;
+};
+
 export const putById = async (url, { id, arg }) => {
   const { data } = await api.put(`/${url}/${id}`, arg);
   return data;
@@ -49,3 +54,16 @@ export const deleteById = async (url, { arg: id }) => {
 // Specifieke exports voor SWR gebruik
 export const getAllUsers = () => getAll('users');
 export const updateUser = (id, data) => api.put(`/users/${id}`, data).then(r => r.data);
+
+// --- AANWEZIGHEDEN (AANGEPAST NAAR MEERVOUD) ---
+
+// 1. Ophalen (was 'aanwezigheid', nu 'aanwezigheden')
+export const getAanwezigheden = () => getAll('aanwezigheden');
+
+// 2. Updaten (was '/aanwezigheid/...', nu '/aanwezigheden/...')
+export const updateAanwezigheid = async (id, data) => {
+  const { data: response } = await api.patch(`/aanwezigheden/${id}`, data);
+  return response;
+};
+
+export const getAanwezighedenByEvent = (eventId) => getAll(`evenementen/${eventId}/aanwezigheden`);

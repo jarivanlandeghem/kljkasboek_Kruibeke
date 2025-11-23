@@ -50,8 +50,14 @@ export default function Navbar() {
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/categories' className="text-white">Categorieën</Link>
         </span>
-
-        {/* Full Name Link - zichtbaar op sm+ */}
+         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
+          <Link to='/leiding' className="text-white">Leiding</Link>
+        </span>
+        <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
+          <Link to='/aanwezigheden' className="text-white">Aanwezigheden</Link>
+        </span>
+        
+        {/* Full Name Link */}
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/profile' className="text-white">
             {fullName}
