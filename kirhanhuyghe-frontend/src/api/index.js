@@ -36,6 +36,12 @@ export const put = async (path, arg) => {
   return data;
 };
 
+export const update = async (url, { arg }) => {
+  // PATCH wordt gebruikt voor het 'updaten' van velden (zoals functies aanpassen)
+  const { data } = await api.patch(`/${url}`, arg); 
+  return data;
+};
+
 export const putById = async (url, { id, arg }) => {
   const { data } = await api.put(`/${url}/${id}`, arg);
   return data;
