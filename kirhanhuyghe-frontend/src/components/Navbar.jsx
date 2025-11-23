@@ -56,6 +56,9 @@ export default function Navbar() {
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/aanwezigheden' className="text-white">Aanwezigheden</Link>
         </span>
+         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
+          <Link to='/ronde' className="text-white">Ronde maken</Link>
+        </span>
         
         {/* Full Name Link */}
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">

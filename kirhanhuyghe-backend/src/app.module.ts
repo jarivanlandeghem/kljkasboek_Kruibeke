@@ -14,6 +14,7 @@ import { MailModule } from './mail/mail.module';
 import { LeidingprofielModule } from './leidingprofiel/leidingprofiel.module';
 import { EvenementenModule } from './evenementen/evenementen.module';
 import { AanwezighedenModule } from './aanwezigheden/aanwezigheden.module';
+import { RondeModule } from './ronde/ronde.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AanwezighedenModule } from './aanwezigheden/aanwezigheden.module';
     LeidingprofielModule,
     EvenementenModule,
     AanwezighedenModule,
+    RondeModule,
   ],
   providers: [
     {

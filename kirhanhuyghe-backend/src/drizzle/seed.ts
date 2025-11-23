@@ -36,14 +36,26 @@ async function resetDatabase() {
   console.log('🗑️  Database leegmaken...');
 
   // Volgorde is belangrijk: Eerst kind-tabellen, dan ouder-tabellen
+
+  // 1. Transacties
   await db.delete(schema.transactieCategorie).execute();
   await db.delete(schema.transacties).execute();
   await db.delete(schema.categorieen).execute();
 
+  // 2. Agenda / Aanwezigheden
   await db.delete(schema.aanwezigheden).execute();
   await db.delete(schema.evenementen).execute();
+
+  // 3. Profielen
   await db.delete(schema.leidingProfiel).execute();
 
+  // 4. Rondes (NIEUW: Deletion order is kritiek ivm foreign keys)
+  await db.delete(schema.rondeBewoners).execute(); // Kinderen van Huizen
+  await db.delete(schema.rondeHuizen).execute(); // Kinderen van Rondes en Leiding
+  await db.delete(schema.rondeLeiding).execute(); // Kinderen van Rondes
+  await db.delete(schema.rondes).execute(); // Ouders
+
+  // 5. Users (Als laatste want alles hangt hieraan)
   await db.delete(schema.users).execute();
 
   console.log('✅ Database is leeg.\n');
@@ -55,14 +67,13 @@ async function seedStaticData() {
   console.log('📦 Seeding statische mock data (Users, Financiën)...');
 
   // Users (Met individuele hashing)
-  // We gebruiken Promise.all omdat hashPassword async is
   const usersToInsert = await Promise.all(
     USER_DATA.map(async (u) => ({
       userid: u.userid,
       voornaam: u.voornaam,
       familienaam: u.familienaam,
       email: u.email,
-      paswoord: await hashPassword(u.paswoord), // 👈 Hier wordt het wachtwoord uit de mock gehasht
+      paswoord: await hashPassword(u.paswoord),
       roles: u.roles,
     })),
   );
@@ -79,7 +90,7 @@ async function seedStaticData() {
     userID: t.userID,
     beschrijving: t.beschrijving,
     in_uit: t.in_uit,
-    bedrag: t.bedrag, // Decimal fix (moet string zijn voor Drizzle)
+    bedrag: t.bedrag, // Decimal fix
     datum: t.datum,
   }));
 
@@ -128,7 +139,7 @@ async function seedDynamicData() {
       type: faker.helpers.arrayElement(eventTypes),
       naam: faker.company.catchPhrase(),
       beschrijving: faker.lorem.paragraph(),
-      datum: datum, // Date object direct doorgeven
+      datum: datum,
       startuur: '14:00:00',
       einduur: '17:00:00',
       googleCalendarID: null,
@@ -193,6 +204,8 @@ async function main() {
   await resetDatabase();
   await seedStaticData();
   await seedDynamicData();
+
+  // OPMERKING: De 'Ronde' tabellen blijven leeg zodat je zelf CSV's kunt testen.
 
   console.log('🎉 Database seeding completed successfully!');
 }

@@ -12,6 +12,8 @@ import {
   varchar,
   uniqueIndex,
   json,
+  index,
+  timestamp,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
@@ -101,15 +103,13 @@ export const leidingProfiel = mysqlTable('leidingProfiel', {
     '+16',
   ]).notNull(),
 
-  // Functies (Set/Lijst van rollen zoals 'Kassier', 'EHBO').
-  // JSON is de standaard manier in Drizzle om arrays/sets op te slaan in MySQL.
+  // Functies
   functies: json('functies').$type<string[]>().notNull(),
 });
 
 // 2. Evenement (Activiteiten, vergaderingen, etc.)
 export const evenementen = mysqlTable('evenementen', {
   evenementID: int('evenementID').autoincrement().primaryKey(),
-  // Hierop filter je voor de <3 regel
   type: mysqlEnum('type', [
     'ACTIVITEIT',
     'EVENEMENT',
@@ -130,19 +130,13 @@ export const aanwezigheden = mysqlTable('aanwezigheid', {
   evenementID: int('evenementID').notNull(), // FK
   userID: int('userID').notNull(), // FK naar de leiding
 
-  // Status Enum (PARTIAL = Aangepast)
   status: mysqlEnum('status', ['UNKNOWN', 'PRESENT', 'ABSENT', 'PARTIAL'])
     .default('UNKNOWN')
     .notNull(),
 
-  // Verplicht bij ABSENT/PARTIAL
   reden: text('reden'),
-
-  // Verplicht bij PARTIAL
   aangepast_startuur: time('aangepast_startuur'),
   aangepast_einduur: time('aangepast_einduur'),
-
-  // Boolean om de "1 week reminder" bij te houden
   reminder_sent: boolean('reminder_sent').default(false).notNull(),
 });
 
@@ -150,7 +144,7 @@ export const aanwezigheden = mysqlTable('aanwezigheid', {
 // RELATIES (Relations API)
 // ---------------------------------------------------------
 
-// Relaties voor Users (Koppeling naar Profiel en Aanwezigheden)
+// Relaties voor Users
 export const usersRelations = relations(users, ({ one, many }) => ({
   leidingProfiel: one(leidingProfiel, {
     fields: [users.userid],
@@ -172,7 +166,7 @@ export const evenementenRelations = relations(evenementen, ({ many }) => ({
   aanwezigheden: many(aanwezigheden),
 }));
 
-// Relaties voor Aanwezigheid (De link tussen User en Evenement)
+// Relaties voor Aanwezigheid
 export const aanwezigheidRelations = relations(aanwezigheden, ({ one }) => ({
   evenement: one(evenementen, {
     fields: [aanwezigheden.evenementID],
@@ -181,5 +175,101 @@ export const aanwezigheidRelations = relations(aanwezigheden, ({ one }) => ({
   user: one(users, {
     fields: [aanwezigheden.userID],
     references: [users.userid],
+  }),
+}));
+
+// ---------------------------------------------------------
+// FUNCTIONALITEIT WIJKVERDELING (RONDE)
+// ---------------------------------------------------------
+
+// TABEL 1: De Ronde
+export const rondes = mysqlTable('rondes', {
+  rondeID: int('ronde_id').primaryKey().autoincrement(),
+  naam: varchar('naam', { length: 255 }).notNull(),
+  datum: timestamp('datum').defaultNow(),
+});
+
+// TABEL 2: De Leiding
+export const rondeLeiding = mysqlTable(
+  'ronde_leiding',
+  {
+    rondeLeidingID: int('ronde_leiding_id').primaryKey().autoincrement(),
+    rondeID: int('ronde_id').notNull(),
+    naam: varchar('naam', { length: 255 }).notNull(),
+    adres: varchar('adres', { length: 255 }).notNull(),
+    lat: decimal('lat', { precision: 10, scale: 7 }),
+    lon: decimal('lon', { precision: 10, scale: 7 }),
+  },
+  (table) => ({
+    rondeIdx: index('leiding_ronde_idx').on(table.rondeID),
+  }),
+);
+
+// TABEL 3: De Huizen (Unieke locaties)
+export const rondeHuizen = mysqlTable(
+  'ronde_huizen',
+  {
+    rondeHuisID: int('ronde_huis_id').primaryKey().autoincrement(),
+    rondeID: int('ronde_id').notNull(),
+    adres: varchar('adres', { length: 255 }).notNull(), // Uniek adres string
+    lat: decimal('lat', { precision: 10, scale: 7 }),
+    lon: decimal('lon', { precision: 10, scale: 7 }),
+
+    toegewezenLeidingID: int('toegewezen_leiding_id'),
+
+    heeftCoordinaten: boolean('heeft_coordinaten').default(false),
+    isBezocht: boolean('is_bezocht').default(false),
+  },
+  (table) => ({
+    rondeIdx: index('huizen_ronde_idx').on(table.rondeID),
+    leidingIdx: index('huizen_leiding_idx').on(table.toegewezenLeidingID),
+  }),
+);
+
+// TABEL 4: De Bewoners (De namen op dat adres)
+export const rondeBewoners = mysqlTable('ronde_bewoners', {
+  bewonerID: int('bewoner_id').primaryKey().autoincrement(),
+  rondeHuisID: int('ronde_huis_id').notNull(), // Link naar het huis
+  naam: varchar('naam', { length: 255 }).notNull(), // bv. "Bart Braem"
+});
+
+// ---------------------------------------------------------
+// RELATIES VOOR RONDE
+// ---------------------------------------------------------
+
+export const rondeRelations = relations(rondes, ({ many }) => ({
+  huizen: many(rondeHuizen),
+  leiding: many(rondeLeiding),
+}));
+
+// 👇 DEZE WAS JE VERGETEN EN VEROORZAAKTE DE ERROR
+export const rondeLeidingRelations = relations(
+  rondeLeiding,
+  ({ one, many }) => ({
+    ronde: one(rondes, {
+      fields: [rondeLeiding.rondeID],
+      references: [rondes.rondeID],
+    }),
+    // Dit zorgt ervoor dat we .findMany({ with: { huizen: true } }) kunnen doen
+    huizen: many(rondeHuizen),
+  }),
+);
+
+export const rondeHuisRelations = relations(rondeHuizen, ({ one, many }) => ({
+  ronde: one(rondes, {
+    fields: [rondeHuizen.rondeID],
+    references: [rondes.rondeID],
+  }),
+  toegewezenLeiding: one(rondeLeiding, {
+    fields: [rondeHuizen.toegewezenLeidingID],
+    references: [rondeLeiding.rondeLeidingID],
+  }),
+  bewoners: many(rondeBewoners), // Een huis heeft meerdere bewoners
+}));
+
+export const rondeBewonerRelations = relations(rondeBewoners, ({ one }) => ({
+  huis: one(rondeHuizen, {
+    fields: [rondeBewoners.rondeHuisID],
+    references: [rondeHuizen.rondeHuisID],
   }),
 }));
