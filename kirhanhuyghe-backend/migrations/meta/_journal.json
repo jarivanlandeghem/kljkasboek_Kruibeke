@@ -36,6 +36,13 @@
       "when": 1763911061622,
       "tag": "0006_lucky_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1763924236462,
+      "tag": "0007_medical_wild_child",
+      "breakpoints": true
     }
   ]
 }

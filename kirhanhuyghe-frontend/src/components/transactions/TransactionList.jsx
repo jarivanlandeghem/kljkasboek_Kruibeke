@@ -17,6 +17,8 @@ import {
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import * as api from '../../api';
+import { nlCSV } from '../../utils/csvLocale';
+
 
 
 // --- ICONS ---
@@ -36,49 +38,7 @@ import 'dayjs/locale/nl';
 import { Importer, ImporterField } from 'react-csv-importer';
 import 'react-csv-importer/dist/index.css';
 
-// --- VERTALING CSV ---
-const nlNL = {
-  general: { goToPreviousStep: 'Vorige', goToNextStep: 'Volgende' },
-  fileStep: {
-    initialDragDropPrompt: 'Sleep het CSV bestand hierheen of klik om te selecteren',
-    activeDragDropPrompt: 'Laat het bestand hier los...',
-    getImportError: (errMsg) => `Fout bij importeren: ${errMsg}`,
-    getDataFormatError: () => 'Controleer of het bestand het juiste formaat heeft',
-    goBackButton: 'Terug',
-    nextButton: 'Volgende',
-    rawFileContents: 'Ruwe bestandsinhoud',
-    previewImportData: 'Voorbeeld import data',
-    changeFile: 'Wijzig bestand',
-    hasHeaders: 'Bevat kopteksten',
-    loadingPreview: 'Voorbeeld laden...',
-  },
-  fieldsStep: {
-    stepTitle: 'Kolommen toewijzen',
-    dragSource: 'Kolom uit CSV',
-    dropTarget: 'Veld in Database',
-    columnTooltip: 'Sleep de kolom naar het juiste veld',
-    nextButton: 'Importeren',
-    backButton: 'Terug',
-    getColumnCardHeader: (code) => `Kolom: ${code}`,
-    getDragTargetRequiredCaption: () => 'Verplicht',
-    getDragTargetOptionalCaption: () => 'Optioneel',
-    getDragTargetRemoveTooltip: () => 'Verwijder toewijzing',
-    getDragSourcePageIndicator: (currentPage, pageCount) => `Pagina ${currentPage} van ${pageCount}`,
-    getDragSourceNextPageTitle: (nextPage) => `Ga naar pagina ${nextPage}`,
-    getDragSourcePreviousPageTitle: (previousPage) => `Ga naar pagina ${previousPage}`,
-    getDragSourceReset: () => 'Reset',
-    getDragSourceSelectAll: () => 'Alles selecteren',
-  },
-  progressStep: {
-    stepTitle: 'Bezig met importeren...',
-    nextButton: 'Klaar',
-    status: {
-      uploading: 'Uploaden...',
-      processing: 'Verwerken...',
-      complete: 'Voltooid!',
-    },
-  },
-};
+
 
 // --- ANIMATIE VARIANTEN ---
 const containerVariants = {
@@ -589,7 +549,7 @@ export default function TransactionList() {
               console.error('CSV import fout:', error);
               alert('Er is een fout opgetreden bij het lezen van het CSV bestand.');
             }}
-            locale={nlNL} 
+            locale={nlCSV} 
           >
             <ImporterField name="Datum" label="Datum" />
             <ImporterField name="Bedrag" label="Bedrag" />
