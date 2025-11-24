@@ -83,3 +83,10 @@ export const updateAanwezigheid = async (id, data) => {
 // maar 'post' en 'getAll' direct gebruiken in de component werkt ook prima.
 export const importRonde = (payload) => post('ronde/import', { arg: payload });
 export const getRondeResultaat = (rondeId) => getAll(`ronde/${rondeId}/resultaat`);
+
+// 4. KASJES / BUDGETTEN
+// Haalt alles op (komt overeen met GET /api/kasjes)
+export const getKasjes = () => getAll('kasjes');
+
+// Update een specifiek kasje (komt overeen met PUT /api/kasjes/:id)
+export const updateKasje = (id, data) => api.put(`/kasjes/${id}`, data).then(r => r.data);

@@ -2,15 +2,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CATEGORIE_DATA, Categorie } from '../api/data/mock_data';
 import {
-    CreateCategorieRequestDto,
-    CategorieListResponseDto,
-    CategorieResponseDto,
-    UpdateCategorieDto,
+  CreateCategorieRequestDto,
+  CategorieListResponseDto,
+  CategorieResponseDto,
+  UpdateCategorieDto,
 } from './categorieen.dto';
 import { categorieen } from '../drizzle/schema';
 import {
-    type DatabaseProvider,
-    InjectDrizzle,
+  type DatabaseProvider,
+  InjectDrizzle,
 } from '../drizzle/drizzle.provider';
 import { eq } from 'drizzle-orm';
 

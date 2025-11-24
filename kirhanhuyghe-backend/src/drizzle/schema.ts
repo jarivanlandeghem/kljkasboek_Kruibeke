@@ -273,3 +273,26 @@ export const rondeBewonerRelations = relations(rondeBewoners, ({ one }) => ({
     references: [rondeHuizen.rondeHuisID],
   }),
 }));
+// ---------------------------------------------------------
+// Kasjes
+// ---------------------------------------------------------
+export const kasjes = mysqlTable(
+  'kasjes',
+  {
+    kasjeID: int('kasjeID').autoincrement().primaryKey(),
+    // De naam van de groep, bv. "-8", "-12", "+20"
+    groep: varchar('groep', { length: 50 }).notNull(),
+    // Het jaar waarvoor dit geldt (zodat je historie hebt)
+    jaar: int('jaar').notNull(),
+    // Het bedrag
+    bedrag: decimal('bedrag', {
+      precision: 10,
+      scale: 2,
+      mode: 'number',
+    }).notNull(),
+  },
+  (table) => ({
+    // Zorgt ervoor dat er per jaar maar 1 regel per groep is
+    unq: uniqueIndex('idx_kasje_groep_jaar').on(table.groep, table.jaar),
+  }),
+);

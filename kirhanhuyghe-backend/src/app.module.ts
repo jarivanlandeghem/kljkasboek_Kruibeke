@@ -15,6 +15,7 @@ import { LeidingprofielModule } from './leidingprofiel/leidingprofiel.module';
 import { EvenementenModule } from './evenementen/evenementen.module';
 import { AanwezighedenModule } from './aanwezigheden/aanwezigheden.module';
 import { RondeModule } from './ronde/ronde.module';
+import { KasjesModule } from './kasjes/kasjes.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RondeModule } from './ronde/ronde.module';
     EvenementenModule,
     AanwezighedenModule,
     RondeModule,
+    KasjesModule,
   ],
   providers: [
     {
