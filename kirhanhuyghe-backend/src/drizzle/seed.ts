@@ -37,7 +37,8 @@ async function resetDatabase() {
 
   // Volgorde is belangrijk: Eerst kind-tabellen, dan ouder-tabellen
 
-  // 1. Transacties
+  // 1. Financiën & Kasjes
+  await db.delete(schema.kasjes).execute(); // <--- NIEUW: Kasjes resetten
   await db.delete(schema.transactieCategorie).execute();
   await db.delete(schema.transacties).execute();
   await db.delete(schema.categorieen).execute();
@@ -49,13 +50,13 @@ async function resetDatabase() {
   // 3. Profielen
   await db.delete(schema.leidingProfiel).execute();
 
-  // 4. Rondes (NIEUW: Deletion order is kritiek ivm foreign keys)
-  await db.delete(schema.rondeBewoners).execute(); // Kinderen van Huizen
-  await db.delete(schema.rondeHuizen).execute(); // Kinderen van Rondes en Leiding
-  await db.delete(schema.rondeLeiding).execute(); // Kinderen van Rondes
-  await db.delete(schema.rondes).execute(); // Ouders
+  // 4. Rondes
+  await db.delete(schema.rondeBewoners).execute();
+  await db.delete(schema.rondeHuizen).execute();
+  await db.delete(schema.rondeLeiding).execute();
+  await db.delete(schema.rondes).execute();
 
-  // 5. Users (Als laatste want alles hangt hieraan)
+  // 5. Users
   await db.delete(schema.users).execute();
 
   console.log('✅ Database is leeg.\n');
@@ -90,7 +91,7 @@ async function seedStaticData() {
     userID: t.userID,
     beschrijving: t.beschrijving,
     in_uit: t.in_uit,
-    bedrag: t.bedrag, // Decimal fix
+    bedrag: t.bedrag,
     datum: t.datum,
   }));
 
@@ -98,6 +99,20 @@ async function seedStaticData() {
 
   // Koppeltabel
   await db.insert(schema.transactieCategorie).values(TRANSACTIE_CATEGORIE_DATA);
+
+  // --- NIEUW: Kasjes / Budgetten Seeden ---
+  const currentYear = new Date().getFullYear();
+  const kasjesData = [
+    { groep: '-8', bedrag: 500.0, jaar: currentYear },
+    { groep: '-12', bedrag: 800.0, jaar: currentYear },
+    { groep: '-16', bedrag: 1200.0, jaar: currentYear },
+    { groep: '+20', bedrag: 2500.0, jaar: currentYear },
+  ];
+
+  await db.insert(schema.kasjes).values(kasjesData);
+  console.log(
+    `💰 ${kasjesData.length} kasjes/budgetten aangemaakt voor ${currentYear}.`,
+  );
 
   console.log('✅ Statische data geseed.\n');
 }
@@ -113,7 +128,7 @@ async function seedDynamicData() {
   const profielenData = allUsers.map((user) => ({
     userID: user.userid,
     telnr: faker.phone.number(),
-    leeftijdsgroep: faker.helpers.arrayElement(['-8', '-12', '-16', '+16']),
+    leeftijdsgroep: faker.helpers.arrayElement(['-8', '-12', '-16', '+16']), // Let op: jouw enum zegt +16, maar kasjes code gebruikt vaak +20. Check consistentie in app.
     functies: faker.helpers.arrayElements(
       [
         'Kassier',
@@ -142,7 +157,6 @@ async function seedDynamicData() {
       datum: datum,
       startuur: '14:00:00',
       einduur: '17:00:00',
-      googleCalendarID: null,
     });
   }
 
@@ -204,8 +218,6 @@ async function main() {
   await resetDatabase();
   await seedStaticData();
   await seedDynamicData();
-
-  // OPMERKING: De 'Ronde' tabellen blijven leeg zodat je zelf CSV's kunt testen.
 
   console.log('🎉 Database seeding completed successfully!');
 }

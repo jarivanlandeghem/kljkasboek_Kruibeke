@@ -21,6 +21,7 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import LeidingPage from './pages/LeidingPage.jsx'
 import AanwezighedenPage from './pages/AanwezighedenPage.jsx';
 import RondePage from './pages/RondePage.jsx'
+import KasjesPage from './pages/KasjesPage.jsx';
 
 const router = createBrowserRouter([
   {
@@ -79,7 +80,9 @@ const router = createBrowserRouter([
       { path: 'logout', element: <Logout /> },
      { path: 'aanwezigheden', element: <AanwezighedenPage /> },
      { path: 'ronde', element: <RondePage /> },
+     { path: 'kasjes', element: <KasjesPage /> },
       { path: '*', element: <NotFound /> },
+      
     ],
   },
 ]);
