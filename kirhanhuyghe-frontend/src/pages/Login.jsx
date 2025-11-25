@@ -260,7 +260,7 @@ export default function Login() {
                 transition={{ delay: 0.4 }}
             >
                 <Typography component="h1" variant="h5" align="center">
-                    Welkom bij het KLJ Kasboek
+                    Welkom in het KLJ Portaal
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 3 }} align="center">
                     Meld je aan om verder te gaan

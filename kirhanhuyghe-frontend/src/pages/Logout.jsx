@@ -87,7 +87,7 @@ export default function Logout() {
                 Je bent succesvol uitgelogd
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-                Bedankt voor het gebruik van het KLJ Kasboek
+                Bedankt voor het gebruik van het KLJ Portaal
               </Typography>
               
               <Button
