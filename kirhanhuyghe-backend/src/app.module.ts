@@ -16,9 +16,23 @@ import { EvenementenModule } from './evenementen/evenementen.module';
 import { AanwezighedenModule } from './aanwezigheden/aanwezigheden.module';
 import { RondeModule } from './ronde/ronde.module';
 import { KasjesModule } from './kasjes/kasjes.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    // Favicon configuratie
+    ServeStaticModule.forRoot({
+      rootPath: join(
+        __dirname,
+        '..',
+        '..',
+        'frontendweb-2526-kirhanhuyghe',
+        'kirhanhuyghe-frontend',
+        'public',
+      ),
+      serveRoot: '/',
+    }),
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
@@ -39,13 +53,12 @@ import { KasjesModule } from './kasjes/kasjes.module';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: AuthGuard, // 👈
+      useClass: AuthGuard,
     },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // 👈 1
-    consumer.apply(LoggerMiddleware).forRoutes('*'); // 👈 2
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }
