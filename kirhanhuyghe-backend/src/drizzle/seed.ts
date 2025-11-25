@@ -32,13 +32,24 @@ async function hashPassword(password: string): Promise<string> {
   });
 }
 
+// Hulpmiddel om tijd aan te passen (eenvoudige HH:MM:SS aanpassing)
+function adjustTime(timeString: string, hours: number): string {
+  const [h, m, s] = timeString.split(':').map(Number);
+  const newHour = h + hours;
+
+  // Zorg ervoor dat de uren tussen 0 en 23 blijven
+  const clampedHour = Math.min(23, Math.max(0, newHour));
+
+  return `${String(clampedHour).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
 async function resetDatabase() {
   console.log('🗑️  Database leegmaken...');
 
   // Volgorde is belangrijk: Eerst kind-tabellen, dan ouder-tabellen
 
   // 1. Financiën & Kasjes
-  await db.delete(schema.kasjes).execute(); // <--- NIEUW: Kasjes resetten
+  await db.delete(schema.kasjes).execute();
   await db.delete(schema.transactieCategorie).execute();
   await db.delete(schema.transacties).execute();
   await db.delete(schema.categorieen).execute();
@@ -128,7 +139,7 @@ async function seedDynamicData() {
   const profielenData = allUsers.map((user) => ({
     userID: user.userid,
     telnr: faker.phone.number(),
-    leeftijdsgroep: faker.helpers.arrayElement(['-8', '-12', '-16', '+16']), // Let op: jouw enum zegt +16, maar kasjes code gebruikt vaak +20. Check consistentie in app.
+    leeftijdsgroep: faker.helpers.arrayElement(['-8', '-12', '-16', '+16']),
     functies: faker.helpers.arrayElements(
       [
         'Kassier',
@@ -145,18 +156,81 @@ async function seedDynamicData() {
 
   // 2. Evenementen
   const eventTypes = ['ACTIVITEIT', 'EVENEMENT', 'VERGADERING'] as const;
+  const realistischeEvenementNamen = [
+    'Ouderavond',
+    'Moulin Rouge opzet maandag',
+    'Moulin Rouge opzet dinsdag',
+    'Moulin Rouge opzet woensdag',
+    'Moulin Rouge opzet donderdag',
+    '-8: Knutselactiviteit',
+    '-12: Speurtocht "De Verloren Schatten"',
+    '-16: Filmavond',
+    '+16: Café-avond',
+    'Leidingsweekend planning',
+    'Grote Sponsordag',
+    'Lokalen opruim actie',
+    'Jaarlijkse BBQ',
+    'Leidingsvergadering (Maandelijks)',
+    'Startdag voor nieuwe leden',
+  ];
+
   const eventsData = [];
 
-  for (let i = 0; i < 12; i++) {
+  for (const naam of realistischeEvenementNamen) {
     const datum = faker.date.soon({ days: 90 });
 
+    let type: (typeof eventTypes)[number] = 'EVENEMENT';
+    let startuur = '19:00:00'; // Standaard avond start
+    let einduur = '22:00:00'; // Standaard avond eind
+
+    if (naam.includes('Moulin Rouge opzet')) {
+      type = 'VERGADERING';
+      startuur = '09:00:00';
+      einduur = '21:00:00';
+    } else if (naam.match(/-\d{1,2}:/)) {
+      // Matcht -8:, -12:, -16:
+      type = 'ACTIVITEIT';
+      startuur = '14:00:00';
+      einduur = '17:00:00';
+    } else if (
+      naam.includes('Ouderavond') ||
+      naam.includes('vergadering') ||
+      naam.includes('planning')
+    ) {
+      type = 'VERGADERING';
+    }
+
     eventsData.push({
-      type: faker.helpers.arrayElement(eventTypes),
-      naam: faker.company.catchPhrase(),
+      type: type,
+      naam: naam,
       beschrijving: faker.lorem.paragraph(),
       datum: datum,
-      startuur: '14:00:00',
-      einduur: '17:00:00',
+      startuur: startuur,
+      einduur: einduur,
+    });
+  }
+
+  while (eventsData.length < 20) {
+    const datum = faker.date.soon({ days: 90 });
+    const randomType = faker.helpers.arrayElement(['EVENEMENT', 'ACTIVITEIT']);
+
+    let startuur = '19:00:00';
+    let einduur = '22:00:00';
+    if (randomType === 'ACTIVITEIT') {
+      startuur = '14:00:00';
+      einduur = '17:00:00';
+    }
+
+    eventsData.push({
+      type: randomType,
+      naam:
+        faker.commerce.productName() +
+        ' - ' +
+        faker.helpers.arrayElement(['Bijeenkomst', 'Training', 'Feestje']),
+      beschrijving: faker.lorem.paragraph(),
+      datum: datum,
+      startuur: startuur,
+      einduur: einduur,
     });
   }
 
@@ -176,19 +250,33 @@ async function seedDynamicData() {
       ]);
 
       let reden = null;
-      let start = null;
-      let eind = null;
+      let start: string | null = null;
+      let eind: string | null = null;
 
       if (status === 'ABSENT') {
         reden = faker.helpers.arrayElement([
-          'Voetbal',
-          'Studeren',
+          'Voetbaltraining',
+          'Examens/Studeren',
           'Familiefeest',
+          'Ziek',
+          'Werkverplichtingen',
         ]);
       } else if (status === 'PARTIAL') {
-        reden = 'Moet vroeger door voor voetbal';
-        start = '14:00:00';
-        eind = '16:00:00';
+        reden = faker.helpers.arrayElement([
+          'Moet vroeger door voor sport',
+          'Komt later wegens les',
+          'Moet de zaal nog klaarzetten',
+        ]);
+
+        const isLate = faker.datatype.boolean();
+
+        if (isLate) {
+          start = adjustTime(event.startuur, 1);
+          eind = event.einduur;
+        } else {
+          start = event.startuur;
+          eind = adjustTime(event.einduur, -1);
+        }
       }
 
       aanwezighedenData.push({
@@ -196,8 +284,9 @@ async function seedDynamicData() {
         userID: user.userid,
         status: status,
         reden: reden,
-        aangepast_startuur: start,
-        aangepast_einduur: eind,
+
+        aangepast_startuur: status === 'PARTIAL' ? start : null,
+        aangepast_einduur: status === 'PARTIAL' ? eind : null,
         reminder_sent: faker.datatype.boolean(),
       });
     }
