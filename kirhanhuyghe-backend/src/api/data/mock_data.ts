@@ -114,7 +114,7 @@ export const USER_DATA: any[] = [
     voornaam: 'Aykon',
     familienaam: 'Kirhan',
     email: 'aykon.kirhan@kljsgw.be',
-    paswoord: 'v',
+    paswoord: 'aykonkirhan',
     roles: [Role.USER],
   },
   {
@@ -125,6 +125,24 @@ export const USER_DATA: any[] = [
     email: 'lotte.speleman@kljsgw.be',
     paswoord: 'hashed_pw_789',
     roles: [Role.LEIDING, Role.USER],
+  },
+  {
+    userid: 4,
+    // verenigingID: 1,
+    voornaam: 'Lander',
+    familienaam: 'Leeman',
+    email: 'lander.leeman@kljsgw.be',
+    paswoord: 'landerleeman',
+    roles: [Role.LEIDING, Role.USER, Role.HOOFDLEIDING],
+  },
+  {
+    userid: 5,
+    // verenigingID: 1,
+    voornaam: 'Robbe',
+    familienaam: 'Braem',
+    email: 'robbe.braem@kljsgw.be',
+    paswoord: 'robbebraem',
+    roles: [Role.LEIDING, Role.USER, Role.GROEPSVERANTWOORDELIJKE],
   },
 ];
 

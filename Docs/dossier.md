@@ -12,6 +12,10 @@
 - **Student:** Aykon Kirhan
 - **Studentennummer:** 202405274
 - **E-mailadres:** <aykon.kirhan@student.hogent.be>
+- **Student:** Jasper Huyghe
+- **Studentennummer:** 202405272
+- **E-mailadres:** <jasper.huyghe@student.hogent.be>
+
 - **GitHub repository:** <https://github.com/HOGENT-frontendweb/frontendweb-2526-kirhanhuyghe>
 - **Online versies:**
   - **Back-end:** <LINK_NAAR_ONLINE_BACKEND>
@@ -21,10 +25,17 @@
 ## 🔐 Logingegevens
 
 > **Instructies:**
+> LOGIN ALS ADMIN:
+> <jasper.huyghe@outlook.be> | hashed_pw_123
 >
-> - Vul de logingegevens in voor test accounts.
-> - Zorg ervoor dat deze accounts representatieve data bevatten.
-> - Voeg hieronder eventueel extra accounts toe voor administrators of andere rollen.
+> LOGIN ALS USER:
+> <aykon.kirhan@kljsgw.be> | v
+>
+> LOGIN ALS HOOFDLEIDING:
+> <lander.leeman@kljsgw.be> | landerleeman
+>
+> LOGIN ALS GROEPSVERANTWOORDELIJKE:
+> <robbe.braem@kljsgw.be> | robbebraem
 
 ### Lokale omgeving
 
@@ -37,81 +48,70 @@
 - **E-mailadres**: <test@example.com>
 - **Wachtwoord**: testpassword
 - **Rol**: admin/user
+TODO wat moet hier
 
 ## 📖 Projectbeschrijving
 
 > **Instructie:** Beschrijf hier duidelijk en beknopt waarover jouw project gaat. Wat is het doel? Wie is de doelgroep? Welke functionaliteiten biedt het?
 
-Het kasboek is een programma waar je alle uitgaven/inkomsten kunt bijhouden van een vereniging. Deze kan je dan in categorieën steken en zo per categorie kijken wat het verschil is.
+Het KLJ portaal biedt verschillende oplossingen en automatisaties voor problemen waar KLJ afdelingen en soortgelijke verenigingen dagelijks mee te maken krijgen. Hieronder vindt u een lijst van functionaliteiten
 
 Functionaliteiten:
-Lijst van alle uitgaven/inkomsten
-Huidig saldo
-Mededeling, datum, .. (zie excel)
-Met filters
-2 categorieën
-Per categorie bekijken (en kunnen filteren)
-Mogelijkheid om toe te voegen/verwijderen
-Importeren uit kbc csv
-Meerdere mensen toegang geven
+login
+  inloggen
+  login aanvragen (omdat de doelgroep van onze applicatie is dat alleen een kleine groep mensen (leiding) de info mag zien, worden logins manueel aangevraagd en aangemaakt door de admlin. Wanneer iemand een login aanvraagt, voert hij/zij deze gegevens in en krijgt de admin hier een mail van.)
 
+Transacties
+  het manueel toevoegen of aanpassen van transacties
+  het importeren van transacties uit een csv
+  het sorteren van de tabel op datum
+  een PDF laten genereren en doorsturen op basis van de transacties gesorteerd op de categorieën
+
+Categorieën
+  Het kiezen van een categorie
+  Een overzicht via grafieken over alle categorieën
+  een tabel overzicht per categorie wat er IN en UIT is gegaan.
+  een paar nuttige grafieken per categorie
+  een knop om categorieen aan te maken/verwijderen
+
+Leiding
+  een overzicht van alle leiding
+  leiding verwijderen, wijzigen of toevoegen (alleen admins)
+
+Aanwezigheden
+  Een lijst van aankomende evenementen, activiteiten, vergaderingen
+  Een knop om aan te geven of je aanwezigheid toe te voegen
+  Evenementen toevoegen, wijzigen of verwijderen (alleen admins of hoofdleiding of groepsverantwoordelijke)
+  De lijst van aanwezigheden bekijken
+  TODO weghalen indien we dit nietmeer doen - De mogelijkheid om aanwezigheden als PDF te exporteren (alleen admins of hoofdleiding of groepsverantwoordelijke)
+  Als een leiding 7 dagen voordat een evenement begint nog geen antwoord heeft gegeven krijgt deze een reminder toegestuurd per mail
+  Als een leiding 4 dagen op voorhand nog steeds geen antwoord heeft krijgt de hoofdleiding hier een mail van.
+  Als er te weinig mankracht is voor een activiteit krijgen de groepsverantwoordelijke hier een mail van zodat ze kunnen schuiven met de leiding die wél kan.
+
+Ronde maken
+  *Elk jaar gaat bij de inschrijving elke leiding rond bij de leden om uitleg te geven en de leden in te schrijven, nu kijkt iemand manueel welke huizen het dichtst bij elk huis liggen, deze tool automatiuseert dit*
+  Een ronde een naam geven, data importeren (ledenlijst en leidinglijst) zodat een algoritme de kortste afstand berekent tot elk huis.
+  Hierna toont hij een overzicht van elke leiding en zijn/haar huizen dat hij/zij moet doen. Onder elk adres staat welke leden dit zijn en er is een link naar het adres via Google Maps
+
+Kasjes
+  *Elke leeftijdsgroep heeft jaarlijks een budget om op te doen. Om redundante toevoegingen te voorkomen wordt deze in het systeem gezet door als categorie een leeftijdsgroep in te geven.*
+  Jaarbudget aanpassen (Alleen admin/hoofdleiding) TODO klopt dit?
+  Bekijken van budget per leeftijdsgroep en een overzicht van de recente transacties
+
+Profielpagina
+  Wachtwoord veranderen
+  Users hun roles aanpassen (alleen admin)
+
+Loguit
+  Simpele logout pagina met knop om terug te gaan
+
+Gebruiker toevoegen (alleen admin)
+  Alleen een admin kan via hier een gebruiker toevoegen.
 >
 
-![ERD]("frontendweb-2526-kirhanhuyghe\Docs\KIRHANHUYGHE_ERD_V1.png")
+ERD - TODO
 
-Vereniging – User: 1 → *
-
-Vereniging – Rekening: 1 → *
-
-User – Transactie: 1 → *
-
-Rekening – Transactie: 1 → *
-
-Transactie – Categorie: *↔* (via TransactieCategorie)
-
-1. Vereniging
-
-Bevat de algemene gegevens van een vereniging (zoals naam en adres).
-
-Een vereniging kan meerdere gebruikers en meerdere rekeningen hebben.
-
-2. User
-
-Gebruikers zijn leden of beheerders van een vereniging.
-
-Elk record bevat o.a. e-mail, naam, wachtwoord en rechtenniveau.
-
-Elke gebruiker behoort tot één vereniging.
-
-Een gebruiker kan meerdere transacties uitvoeren.
-
-3. Rekening
-
-Vertegenwoordigt een bankrekening van een vereniging.
-
-Bevat o.a. het IBAN-nummer, type en naam van de houder.
-
-Elke rekening hoort bij één vereniging maar kan meerdere transacties bevatten.
-
-4. Transactie
-
-Stelt een financiële verrichting voor.
-
-Bevat gegevens zoals beschrijving, bedrag, type (inkomst of uitgave) en verwijzingen naar de rekening en de gebruiker die de transactie uitvoerde.
-
-Eén transactie kan aan meerdere categorieën gekoppeld zijn (via een tussentabel).
-
-5. Categorie
-
-Geeft aan tot welk soort uitgave of inkomst een transactie behoort (bijv. “Lidgeld”, “Materiaal”, “Sponsoring”).
-
-De relatie met transacties verloopt via de koppeltabel TransactieCategorie, omdat één transactie meerdere categorieën kan hebben en omgekeerd.
-
-6. TransactieCategorie (koppeltabel)
-
-Verbindt Transactie en Categorie in een many-to-many-relatie.
-
-Bestaat enkel uit twee foreign keys: transactieID en categorieID.
+TODO uitleg erd?
 
 ## ✅ Ontvankelijkheidscriteria
 
@@ -124,15 +124,48 @@ Bestaat enkel uit twee foreign keys: transactieID en categorieID.
 
 ### Front-end Web Development
 
-- <LINK_NAAR_NPM_PACKAGE>
-  - [Reden van keuze]
-- ...
+- <https://mui.com/material-ui/>
+  - Een visuele upgrade voor onze applicatie
+  - Het gebrui van een avatar
+  - Het gerbruik van een datepicker
+  - Het gebruiken van icoontjes & het loading icoontje
+  - custom forms aanmaken
+  - custom dialog boxes
+
+- <https://www.npmjs.com/package/dayjs>
+  - Dependency van de MUI Datepicker om met datums te werken
+
+- <https://tanstack.com/table/latest>
+  - De lector gaf de opmerking dat onze tabel te veel leek op degene in de voorbeeldapplicatie. De synax om een tanstack table op te zetten verschilt van de native React syntax.
+  - Door tanstack te gebruiken konden we makkelijk een sorteerfunctie toevoegen
+
+- <https://www.npmjs.com/package/chart.js?activeTab=readme>
+  - Het visualiseren van zowel de kasjes als de categorieën
+
+- <https://react-chartjs-2.js.org/>
+  - Extra componenten voor chartjs
+
+- <https://www.npmjs.com/package/framer-motion>
+  - Een visuele upgrade voor onze applicatie, zowel het laden van de pagina als het tonen van de grafieken
+- <https://www.npmjs.com/package/react-csv-importer>
+  - Importeren van csv bestanden mogelijk maken gebruikt voor transacties & de rondes
+
+- <https://www.npmjs.com/package/papaparse>
+  - Dependency van react-csv-importer
 
 ### Web Services
 
-- <LINK_NAAR_NPM_PACKAGE>
-  - [Reden van keuze]
-- ...
+- <https://www.npmjs.com/package/@faker-js/faker>
+  - Dit w 1 van de voorgestelde extra's
+  - Handig om veel data in het project te krijgen
+
+- <https://nodemailer.com/>
+  - We moesten een manier hebben om de pdf op te sturen
+  - We moesten een manier hebben voor een gebruiker om een aanvraag in te dienen
+  - We moesten een manier hebben om reminders te sturen naar leiding. Whatsapp APIs of SMS zijn betalend.
+
+- <https://www.npmjs.com/package/pdfkit>
+  - Makkelijke manier om een rapport op te maken om te delen tijdens een vergadering
 
 ## 🤔 Reflectie
 
@@ -140,27 +173,36 @@ Bestaat enkel uit twee foreign keys: transactieID en categorieID.
 
 **Wat heb je geleerd?**
 
-[Beschrijf je belangrijkste leermoment...]
+Doorheen het project heb ik heel veel bijgeleerd. Hoe routing werkt, hoe de beveiliging werkt, ...
+Mijn belangrijkste leerproces vond ik dat er heel veel libraries gebruikt die je als een soort puzzelstukjes allemaal kunt implementeren om je applicatie naar een hoger niveau te tillen.
 
 **Wat vond je goed aan dit project?**
 
 [Positieve aspecten...]
 
+Ik vind dat onze applicatie heel modern en professioneel oogt. Qua backend denk ik dat we een paar knappe algoritmes hebben uitgeschreven.
+
 **Wat zou je anders doen?**
 
 [Verbeterpunten voor jezelf...]
 
+Ik zou vanaf het begin meer kijken naar 'het grote plaatje' in plaats van heel hard te focussen op één functie.
+
 **Wat waren de grootste uitdagingen?**
 
-[Moeilijkheden die je bent tegengekomen...]
+De bestandsindeling die KBC geeft wanneer je via KBC Touch een csv aanvraagt, is verschrikkelijk opgebouwd. Zorgen dat de applicatie deze zonder conversies kan lezen was ongetwijfeld mijn grootste uitdaging.
 
 **Wat zou je behouden aan de cursus?**
 
 [Wat werkt goed...]
 
+De opbouw en de voorgekauwde code vind ik top!
+
 **Wat zou je toevoegen/aanpassen?**
 
 [Suggesties voor verbetering...]
+
+Minder grote blokken tekst, dit is iets waar je snel overleest. Ik denk dat het nuttiger zou zijn als de code gedocumenteerd was met comments in plaats van pijltjes.
 
 ### Reflectie groepswerk
 
@@ -170,16 +212,19 @@ Bestaat enkel uit twee foreign keys: transactieID en categorieID.
 > - Verwijder deze sectie als je alleen hebt gewerkt.
 
 **Hoe verliep het groepswerk?**
+Aykon en ik werken al samen aan groepswerken sinds het zesde middelbaar, ik durf te zeggen dat wij heel goed op elkaar zijn ingespeeld en elkaars tekortkomingen kunnen opvullen.
 
 > **Instructie:** Vink voor elk groepslid één van de drie opties aan door een 'x' tussen de vierkante haken te plaatsen: `[x]`
 
-- **[Naam student 1]:**
+- **Jasper:**
 
   - [ ] Ik heb minder bijgedragen dan mijn groepsgenoot
-  - [ ] Ik heb evenveel bijgedragen als mijn groepsgenoot
+  - [x] Ik heb evenveel bijgedragen als mijn groepsgenoot
   - [ ] Ik heb meer bijgedragen dan mijn groepsgenoot
 
-- **[Naam student 2]:**
+Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel ongeveer 50/50 is. Veel complexe problemen, ideeën en designs werkte we samen achter de schermen uit.
+
+- **Aykon:**
   - [ ] Ik heb minder bijgedragen dan mijn groepsgenoot
   - [ ] Ik heb evenveel bijgedragen als mijn groepsgenoot
   - [ ] Ik heb meer bijgedragen dan mijn groepsgenoot
@@ -193,7 +238,7 @@ Bestaat enkel uit twee foreign keys: transactieID en categorieID.
   - [Bijvoorbeeld: Gebruikersregistratie en login systeem]
   - [Bijvoorbeeld: Dashboard met overzicht functionaliteit]
   - [Bijvoorbeeld: Integratietesten voor product endpoints]
-
+  
 - **[Naam student 2]:**
   - [Bijvoorbeeld: Productcatalogus met zoek- en filterfunctionaliteit]
   - [Bijvoorbeeld: Winkelwagen en checkout proces]

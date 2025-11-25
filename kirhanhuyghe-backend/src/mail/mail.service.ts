@@ -28,7 +28,7 @@ export class MailService {
 
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Bevestiging aanvraag KLJ Kasboek',
+        subject: 'Bevestiging aanvraag KLJ Portaal',
         html: `<p>Beste ${firstName}, we hebben je aanvraag ontvangen.</p>`,
       });
       this.logger.log(`✅ Bevestiging naar gebruiker (${email}) verzonden!`);
@@ -47,11 +47,11 @@ export class MailService {
     try {
       await this.mailerService.sendMail({
         to: userEmail,
-        subject: 'Jouw Transactie Rapport - KLJ Kasboek',
+        subject: 'Jouw Transactie Rapport - KLJ Portaal',
         html: `
           <h3>Dag ${firstName},</h3>
           <p>In bijlage vind je het gevraagde overzicht van je transacties, opgesplitst per categorie.</p>
-          <p>Met vriendelijke groeten,<br/>Het KLJ Kasboek Team</p>
+          <p>Met vriendelijke groeten,<br/>Het KLJ Portaal Team</p>
         `,
         attachments: [
           {
