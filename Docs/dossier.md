@@ -233,28 +233,56 @@ Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel on
 
 > **Instructie:** Geef per persoon een duidelijk overzicht van wat die heeft geïmplementeerd voor het project voor het olod Web Services.
 
-- **[Naam student 1]:**
-
-  - [Bijvoorbeeld: Gebruikersregistratie en login systeem]
-  - [Bijvoorbeeld: Dashboard met overzicht functionaliteit]
-  - [Bijvoorbeeld: Integratietesten voor product endpoints]
-  
-- **[Naam student 2]:**
-  - [Bijvoorbeeld: Productcatalogus met zoek- en filterfunctionaliteit]
-  - [Bijvoorbeeld: Winkelwagen en checkout proces]
-  - [Bijvoorbeeld: Integratietesten voor winkelwagen endpoints]
+| Functionaliteit | Jasper | Aykon | Beide |
+|------------------|--------|-------|-------|
+| **Login / authenticatie** | ✅ (JWT, guards, decorators, login/register endpoints) | ✅ (login bugfix) | |
+| **Transacties** | | | |
+| - CRUD + validatie | ✅ (transactieservice, DTOs, controllers) | ✅ (async refactoring, getById, updateById) | |
+| - CSV-import logica | ✅ | ✅ (KBC format ondersteuning) | ✅ |
+| - Dubbele transactie check | ✅ | | |
+| **Categorieën** | | | |
+| - CRUD + join-tabel met transacties | ✅ (schema, service, endpoints) | ✅ (categoriekeuze, join-tabel logica) | ✅ |
+| - Categorie toevoegen via DB | ✅ | ✅ | |
+| **Gebruikers & rollen** | ✅ (rol-based access, role guards, user service, DTOs) | ✅ (gebruikersdata ophalen, Swagger docs) | ✅ |
+| **Kasjes / Budgets** | ✅ (DB schema, seeding, API endpoints) | | |
+| **Mailfunctionaliteit** | ✅ (nodemailer voor wachtwoordherstel & rapporten) | | |
+| **Logging & error handling** | ✅ (global filters, Drizzle error handling) | | |
+| **Database & ORM** | ✅ (Drizzle, MySQL, docker-compose, migrations) | | |
+| **Registratie** | ✅ (wachtwoord hashing, default role) | | |
+| **Email reminders** | ✅ | | |
+| **PDF exports** | ✅ | ✅| ✅|
+| **CI/CD** | ✅  | | |
+| **Testing** |   | ✅| |
 
 **Welke functionaliteiten heeft elk groepslid toegevoegd voor Front-end Web Development?**
 
 > **Instructie:** Geef per persoon een duidelijk overzicht van wat die heeft geïmplementeerd voor het project voor het olod Front-end Web Development.
 
-- **[Naam student 1]:**
+ Functionaliteit | Jasper | Aykon | Beide |
+|------------------|--------|-------|-------|
+| **Login / authenticatie** | ✅ (auth context, login pagina, JWT, logout) | ✅ (fix login bug, logout bij token vervallen) | ✅ |
+| **Transacties** | | | |
+| - Manueel toevoegen/aanpassen | ✅ (dialog, forms) | ✅ (edit-popup volledig werkend) | ✅ |
+| - CSV-import | ✅ (import logica, vertaling) | ✅ (CSV-fix, import werkt volledig) | ✅ |
+| - Sorteren op datum | | ✅ | |
+| - PDF genereren & mailen | ✅ (rapport opmaak + mail) | | |
+| **Categorieën** | | | |
+| - Categorie kiezen bij transactie | ✅ | ✅ (dropdown gefixt, categorie-ID mapping) | ✅ |
+| - Tabel overzicht per categorie (IN/UIT) | | ✅ (onnodige kolommen verwijderd) | |
+| - Categorie toevoegen/verwijderen | ✅ (frontend integratie) | | |
+| **Leiding** | | | |
+| - Overzicht en CRUD (alleen admin) | ✅ (leidingspagina + knop alleen voor admins) | | |
+| **Aanwezigheden** | | | |
+| - Lijst evenementen + aanwezigheid aanduiden | ✅ (frontend OK) | | |
+| - Evenementen beheren (alleen bevoegden) | ✅ | | |
+| **Kasjes / Budgets** | ✅ (volledige UI + doughnut chart) | | |
+| **Profielpagina** | ✅ (wachtwoord wijzigen, rollen UI) | | |
+| **Layout & UX** | | | |
+| - Responsiveness | ✅ | ✅ (verbeterde layout, hamburgermenu, overflow) | ✅ |
+| - Dark mode (later verwijderd) | ✅ | ✅ | |
+| - Routing / navigatie | ✅ | ✅ (React Router, links, navbar) | |
+| **Gebruiker toevoegen** | ✅ (knop alleen zichtbaar voor admins) | | |
+| **CI/CD** | ✅  | | |
+| **Testing** |   | ✅| |
 
-  - [Bijvoorbeeld: Gebruikersregistratie en login systeem]
-  - [Bijvoorbeeld: Dashboard met overzicht functionaliteit]
-  - [Bijvoorbeeld: Integratietesten voor product endpoints]
-
-- **[Naam student 2]:**
-  - [Bijvoorbeeld: Productcatalogus met zoek- en filterfunctionaliteit]
-  - [Bijvoorbeeld: Winkelwagen en checkout proces]
-  - [Bijvoorbeeld: Integratietesten voor winkelwagen endpoints]
+---
