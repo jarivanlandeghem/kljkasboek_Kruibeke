@@ -57,7 +57,7 @@ pnpm run preview
 
 ### Testen
 
-- Frontend heeft momenteel geen specifieke test setup. Eventueel kan `vitest` of `jest` toegevoegd worden.
+- TODO
 
 ---
 
@@ -81,10 +81,17 @@ CORS_MAX_AGE=10800
 DATABASE_URL=mysql://devusr:devpwd@localhost:3307/kirhanhuyghe
 LOG_LEVELS=["log","error","warn","debug"]
 AUTH_JWT_SECRET=eensuperveiligsecretvoorindevelopment 
-^^ MAG DIT ERIN?
+GOOGLE_CLIENT_ID=vul_hier_jouw_client_id_in
+GOOGLE_CLIENT_SECRET=vul_hier_jouw_client_secret_in
+GOOGLE_REFRESH_TOKEN=vul_hier_jouw_refresh_token_in
 ```
 
 > Pas indien nodig de `DATABASE_URL` aan voor jouw MySQL-configuratie.
+> 
+> De mailservice werkt met Google OAuth 2.0. Omdat deze tokens je volledige toegang geven tot een Google account zetten wij dit niet in de readme. Zoals afgesproken krijgen deze lectors deze opgestuurd via mail. 
+> [OAuth 2.0 opzetten]((https://developers.google.com/identity/protocols/oauth2))
+>
+TODO bij ons zit dit opgedeeld.. mag dit??
 
 ### Development
 
