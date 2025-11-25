@@ -29,10 +29,6 @@ export class TransactieService {
     private readonly mailService: MailService,
   ) {}
 
-  // ==========================================================================================
-  //  CRUD OPERATIES (Deze blijven ongewijzigd, maar zijn nodig voor de context)
-  // ==========================================================================================
-
   async getAll(): Promise<TransactieListResponseDto> {
     const items = await this.db.query.transacties.findMany({
       with: { categorieKoppelingen: true },
@@ -150,9 +146,7 @@ export class TransactieService {
     };
   }
 
-  // ==========================================================================================
-  //  PDF RAPPORTAGE LOGICA (AANGEPAST)
-  // ==========================================================================================
+  //  PDF RAPPORTAGE LOGICA
 
   async generateAndMailReport(
     userId: number,
@@ -201,9 +195,7 @@ export class TransactieService {
     );
   }
 
-  /**
-   * Genereert de PDF met Poppins fonts en KLJ Mannetje logo
-   */
+  // pdf genereren
   private createPdfBuffer(
     groupedData: Map<string, { in: any[]; out: any[] }>,
     name: string,
@@ -216,11 +208,8 @@ export class TransactieService {
       });
       const buffers: Buffer[] = [];
 
-      // 1. PADEN INSTELLEN
-      // process.cwd() verwijst naar de root map waar je package.json staat
       const assetsPath = path.join(process.cwd(), 'assets');
 
-      // Specifieke bestandsnamen zoals je ze hebt aangeleverd
       const fonts = {
         Regular: path.join(assetsPath, 'Poppins-Regular.ttf'),
         Bold: path.join(assetsPath, 'Poppins-Bold.ttf'),
@@ -232,8 +221,6 @@ export class TransactieService {
 
       const logoPath = path.join(assetsPath, 'KLJ_LOGO_MANNETJE.png');
 
-      // 2. FONTS REGISTREREN
-      // We proberen ze te laden. Als ze niet bestaan, vallen we niet keihard om maar loggen we een warning.
       try {
         if (fs.existsSync(fonts.Regular))
           doc.registerFont('Poppins', fonts.Regular);
@@ -249,6 +236,7 @@ export class TransactieService {
         // Zet standaard font
         doc.font('Poppins');
       } catch (e) {
+        console.log(e);
         this.logger.warn(
           'Kon Poppins fonts niet laden, fallback naar Helvetica. Check je assets map.',
         );
@@ -257,18 +245,17 @@ export class TransactieService {
 
       doc.on('data', (chunk) => buffers.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
-      doc.on('error', (err) => reject(err));
+      doc.on('error', (err) => reject(err)); //TODO
 
       // --- HEADER ---
 
-      // Logo (KLJ Mannetje)
+      // Logo
       if (fs.existsSync(logoPath)) {
-        // Logo linksboven, iets groter omdat het een mannetje is
         doc.image(logoPath, 40, 30, { width: 60 });
       }
 
       // Titel en Info (Rechts van logo of gecentreerd)
-      // We gebruiken Poppins-Bold voor de titel
+      //  Poppins-Bold voor de titel
       doc.font('Poppins-Bold').fontSize(22).fillColor('#222222');
       doc.text('Transactie Rapport', 120, 40);
 
@@ -291,7 +278,7 @@ export class TransactieService {
       doc.moveDown(3);
       doc.y = 130; // Start y-positie voor content
 
-      // --- CONTENT ---
+      //  CONTENT
 
       groupedData.forEach((data, categoryName) => {
         // Check of we ruimte hebben op de pagina
@@ -369,7 +356,7 @@ export class TransactieService {
         doc.moveDown(2);
       });
 
-      // --- FOOTER (Paginanummers) ---
+      //  FOOTER (Paginanummers)
       const range = doc.bufferedPageRange();
       for (let i = 0; i < range.count; i++) {
         doc.switchToPage(i);
@@ -404,13 +391,13 @@ export class TransactieService {
     doc.rect(startX, currentY, 510, rowHeight).fill(headerBgColor);
     doc.fillColor('#333333').font('Poppins-SemiBold').fontSize(9);
 
-    // Header Tekst (Iets verlaagd voor verticale centrering)
+    // Header Tekst
     doc.text('DATUM', colDatum, currentY + 6);
     doc.text('BESCHRIJVING', colBeschr, currentY + 6);
     doc.text('BEDRAG', colBedrag, currentY + 6, { width: 100, align: 'right' });
 
     currentY += rowHeight;
-    doc.font('Poppins'); // Terug naar regular
+    doc.font('Poppins');
 
     // Rijen
     transactions.forEach((t, index) => {
@@ -420,7 +407,6 @@ export class TransactieService {
         currentY = 50;
       }
 
-      // Zebra striping (om en om lichtgrijs)
       if (index % 2 === 0) {
         doc.rect(startX, currentY, 510, rowHeight).fill('#f9f9f9');
       }
@@ -445,7 +431,6 @@ export class TransactieService {
       currentY += rowHeight;
     });
 
-    // Cursor update na tabel
     doc.y = currentY;
   }
 }

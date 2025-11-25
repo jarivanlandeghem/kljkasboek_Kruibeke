@@ -44,7 +44,7 @@ export class RondeService {
           lat: coords?.lat,
           lon: coords?.lon,
         });
-        await this.delay(50); // Respecteer API limits
+        await this.delay(50); // best practice -> niet direct na elkaar om overload op de server te voorkomen
       }
       if (leidingInserts.length)
         await tx.insert(rondeLeiding).values(leidingInserts);
@@ -159,7 +159,7 @@ export class RondeService {
       route: (l.huizen || []).map((h: any) => ({
         adres: h.adres,
         bewoners: h.bewoners.map((b: any) => b.naam).join(', '),
-        // Handige link naar Google Maps voor de gebruiker
+        // link naar google maps
         link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.adres)}`,
       })),
     }));
@@ -171,7 +171,7 @@ export class RondeService {
     const validLeiding = leiding.filter((l) => l.lat && l.lon);
     if (!validLeiding.length || !validHuizen.length) return [];
 
-    // 2. Setup (in-memory structuur)
+    // 2. Setup $
     const leidingMap = validLeiding.map((l) => ({
       id: l.rondeLeidingID,
       lat: Number(l.lat),
@@ -263,7 +263,7 @@ export class RondeService {
   ): Promise<{ lat: string; lon: string } | null> {
     try {
       const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(adres)}&limit=1`;
-      // Gebruik native fetch (Node 18+) omdat dit geen extra dependencies vereist en stabiel is
+
       const response = await fetch(url);
       if (!response.ok) return null;
 

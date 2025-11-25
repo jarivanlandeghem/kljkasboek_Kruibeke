@@ -15,11 +15,11 @@ export class CsvHuisDto {
 
   @IsString()
   @IsNotEmpty()
-  straatEnNummer: string; // Vroeger was dit straat & nummer apart
+  straatEnNummer: string;
 
   @IsString()
   @IsOptional()
-  postcode: string; // Deze ontbrak in jouw definitie
+  postcode: string;
 
   @IsString()
   @IsNotEmpty()
@@ -41,7 +41,7 @@ export class CsvLeidingDto {
 
   @IsString()
   @IsOptional()
-  postcode: string; // Deze ontbrak in jouw definitie
+  postcode: string;
 
   @IsString()
   @IsNotEmpty()

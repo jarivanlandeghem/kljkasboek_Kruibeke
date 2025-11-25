@@ -26,12 +26,6 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 // CREATE REQUEST DTO
 
-/**
- * DTO nieuw evenement
- * Opmerkingen:
- * - 'datum' verwacht een string in 'YYYY-MM-DD' formaat.
- * - 'startuur' en 'einduur' verwachten strings in 'HH:MM' of 'HH:MM:SS' formaat.
- */
 export class CreateEvenementRequestDto {
   @IsNotEmpty()
   @ApiProperty({
@@ -96,11 +90,6 @@ export class CreateEvenementRequestDto {
 // DB OUTPUT INTERFACE
 // ----------------------------------------------------------------------
 
-/**
- * Interface voor de ruwe output van een Drizzle/database-query voor Evenementen.
- * Drizzle 'date' type kan terugkomen als string of Date object afhankelijk van de driver config,
- * maar 'time' komt meestal als string terug.
- */
 export interface EvenementDbOutput {
   evenementID: number;
   type: 'ACTIVITEIT' | 'EVENEMENT' | 'VERGADERING' | 'OVERIGE';
@@ -112,14 +101,9 @@ export interface EvenementDbOutput {
 }
 
 // ----------------------------------------------------------------------
-// RESPONSE DTO (API OUTPUT)
+// RESPONSE DTO
 // ----------------------------------------------------------------------
 
-/**
- * DTO voor het response object van een evenement.
- * Dit is de schone response die de API teruggeeft aan de frontend.
- * We standaardiseren datum en tijd hier naar strings.
- */
 export class EvenementResponseDto {
   @ApiProperty({ example: 1, description: 'Uniek ID van het evenement' })
   evenementID: number;

@@ -28,13 +28,12 @@ export interface LogConfig {
   levels: LogLevel[];
 }
 
-// 👇 DEZE INTERFACE MOEST AANGEPAST WORDEN
 export interface MailConfig {
   user: string;
-  clientId: string; // Nieuw
-  clientSecret: string; // Nieuw
-  refreshToken: string; // Nieuw
-  from?: string; // Optioneel gemaakt
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+  from?: string;
 }
 
 export interface ServerConfig {
@@ -56,7 +55,7 @@ export default (): ServerConfig => ({
       : [],
     maxAge: parseInt(process.env.CORS_MAX_AGE || String(3 * 60 * 60)),
   },
-  // 👇 HIER PROBEERDE JE TOE TE WIJZEN, MAAR DE TYPES KLOPTEN NIET
+
   mail: {
     user: process.env.MAIL_USER || '',
     clientId: process.env.GOOGLE_CLIENT_ID || '',

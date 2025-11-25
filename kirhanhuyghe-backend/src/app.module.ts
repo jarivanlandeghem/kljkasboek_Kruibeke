@@ -41,8 +41,6 @@ import { KasjesModule } from './kasjes/kasjes.module';
       provide: APP_GUARD,
       useClass: AuthGuard, // 👈
     },
-
-    // ... andere providers
   ],
 })
 export class AppModule implements NestModule {

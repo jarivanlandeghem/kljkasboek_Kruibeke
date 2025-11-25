@@ -16,7 +16,7 @@ export class UserDbRow {
     description: 'E-mailadres (DB rij)',
   })
   email!: string;
-  // stored hashed password
+
   @ApiProperty({
     example: '$2b$12$...',
     description: 'Gehasht wachtwoord zoals opgeslagen in de database',
@@ -26,5 +26,5 @@ export class UserDbRow {
     example: {},
     description: 'Rollen opgeslagen in de database (JSON kolom)',
   })
-  roles!: unknown; // JSON kolom
+  roles!: unknown;
 }

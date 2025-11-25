@@ -23,8 +23,6 @@ export class UserService {
     private readonly db: DatabaseProvider,
   ) {}
 
-  // ... (getAll, getById, create blijven hetzelfde) ...
-
   async getAll(): Promise<UserListResponseDto> {
     const dbUsers = this.db ? await this.db.query.users.findMany() : USER_DATA;
     const items = dbUsers.map((user) =>
@@ -83,7 +81,6 @@ export class UserService {
     });
   }
 
-  // 🔹 4. User bijwerken
   async updateById(
     id: number,
     updateDto: updateUserDto,
@@ -100,7 +97,6 @@ export class UserService {
       ? await argon2.hash(updateDto.paswoord)
       : undefined;
 
-    // LOGICA AANGEPAST: Kijk eerst naar 'roles' (array), dan naar 'role' (string), anders behoud oude.
     let newRoles = existing.roles;
     if (updateDto.roles) {
       newRoles = updateDto.roles;

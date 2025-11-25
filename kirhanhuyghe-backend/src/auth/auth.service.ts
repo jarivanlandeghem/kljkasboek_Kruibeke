@@ -54,7 +54,7 @@ export class AuthService {
         email: user.email,
         roles: user.roles,
         voornaam: user.voornaam,
-      }, // 👈 1 // TODO moet voornaam & naam ier niet?
+      },
       {
         // 👇 2
         secret: authConfig.jwt.secret,
@@ -123,7 +123,6 @@ export class AuthService {
       })
       .$returningId();
 
-    // ✅ Ook hier select().from()
     const [user] = await this.db
       .select()
       .from(users)
@@ -142,7 +141,7 @@ export class AuthService {
     id: number,
     dto: ChangePasswordRequestDto,
   ): Promise<void> {
-    // 1. Haal de gebruiker op met de juiste property naam 'userid'
+    // 1. Haal de gebruiker op met de juiste naam 'userid'
     const user = await this.db.query.users.findFirst({
       where: eq(users.userid, id),
     });
@@ -152,7 +151,7 @@ export class AuthService {
     }
 
     // 2. Controleer of het huidige wachtwoord klopt
-    // Let op: in jouw tabel heet het veld 'paswoord' (dat mapte naar password_hash)
+
     const isMatch = await argon2.verify(user.paswoord, dto.currentPassword);
 
     if (!isMatch) {
@@ -160,13 +159,13 @@ export class AuthService {
       throw new BadRequestException('Het huidige wachtwoord is onjuist');
     }
 
-    // 3. Hash het nieuwe wachtwoord (gebruik je bestaande hash configuratie of default)
+    // Hash het nieuwe wachtwoord
     const newHash = await this.hashPassword(dto.newPassword);
 
-    // 4. Update de database
+    // Update de db
     await this.db
       .update(users)
-      .set({ paswoord: newHash }) // Gebruik de property naam 'paswoord'
+      .set({ paswoord: newHash })
       .where(eq(users.userid, id));
   }
 }

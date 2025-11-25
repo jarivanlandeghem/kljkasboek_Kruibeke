@@ -115,8 +115,6 @@ export class EvenementenController {
     @Param('id') id: string,
     @Body() body: { email: string; naam: string },
   ): Promise<{ message: string }> {
-    // In een productie-app zou je email/naam uit de ingelogde gebruiker (JWT) halen.
-    // Voor nu halen we het uit de body.
     await this.evenementenService.generateAndMailAttendanceList(
       +id,
       body.email,

@@ -9,7 +9,6 @@ import { LogConfig } from './config/configuration';
 import { DrizzleQueryErrorFilter } from './drizzle/drizzle-query-error.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-//TODO ZEKER DAT DIT WEKRT?
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -17,9 +16,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      // Allow unknown values here to avoid class-validator 'unknownValue' errors
-      // when validating incoming plain objects from the frontend. This is
-      // relaxed for development; consider stricter settings for production.
+
       forbidUnknownValues: false,
       transform: true,
 
@@ -35,8 +32,8 @@ async function bootstrap() {
         return formattedErrors;
       },
     }),
-  ); //TODO
-  // Correct gebruik van generics
+  );
+
   const config = app.get<ConfigService<ServerConfig>>(ConfigService);
 
   // Haal de poort op uit de config

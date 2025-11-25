@@ -7,13 +7,11 @@ import {
   MaxLength,
   IsNotEmpty,
   IsInt,
-  IsOptional, // 👈 BELANGRIJK: Nodig voor updates
-  IsArray, // 👈 Nodig voor rollen array
+  IsOptional,
+  IsArray,
 } from 'class-validator';
 import { Role } from '../auth/roles';
 import { ApiProperty } from '@nestjs/swagger';
-
-// ... (CreateUserRequestDto, UserResponseDto, UserListResponseDto blijven hetzelfde) ...
 
 export class CreateUserRequestDto {
   @IsString()
@@ -94,10 +92,7 @@ export class UserListResponseDto {
   items: UserResponseDto[];
 }
 
-// 👇 HIER ZAT HET PROBLEEM
 export class updateUserDto {
-  // userid hoeft hier niet, die zit in de URL (@Param)
-
   @IsOptional()
   @IsString()
   @ApiProperty({
@@ -136,13 +131,11 @@ export class updateUserDto {
   @ApiProperty({ required: false, description: 'Optioneel type veld' })
   type?: string;
 
-  // Legacy support (enkelvoud)
   @IsOptional()
   @IsString()
   @ApiProperty({ required: false, description: 'Optionele rol (enkelvoud)' })
   role?: string;
 
-  // ✅ Nieuwe support voor Admin Panel (meervoud)
   @IsOptional()
   @IsArray()
   @ApiProperty({ required: false, description: 'Optionele rollen (meervoud)' })

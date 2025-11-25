@@ -59,17 +59,12 @@ export class EvenementenService {
     return this.toResponseDto(evenement);
   }
 
-  // ---------------------------------------------------------
-  // 👇 AANGEPASTE CREATE METHODE (FIX VOOR 'GEEN RECORD')
-  // ---------------------------------------------------------
   async create(dto: CreateEvenementRequestDto): Promise<EvenementResponseDto> {
-    // 1. Evenement data voorbereiden
     const evenementToInsert = {
       ...dto,
       datum: new Date(dto.datum),
     };
 
-    // 2. Evenement invoegen
     const [newEvenementIdObject] = await this.db
       .insert(evenementen)
       .values(evenementToInsert)
@@ -77,8 +72,8 @@ export class EvenementenService {
 
     const newEventId = newEvenementIdObject.evenementID;
 
-    // 3. 👇 AUTOMATISCH AANWEZIGHEDEN AANMAKEN
-    // We halen alle users op om voor iedereen een 'UNKNOWN' record te maken
+    //  AUTOMATISCH AANWEZIGHEDEN AANMAKEN
+
     const allUsers = await this.db.select().from(users);
 
     if (allUsers.length > 0) {
@@ -89,11 +84,9 @@ export class EvenementenService {
         reminder_sent: false,
       }));
 
-      // Bulk insert in aanwezigheden tabel
       await this.db.insert(aanwezigheden).values(emptyAttendances);
     }
 
-    // 4. Resultaat ophalen en terugsturen
     return await this.getById(newEventId);
   }
 

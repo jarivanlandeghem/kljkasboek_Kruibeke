@@ -2,23 +2,17 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import {
-    IsInt,
-    IsNotEmpty,
-    IsString,
-    MaxLength,
-    IsIn,
-    Length,
-    IsOptional,
-    IsNumber,
-    IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  IsIn,
+  Length,
+  IsOptional,
+  IsNumber,
+  IsArray,
 } from 'class-validator';
 
-/**
- * DTO voor het aanmaken van een nieuwe transactie.
- * Let op:
- * - 'datum' is een string in 'YYYY-MM-DD' formaat, want Drizzle date() verwacht een string.
- * - 'bedrag' blijft number in DTO, maar bij insert in Drizzle moet je het omzetten naar string.
- */
 export class CreateTransactieRequestDto {
   @IsInt()
   @ApiProperty({
@@ -72,32 +66,16 @@ export class CreateTransactieRequestDto {
   datum: string; // YYYY-MM-DD
 }
 
-// ----------------------------------------------------------------------
-// NIEUWE DTO's voor het mappen van de database-output
-// De foutmelding gebruikte: '{ transactieID: number; ...; bedrag: string; datum: Date; }'
-// We maken nu een DTO die exact matcht met die output
-// ----------------------------------------------------------------------
-
-/**
- * Interface voor de ruwe output van een Drizzle/database-query
- * (Matcht de typefout in de oorspronkelijke foutmelding: bedrag als string, datum als Date).
- */
 export interface TransactieDbOutput {
   transactieID: number;
   rekeningID: number;
   userID: number;
   beschrijving: string;
   in_uit: 'IN' | 'UIT';
-  bedrag: string; // Type is string/decimal in database
-  datum: Date; // Type is Date (of string) bij ruwe database-query
+  bedrag: string;
+  datum: Date;
 }
 
-/**
- * DTO voor het response object van een transactie na creatie.
- * We baseren dit NIET meer op CreateTransactieRequestDto om de type-inconsistenties op te lossen.
- * Dit is de schone response die de API teruggeeft.
- * (Gebruikt 'number' voor bedrag, en 'string' voor datum, wat de API-standaard zou moeten zijn).
- */
 export class TransactieResponseDto {
   @ApiProperty({ example: 1, description: 'Uniek ID van de transactie' })
   transactieID: number;
@@ -123,33 +101,22 @@ export class TransactieResponseDto {
     example: 20.5,
     description: 'Bedrag van de transactie (in EUR)',
   })
-  bedrag: number; // Schone API response gebruikt 'number'
+  bedrag: number;
   @ApiProperty({
     example: '2025-05-25',
     description: 'Datum van de transactie in YYYY-MM-DD formaat',
   })
-  datum: string; // Schone API response gebruikt 'string' (YYYY-MM-DD)
+  datum: string;
 }
 
-// ----------------------------------------------------------------------
-// OUDE DTO's AANGEPAST
-// ----------------------------------------------------------------------
-
-/**
- * DTO voor lijstweergave van transacties
- */
 export class TransactieListResponseDto {
   @ApiProperty({
     type: [TransactieResponseDto],
     description: 'Lijst van transacties',
   })
-  items: TransactieResponseDto[]; // Gebruikt nu de schone ResponseDto
+  items: TransactieResponseDto[];
 }
 
-/**
- * DTO voor het wijzigen van een bestaande transactie.
- * Alle velden optioneel voor PATCH/PUT.
- */
 export class UpdateTransactieDto {
   @ApiProperty({
     required: false,
@@ -200,7 +167,7 @@ export class UpdateTransactieDto {
   @IsOptional()
   @IsString()
   datum?: string; // YYYY-MM-DD
-  // Optionele lijst met categorieIDs voor koppeling
+
   @ApiProperty({
     required: false,
     type: [Number],
@@ -212,9 +179,6 @@ export class UpdateTransactieDto {
   categorieIDs?: number[];
 }
 
-/**
- * Helper class voor categorie details bij een transactie
- */
 export class TransactieCategorieDetails {
   @ApiProperty({ example: 1, description: 'ID van de categorie' })
   categorieID: number;
@@ -225,17 +189,12 @@ export class TransactieCategorieDetails {
   naam: string;
 }
 
-/**
- * DTO voor het lezen van een transactie (response object).
- * Matcht het schema en bevat extra user- en categorie details.
- */
 export class ReadTransactieDto {
   @ApiProperty({ example: 1, description: 'ID van de transactie' })
   transactieID: number;
   @ApiProperty({ example: 1, description: 'ID van de rekening' })
   rekeningID: number;
 
-  // User details
   @ApiProperty({ example: 1, description: 'ID van de gebruiker' })
   userID: number;
   @ApiProperty({

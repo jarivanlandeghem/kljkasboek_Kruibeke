@@ -13,7 +13,7 @@ import { ConfigService } from '@nestjs/config';
         transport: {
           service: 'gmail',
           auth: {
-            type: 'OAuth2', // 👈 Cruciaal
+            type: 'OAuth2',
             user: config.get<string>('mail.user'),
             clientId: config.get<string>('mail.clientId'),
             clientSecret: config.get<string>('mail.clientSecret'),

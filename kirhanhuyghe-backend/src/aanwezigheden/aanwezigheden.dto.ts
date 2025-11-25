@@ -21,18 +21,8 @@ const AANWEZIGHEID_STATUS = [
   'PARTIAL',
 ] as const;
 
-// Regex voor Tijd formaat HH:MM of HH:MM:SS (zelfde als bij evenementen)
 const TIME_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
 
-// ----------------------------------------------------------------------
-// CREATE REQUEST DTO
-// ----------------------------------------------------------------------
-
-/**
- * DTO voor het aanmaken van een aanwezigheid.
- * Vaak gebeurt dit automatisch (bulk) bij het aanmaken van een evenement,
- * maar voor manuele toevoegingen is dit nodig.
- */
 export class CreateAanwezigheidRequestDto {
   @IsInt()
   @ApiProperty({ example: 1, description: 'ID van het evenement' })
@@ -55,14 +45,6 @@ export class CreateAanwezigheidRequestDto {
   status?: (typeof AANWEZIGHEID_STATUS)[number];
 }
 
-// ----------------------------------------------------------------------
-// UPDATE REQUEST DTO
-// ----------------------------------------------------------------------
-
-/**
- * DTO voor het updaten van een aanwezigheid (bijv. leiding geeft door dat ze later komen).
- * Alle velden zijn optioneel.
- */
 export class UpdateAanwezigheidDto {
   @IsOptional()
   @ApiProperty({
@@ -115,14 +97,6 @@ export class UpdateAanwezigheidDto {
   reminder_sent?: boolean;
 }
 
-// ----------------------------------------------------------------------
-// RESPONSE DTO
-// ----------------------------------------------------------------------
-
-/**
- * DTO voor de database output.
- * Bevat vaak ook gekoppelde user-data als je die joint in de service.
- */
 export class AanwezigheidResponseDto {
   @ApiProperty({ example: 1, description: 'Uniek ID van de aanwezigheid' })
   aanwezigheidID: number;
@@ -133,7 +107,6 @@ export class AanwezigheidResponseDto {
   @ApiProperty({ example: 5, description: 'ID van de gebruiker' })
   userID: number;
 
-  // Optionele velden voor als je joins doet (handig voor de frontend)
   @ApiProperty({
     required: false,
     example: 'Jasper',
@@ -182,10 +155,6 @@ export class AanwezigheidResponseDto {
   })
   reminder_sent: boolean;
 }
-
-// ----------------------------------------------------------------------
-// LIST RESPONSE
-// ----------------------------------------------------------------------
 
 export class AanwezigheidListResponseDto {
   @ApiProperty({

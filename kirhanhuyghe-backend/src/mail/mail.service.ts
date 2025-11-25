@@ -15,7 +15,6 @@ export class MailService {
     );
 
     try {
-      // 1. Mail naar Admin
       await this.mailerService.sendMail({
         to: adminEmail,
         subject: `Nieuwe accountaanvraag: ${firstName} ${lastName}`,
@@ -27,7 +26,6 @@ export class MailService {
       });
       this.logger.log(`✅ Mail naar admin (${adminEmail}) verzonden!`);
 
-      // 2. Bevestiging naar Gebruiker
       await this.mailerService.sendMail({
         to: email,
         subject: 'Bevestiging aanvraag KLJ Kasboek',
@@ -35,7 +33,6 @@ export class MailService {
       });
       this.logger.log(`✅ Bevestiging naar gebruiker (${email}) verzonden!`);
     } catch (error) {
-      // 👇 DIT IS CRUCIAAL: Print de echte error
       this.logger.error('❌ FOUT BIJ VERZENDEN MAIL:', error);
       throw error; // Gooi de fout door zodat de frontend een 500 krijgt
     }

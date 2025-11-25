@@ -88,11 +88,6 @@ export class TransactiesController {
   // rapport eindpunt
   @Post('report')
   async generateReport(@CurrentUser() user: Session) {
-    // 👇 Nu werkt user.userId en user.email omdat het type 'Session' dit definieert.
-
-    // Check of voornaam bestaat op het object, anders fallback.
-    // Omdat we het type Session gebruiken, geeft TS geen error meer op unknown properties
-    // als we het correct benaderen.
     const name = user.voornaam || 'Gebruiker';
 
     return await this.transactieService.generateAndMailReport(

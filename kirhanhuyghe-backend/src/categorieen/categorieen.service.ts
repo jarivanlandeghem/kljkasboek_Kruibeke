@@ -53,15 +53,14 @@ export class CategorieenService {
 
   // Nieuwe categorie aanmaken
   async create(dto: CreateCategorieRequestDto): Promise<CategorieResponseDto> {
-    // 1. Insert de nieuwe categorie
     const [newCategorieIdObject] = await this.db
       .insert(categorieen)
       .values(dto)
       .$returningId();
     const newCategorieId = newCategorieIdObject.categorieID;
-    // 2. Haal de volledige categorie op
+
     const resultaat = await this.getById(newCategorieId);
-    // 3. Retourneer het resultaat
+
     return resultaat;
   }
 

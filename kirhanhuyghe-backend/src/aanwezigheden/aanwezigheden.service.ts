@@ -19,11 +19,6 @@ export class AanwezighedenService {
     private readonly db: DatabaseProvider,
   ) {}
 
-  // ---------------------------------------------------------
-  // BASIS CRUD
-  // ---------------------------------------------------------
-
-  // 1. Create
   async create(
     dto: CreateAanwezigheidRequestDto,
   ): Promise<AanwezigheidResponseDto> {
@@ -35,15 +30,12 @@ export class AanwezighedenService {
     return this.getById(newIdObj.aanwezigheidID);
   }
 
-  // 2. Get All (Admin gebruik)
   async findAll(): Promise<AanwezigheidListResponseDto> {
     const items = await this.db.select().from(aanwezigheden);
 
-    // 👇 AANGEPAST: Arrow function gebruiken om 'this' scope te behouden
     return { items: items.map((item) => this.toResponseDto(item)) };
   }
 
-  // 3. Get One by ID
   async getById(id: number): Promise<AanwezigheidResponseDto> {
     const result = await this.db.query.aanwezigheden.findFirst({
       where: eq(aanwezigheden.aanwezigheidID, id),
@@ -66,7 +58,6 @@ export class AanwezighedenService {
     };
   }
 
-  // 4. Update
   async update(
     id: number,
     dto: UpdateAanwezigheidDto,
@@ -81,7 +72,6 @@ export class AanwezighedenService {
     return this.getById(id);
   }
 
-  // 5. Delete
   async remove(id: number): Promise<void> {
     const [result] = await this.db
       .delete(aanwezigheden)
@@ -93,10 +83,6 @@ export class AanwezighedenService {
       );
     }
   }
-
-  // ---------------------------------------------------------
-  // SPECIFIEKE ZOEKFUNCTIES
-  // ---------------------------------------------------------
 
   async findByEventId(
     evenementId: number,
@@ -127,13 +113,9 @@ export class AanwezighedenService {
       },
     });
 
-    // 👇 AANGEPAST: Arrow function gebruiken
     return { items: items.map((item) => this.toResponseDto(item)) };
   }
 
-  // ---------------------------------------------------------
-  // HELPER
-  // ---------------------------------------------------------
   private toResponseDto(data: any): AanwezigheidResponseDto {
     return {
       aanwezigheidID: data.aanwezigheidID,

@@ -211,7 +211,7 @@ export const rondeHuizen = mysqlTable(
   {
     rondeHuisID: int('ronde_huis_id').primaryKey().autoincrement(),
     rondeID: int('ronde_id').notNull(),
-    adres: varchar('adres', { length: 255 }).notNull(), // Uniek adres string
+    adres: varchar('adres', { length: 255 }).notNull(),
     lat: decimal('lat', { precision: 10, scale: 7 }),
     lon: decimal('lon', { precision: 10, scale: 7 }),
 
@@ -242,7 +242,6 @@ export const rondeRelations = relations(rondes, ({ many }) => ({
   leiding: many(rondeLeiding),
 }));
 
-// 👇 DEZE WAS JE VERGETEN EN VEROORZAAKTE DE ERROR
 export const rondeLeidingRelations = relations(
   rondeLeiding,
   ({ one, many }) => ({
@@ -250,7 +249,7 @@ export const rondeLeidingRelations = relations(
       fields: [rondeLeiding.rondeID],
       references: [rondes.rondeID],
     }),
-    // Dit zorgt ervoor dat we .findMany({ with: { huizen: true } }) kunnen doen
+
     huizen: many(rondeHuizen),
   }),
 );
@@ -282,7 +281,7 @@ export const kasjes = mysqlTable(
     kasjeID: int('kasjeID').autoincrement().primaryKey(),
     // De naam van de groep, bv. "-8", "-12", "+20"
     groep: varchar('groep', { length: 50 }).notNull(),
-    // Het jaar waarvoor dit geldt (zodat je historie hebt)
+    // Het jaar waarvoor dit geldt
     jaar: int('jaar').notNull(),
     // Het bedrag
     bedrag: decimal('bedrag', {

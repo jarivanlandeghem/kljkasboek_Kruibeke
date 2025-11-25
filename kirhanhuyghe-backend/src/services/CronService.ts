@@ -66,7 +66,6 @@ export class CronService implements OnModuleInit {
       .innerJoin(users, eq(aanwezigheden.userID, users.userid))
       .where(
         and(
-          // 👇 FIX 1: Cast de string naar Date om TypeScript tevreden te houden
           eq(evenementen.datum, targetDate as unknown as Date),
           eq(aanwezigheden.status, 'UNKNOWN'),
           eq(aanwezigheden.reminder_sent, false),

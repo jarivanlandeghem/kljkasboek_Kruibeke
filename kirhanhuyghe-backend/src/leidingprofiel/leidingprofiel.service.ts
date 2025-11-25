@@ -64,7 +64,6 @@ export class LeidingProfielService {
 
   // 3. GET BY ID
   async getById(id: number): Promise<LeidingProfielResponseDto> {
-    // We doen een handmatige join omdat we user info nodig hebben
     const [result] = await this.db
       .select({
         profiel: leidingProfiel,
@@ -82,7 +81,7 @@ export class LeidingProfielService {
     return this.mapToDto(result.profiel, result.user);
   }
 
-  // 4. GET BY USER ID (Handig voor "Mijn Profiel" pagina)
+  // 4. GET BY USER ID (voor "Mijn Profiel" pagina)
   async getByUserId(userId: number): Promise<LeidingProfielResponseDto> {
     const [result] = await this.db
       .select({

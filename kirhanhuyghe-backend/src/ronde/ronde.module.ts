@@ -2,13 +2,10 @@
 import { Module } from '@nestjs/common';
 import { RondeService } from './ronde.service';
 import { RondeController } from './ronde.controller';
-// 👇 Pas dit pad aan als jouw DrizzleModule ergens anders staat
 import { DrizzleModule } from '../drizzle/drizzle.module';
 
 @Module({
-  imports: [
-    DrizzleModule, // <--- DIT IS DE OPLOSSING
-  ],
+  imports: [DrizzleModule],
   controllers: [RondeController],
   providers: [RondeService],
 })
