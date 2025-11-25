@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "9ea50fa1-295f-4a06-aa9e-2eefb3bdf35b",
-  "prevId": "797cddbb-7c10-4267-83e6-ac81837336b1",
+  "id": "8e7784ff-2afa-4956-9fe8-3a77eb5f9701",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "aanwezigheid": {
       "name": "aanwezigheid",
@@ -170,6 +170,60 @@
           "name": "evenementen_evenementID",
           "columns": [
             "evenementID"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "kasjes": {
+      "name": "kasjes",
+      "columns": {
+        "kasjeID": {
+          "name": "kasjeID",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "groep": {
+          "name": "groep",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jaar": {
+          "name": "jaar",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bedrag": {
+          "name": "bedrag",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_kasje_groep_jaar": {
+          "name": "idx_kasje_groep_jaar",
+          "columns": [
+            "groep",
+            "jaar"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "kasjes_kasjeID": {
+          "name": "kasjes_kasjeID",
+          "columns": [
+            "kasjeID"
           ]
         }
       },
