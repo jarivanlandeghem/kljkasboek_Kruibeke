@@ -39,9 +39,8 @@ export interface Transactie {
 export interface TransactieCategorie {
   transactieID: number;
   categorieID: number;
-  groep?: string; // Optioneel toegevoegd om de koppeling met kasjes te verduidelijken, maar niet gebruikt in de Drizzle schema interface.
+  groep?: string; // Optioneel toegevoegd om de koppeling met kasjes te verduidelijken, maar niet gebruikt in de Drizzle schema
 }
-
 // -----------------------------
 // Mock data
 // -----------------------------
@@ -404,62 +403,54 @@ export const TRANSACTIE_CATEGORIE_DATA: TransactieCategorie[] = [
   { transactieID: 11, categorieID: 5 }, // ouderavond
   { transactieID: 11, categorieID: 6 }, // brouwer
 
-  // --- UITBREIDING: NEGATIEVE TRANSACTIES PER KASJE ---
-  // Opmerking: CategorieID 12 is verwijderd. De IDs erna schuiven op.
-
   // 12. -8: Aankoop knutselmateriaal (lijm)
   { transactieID: 12, categorieID: 7 }, // Kas -8
-  // { transactieID: 12, categorieID: 12 }, // Oude ACTIVITEIT ID
 
   // 13. -8: Aankoop knutselmateriaal (verf)
   { transactieID: 13, categorieID: 7 }, // Kas -8
-  // { transactieID: 13, categorieID: 12 }, // Oude ACTIVITEIT ID
 
   // 14. -8: Nieuwe bal voor buitenactiviteit
   { transactieID: 14, categorieID: 7 }, // Kas -8
-  { transactieID: 14, categorieID: 13 }, // materiaal (was 13)
+  { transactieID: 14, categorieID: 13 }, // materiaal
 
   // 15. -8: IJsjes voor activiteit
   { transactieID: 15, categorieID: 7 }, // Kas -8
-  { transactieID: 15, categorieID: 14 }, // snacks (was 14)
+  { transactieID: 15, categorieID: 14 }, // snacks
 
   // 16. -12: Inkom zwembad (deel 1)
   { transactieID: 16, categorieID: 8 }, // Kas -12
-  // { transactieID: 16, categorieID: 12 }, // Oude ACTIVITEIT ID
 
   // 17. -12: Inkom zwembad (deel 2)
   { transactieID: 17, categorieID: 8 }, // Kas -12
-  // { transactieID: 17, categorieID: 12 }, // Oude ACTIVITEIT ID
 
   // 18. -12: Huur busje daguitstap
   { transactieID: 18, categorieID: 8 }, // Kas -12
-  { transactieID: 18, categorieID: 15 }, // vervoer (was 15)
+  { transactieID: 18, categorieID: 15 },
 
   // 19. -12: Drank voor quiz
   { transactieID: 19, categorieID: 8 }, // Kas -12
-  { transactieID: 19, categorieID: 14 }, // snacks (was 14)
+  { transactieID: 19, categorieID: 14 },
 
   // 20. -16: Paintball inkom
-  { transactieID: 20, categorieID: 9 }, // Kas -16
-  // { transactieID: 20, categorieID: 12 }, // Oude ACTIVITEIT ID
+  { transactieID: 20, categorieID: 9 },
 
   // 21. -16: Aankoop tentzeil (Materiaal)
-  { transactieID: 21, categorieID: 9 }, // Kas -16
-  { transactieID: 21, categorieID: 13 }, // materiaal (was 13)
+  { transactieID: 21, categorieID: 9 },
+  { transactieID: 21, categorieID: 13 },
 
   // 22. -16: Vergoeding leiding weekend
-  { transactieID: 22, categorieID: 9 }, // Kas -16
-  { transactieID: 22, categorieID: 16 }, // leiding (was 16)
+  { transactieID: 22, categorieID: 9 },
+  { transactieID: 22, categorieID: 16 },
 
   // 23. +20: Onderhoud lokalen (Gebouw)
-  { transactieID: 23, categorieID: 11 }, // Kas +20
-  { transactieID: 23, categorieID: 17 }, // gebouw (was 17)
+  { transactieID: 23, categorieID: 11 },
+  { transactieID: 23, categorieID: 17 },
 
   // 24. +20: Promomateriaal event (Deel 1)
-  { transactieID: 24, categorieID: 11 }, // Kas +20
-  { transactieID: 24, categorieID: 18 }, // evenement (was 18)
+  { transactieID: 24, categorieID: 11 },
+  { transactieID: 24, categorieID: 18 },
 
   // 25. +20: Vergoeding vorming (Leiding)
-  { transactieID: 25, categorieID: 11 }, // Kas +20
-  { transactieID: 25, categorieID: 16 }, // leiding (was 16)
+  { transactieID: 25, categorieID: 11 },
+  { transactieID: 25, categorieID: 16 },
 ];
