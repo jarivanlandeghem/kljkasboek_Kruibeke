@@ -39,85 +39,8 @@ export interface Transactie {
 export interface TransactieCategorie {
   transactieID: number;
   categorieID: number;
+  groep?: string; // Optioneel toegevoegd om de koppeling met kasjes te verduidelijken, maar niet gebruikt in de Drizzle schema interface.
 }
-
-// src/drizzle/schema.ts
-import {
-  mysqlTable,
-  int,
-  decimal,
-  //  date,
-  text,
-  mysqlEnum,
-  primaryKey,
-  varchar,
-  uniqueIndex,
-  json,
-} from 'drizzle-orm/mysql-core';
-import { relations } from 'drizzle-orm';
-import { User } from '../../types/user';
-//  Transacties
-export const transacties = mysqlTable('transacties', {
-  transactieID: int('transactieID').autoincrement().primaryKey(),
-  rekeningID: int('rekeningID').notNull(),
-  userID: int('userID').notNull(),
-  beschrijving: text('beschrijving').notNull(),
-  in_uit: mysqlEnum('in_uit', ['IN', 'UIT']).notNull(),
-  //  decimal moet als string worden ingevoerd bij insert
-  bedrag: decimal('bedrag', {
-    precision: 10,
-    scale: 2,
-    mode: 'number',
-  }).notNull(),
-
-  datum: text('datum').notNull(),
-});
-
-// Categorieen
-export const categorieen = mysqlTable('categorieen', {
-  categorieID: int('categorieID').autoincrement().primaryKey(),
-  categorienaam: text('categorienaam').notNull(),
-});
-//  TransactieCategorie (join table)
-export const transactieCategorie = mysqlTable(
-  'transactieCategorie',
-  {
-    transactieID: int('transactieID').notNull(),
-    categorieID: int('categorieID').notNull(),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.transactieID, table.categorieID] }),
-  }),
-);
-
-//  USER TABEL
-// src/drizzle/schema.ts
-export const users = mysqlTable(
-  'users',
-  {
-    userid: int('id', { unsigned: true }).primaryKey().autoincrement(),
-    voornaam: varchar('voornaam', { length: 255 }).notNull(),
-    familienaam: varchar('familienaam', { length: 255 }).notNull(),
-    email: varchar('email', { length: 255 }).notNull(), // 👈
-    paswoord: varchar('password_hash', { length: 255 }).notNull(), // 👈
-    roles: json('roles').notNull(), // 👈
-  },
-  (table) => [uniqueIndex('idx_user_email_unique').on(table.email)], // 👈
-);
-
-// Relaties met transacties
-export const transactiesRelations = relations(transacties, ({ many }) => ({
-  categorieKoppelingen: many(transactieCategorie),
-}));
-export const transactieCategorieRelations = relations(
-  transactieCategorie,
-  ({ one }) => ({
-    transactie: one(transacties, {
-      fields: [transactieCategorie.transactieID],
-      references: [transacties.transactieID],
-    }),
-  }),
-);
 
 // -----------------------------
 // Mock data
@@ -134,41 +57,50 @@ export const VERENIGING_DATA: Vereniging = {
   busnr: '',
 };
 
-// // Rekeningen
-// export const REKENING_DATA: Rekening[] = [
-//   {
-//     rekeningID: 1,
-//     verenigingID: 1,
-//     IBAN: 'BE1234567890123456789012',
-//     type: 'zichtrekeningKLJSGW',
-//     houder: 'Jasper Huyghe',
-//   },
-//   {
-//     rekeningID: 2,
-//     verenigingID: 1,
-//     IBAN: 'BE5556667778889990001112',
-//     type: 'spaarrekeningKLJSGW',
-//     houder: 'KLJ Sint-Gillis-Waas',
-//   },
-// ];
+// Rekeningen
+export const REKENING_DATA: Rekening[] = [
+  {
+    rekeningID: 1,
+    verenigingID: 1,
+    IBAN: 'BE1234567890123456789012',
+    type: 'zichtrekeningKLJSGW',
+    houder: 'Jasper Huyghe',
+  },
+  {
+    rekeningID: 2,
+    verenigingID: 1,
+    IBAN: 'BE5556667778889990001112',
+    type: 'spaarrekeningKLJSGW',
+    houder: 'KLJ Sint-Gillis-Waas',
+  },
+];
 
 // Categorieën
 export const CATEGORIE_DATA: Categorie[] = [
-  { categorieID: 1, categorienaam: 'Kilometervergoeding' },
-  { categorieID: 2, categorienaam: 'Materiaalaankoop' },
-  { categorieID: 3, categorienaam: 'Inschrijvingsgeld' },
-  { categorieID: 4, categorienaam: 'Moulin Rougeke (fuif)' },
-  { categorieID: 5, categorienaam: 'Ouderavond' },
-  { categorieID: 6, categorienaam: 'Brouwer' },
+  { categorieID: 1, categorienaam: 'kilometervergoeding' },
+  { categorieID: 2, categorienaam: 'materiaalaankoop' },
+  { categorieID: 3, categorienaam: 'inschrijvingsgeld' },
+  { categorieID: 4, categorienaam: 'moulin rougeke (fuif)' },
+  { categorieID: 5, categorienaam: 'ouderavond' },
+  { categorieID: 6, categorienaam: 'brouwer' },
+  // Let op: deze categorieën worden in de seed.ts gebruikt als groepskasjes
   { categorieID: 7, categorienaam: '-8' },
   { categorieID: 8, categorienaam: '-12' },
   { categorieID: 9, categorienaam: '-16' },
   { categorieID: 10, categorienaam: '+16' },
   { categorieID: 11, categorienaam: '+20' },
+  // CategorieID 12 ('ACTIVITEIT') is verwijderd. De ID's erna zijn aangepast.
+  { categorieID: 13, categorienaam: 'materiaal' },
+  { categorieID: 14, categorienaam: 'snacks' },
+  { categorieID: 15, categorienaam: 'vervoer' },
+  { categorieID: 16, categorienaam: 'leiding' },
+  { categorieID: 17, categorienaam: 'gebouw' },
+  { categorieID: 18, categorienaam: 'evenement' },
 ];
 
 // Gebruikers
-export const USER_DATA: User[] = [
+export const USER_DATA: any[] = [
+  // Aangepast naar any[] om User interface uit schema.ts niet te hoeven importeren, maar de structuur te behouden.
   {
     userid: 1,
     voornaam: 'Jasper',
@@ -203,25 +135,25 @@ export const TRANSACTION_DATA: Transactie[] = [
     transactieID: 1,
     rekeningID: 1,
     userID: 1,
-    beschrijving: 'Kilometervergoeding Louise rit Sligro Gent ouderavond',
+    beschrijving: 'kilometervergoeding louise rit sligro gent ouderavond',
     in_uit: 'UIT',
-    bedrag: -25.78,
+    bedrag: 25.78,
     datum: '2025-05-12',
   },
   {
     transactieID: 2,
     rekeningID: 1,
     userID: 2,
-    beschrijving: 'Aankoop spelmaterialen voor zomerkamp',
+    beschrijving: 'aankoop spelmaterialen voor zomerkamp',
     in_uit: 'UIT',
-    bedrag: -89.5,
+    bedrag: 89.5,
     datum: '2025-05-10',
   },
   {
     transactieID: 3,
     rekeningID: 1,
     userID: 3,
-    beschrijving: 'Wijk Bert',
+    beschrijving: 'wijk bert',
     in_uit: 'IN',
     bedrag: 250.0,
     datum: '2024-05-08',
@@ -230,16 +162,16 @@ export const TRANSACTION_DATA: Transactie[] = [
     transactieID: 4,
     rekeningID: 1,
     userID: 1,
-    beschrijving: 'Factuur KLJ nationaal inschrijvingen',
+    beschrijving: 'factuur klj nationaal inschrijvingen',
     in_uit: 'UIT',
-    bedrag: -150.0,
+    bedrag: 150.0,
     datum: '2025-05-11',
   },
   {
     transactieID: 5,
     rekeningID: 2,
     userID: 1,
-    beschrijving: 'Knutselactiviteit -8',
+    beschrijving: 'knutselactiviteit -8',
     in_uit: 'IN',
     bedrag: 2.35,
     datum: '2025-04-30',
@@ -248,34 +180,34 @@ export const TRANSACTION_DATA: Transactie[] = [
     transactieID: 6,
     rekeningID: 1,
     userID: 2,
-    beschrijving: 'Factuur brouwer',
+    beschrijving: 'factuur brouwer',
     in_uit: 'UIT',
-    bedrag: -400.78,
+    bedrag: 400.78,
     datum: '2024-05-14',
   },
   {
     transactieID: 7,
     rekeningID: 1,
     userID: 2,
-    beschrijving: 'Aankoop kaas ouderavond',
+    beschrijving: 'aankoop kaas ouderavond',
     in_uit: 'UIT',
-    bedrag: -400.78,
+    bedrag: 400.78,
     datum: '2024-05-14',
   },
   {
     transactieID: 8,
     rekeningID: 1,
     userID: 2,
-    beschrijving: 'Aankoop vlees ouderavond',
+    beschrijving: 'aankoop vlees ouderavond',
     in_uit: 'UIT',
-    bedrag: -600.99,
+    bedrag: 600.99,
     datum: '2025-05-14',
   },
   {
     transactieID: 9,
     rekeningID: 1,
     userID: 2,
-    beschrijving: 'Payconiq inkomsten ouderavond',
+    beschrijving: 'payconiq inkomsten ouderavond',
     in_uit: 'IN',
     bedrag: 1000.78,
     datum: '2025-05-14',
@@ -284,7 +216,7 @@ export const TRANSACTION_DATA: Transactie[] = [
     transactieID: 10,
     rekeningID: 1,
     userID: 1,
-    beschrijving: 'Stamhoofd inschrijvingen inkomsten ouderavond',
+    beschrijving: 'stamhoofd inschrijvingen inkomsten ouderavond',
     in_uit: 'IN',
     bedrag: 1200.78,
     datum: '2025-05-12',
@@ -293,46 +225,241 @@ export const TRANSACTION_DATA: Transactie[] = [
     transactieID: 11,
     rekeningID: 1,
     userID: 1,
-    beschrijving: 'Factuur brouwer ouderavond',
+    beschrijving: 'factuur brouwer ouderavond',
     in_uit: 'IN',
     bedrag: 500.78,
     datum: '2025-05-16',
+  },
+
+  // --- UITBREIDING: NEGATIEVE TRANSACTIES PER KASJE ---
+  // -8 Transacties (categorieID 7)
+  {
+    transactieID: 12,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-8: aankoop knutselmateriaal (lijm)',
+    in_uit: 'UIT',
+    bedrag: 18.5,
+    datum: '2025-05-20',
+  },
+  {
+    transactieID: 13,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-8: aankoop knutselmateriaal (verf)',
+    in_uit: 'UIT',
+    bedrag: 22.95,
+    datum: '2025-05-21',
+  },
+  {
+    transactieID: 14,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-8: nieuwe bal voor buitenactiviteit',
+    in_uit: 'UIT',
+    bedrag: 35.0,
+    datum: '2025-05-22',
+  },
+  {
+    transactieID: 15,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-8: ijsjes voor activiteit',
+    in_uit: 'UIT',
+    bedrag: 14.75,
+    datum: '2025-05-23',
+  },
+
+  // -12 Transacties (categorieID 8)
+  {
+    transactieID: 16,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-12: inkom zwembad (deel 1)',
+    in_uit: 'UIT',
+    bedrag: 45.0,
+    datum: '2025-05-24',
+  },
+  {
+    transactieID: 17,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-12: inkom zwembad (deel 2)',
+    in_uit: 'UIT',
+    bedrag: 55.0,
+    datum: '2025-05-25',
+  },
+  {
+    transactieID: 18,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-12: huur busje daguitstap',
+    in_uit: 'UIT',
+    bedrag: 130.0,
+    datum: '2025-05-26',
+  },
+  {
+    transactieID: 19,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-12: drank voor quiz',
+    in_uit: 'UIT',
+    bedrag: 28.5,
+    datum: '2025-05-27',
+  },
+
+  // -16 Transacties (categorieID 9)
+  {
+    transactieID: 20,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-16: paintball inkom',
+    in_uit: 'UIT',
+    bedrag: 200.0,
+    datum: '2025-05-28',
+  },
+  {
+    transactieID: 21,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-16: aankoop tentzeil (materiaal)',
+    in_uit: 'UIT',
+    bedrag: 95.0,
+    datum: '2025-05-29',
+  },
+  {
+    transactieID: 22,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '-16: vergoeding leiding weekend',
+    in_uit: 'UIT',
+    bedrag: 80.0,
+    datum: '2025-05-30',
+  },
+
+  // +20 Transacties (categorieID 11)
+  {
+    transactieID: 23,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '+20: onderhoud lokalen (gebouw)',
+    in_uit: 'UIT',
+    bedrag: 450.0,
+    datum: '2025-06-01',
+  },
+  {
+    transactieID: 24,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '+20: promomateriaal event (deel 1)',
+    in_uit: 'UIT',
+    bedrag: 110.0,
+    datum: '2025-06-02',
+  },
+  {
+    transactieID: 25,
+    rekeningID: 1,
+    userID: 3,
+    beschrijving: '+20: vergoeding vorming (leiding)',
+    in_uit: 'UIT',
+    bedrag: 65.0,
+    datum: '2025-06-03',
   },
 ];
 
 // Koppeltabel TransactieCategorie
 export const TRANSACTIE_CATEGORIE_DATA: TransactieCategorie[] = [
+  // Oorspronkelijke data
   // 1. Kilometervergoeding Louise rit Sligro Gent ouderavond
-  { transactieID: 1, categorieID: 1 }, // Kilometervergoeding
-  { transactieID: 1, categorieID: 5 }, // Ouderavond
+  { transactieID: 1, categorieID: 1 }, // kilometervergoeding
+  { transactieID: 1, categorieID: 5 }, // ouderavond
 
   // 2. Aankoop spelmaterialen voor zomerkamp
-  { transactieID: 2, categorieID: 2 }, // Materiaalaankoop
+  { transactieID: 2, categorieID: 2 }, // materiaalaankoop
 
   // 3. Wijk Bert -> Geen passende categorie in de lijst (overslaan)
 
   // 4. Factuur KLJ nationaal inschrijvingen
-  { transactieID: 4, categorieID: 3 }, // Inschrijvingsgeld
+  { transactieID: 4, categorieID: 3 }, // inschrijvingsgeld
 
   // 5. Knutselactiviteit -8
-  { transactieID: 5, categorieID: 7 }, // -8
+  { transactieID: 5, categorieID: 7 }, // -8 (Groepskas)
 
   // 6. Factuur brouwer
-  { transactieID: 6, categorieID: 6 }, // Brouwer
+  { transactieID: 6, categorieID: 6 }, // brouwer
 
   // 7. Aankoop kaas ouderavond
-  { transactieID: 7, categorieID: 5 }, // Ouderavond
+  { transactieID: 7, categorieID: 5 }, // ouderavond
 
   // 8. Aankoop vlees ouderavond
-  { transactieID: 8, categorieID: 5 }, // Ouderavond
+  { transactieID: 8, categorieID: 5 }, // ouderavond
 
   // 9. Payconiq inkomsten ouderavond
-  { transactieID: 9, categorieID: 5 }, // Ouderavond
+  { transactieID: 9, categorieID: 5 }, // ouderavond
 
   // 10. Stamhoofd inschrijvingen inkomsten ouderavond
-  { transactieID: 10, categorieID: 5 }, // Ouderavond
+  { transactieID: 10, categorieID: 5 }, // ouderavond
 
   // 11. Factuur brouwer ouderavond
-  { transactieID: 11, categorieID: 5 }, // Ouderavond
-  { transactieID: 11, categorieID: 6 }, // Brouwer
+  { transactieID: 11, categorieID: 5 }, // ouderavond
+  { transactieID: 11, categorieID: 6 }, // brouwer
+
+  // --- UITBREIDING: NEGATIEVE TRANSACTIES PER KASJE ---
+  // Opmerking: CategorieID 12 is verwijderd. De IDs erna schuiven op.
+
+  // 12. -8: Aankoop knutselmateriaal (lijm)
+  { transactieID: 12, categorieID: 7 }, // Kas -8
+  // { transactieID: 12, categorieID: 12 }, // Oude ACTIVITEIT ID
+
+  // 13. -8: Aankoop knutselmateriaal (verf)
+  { transactieID: 13, categorieID: 7 }, // Kas -8
+  // { transactieID: 13, categorieID: 12 }, // Oude ACTIVITEIT ID
+
+  // 14. -8: Nieuwe bal voor buitenactiviteit
+  { transactieID: 14, categorieID: 7 }, // Kas -8
+  { transactieID: 14, categorieID: 13 }, // materiaal (was 13)
+
+  // 15. -8: IJsjes voor activiteit
+  { transactieID: 15, categorieID: 7 }, // Kas -8
+  { transactieID: 15, categorieID: 14 }, // snacks (was 14)
+
+  // 16. -12: Inkom zwembad (deel 1)
+  { transactieID: 16, categorieID: 8 }, // Kas -12
+  // { transactieID: 16, categorieID: 12 }, // Oude ACTIVITEIT ID
+
+  // 17. -12: Inkom zwembad (deel 2)
+  { transactieID: 17, categorieID: 8 }, // Kas -12
+  // { transactieID: 17, categorieID: 12 }, // Oude ACTIVITEIT ID
+
+  // 18. -12: Huur busje daguitstap
+  { transactieID: 18, categorieID: 8 }, // Kas -12
+  { transactieID: 18, categorieID: 15 }, // vervoer (was 15)
+
+  // 19. -12: Drank voor quiz
+  { transactieID: 19, categorieID: 8 }, // Kas -12
+  { transactieID: 19, categorieID: 14 }, // snacks (was 14)
+
+  // 20. -16: Paintball inkom
+  { transactieID: 20, categorieID: 9 }, // Kas -16
+  // { transactieID: 20, categorieID: 12 }, // Oude ACTIVITEIT ID
+
+  // 21. -16: Aankoop tentzeil (Materiaal)
+  { transactieID: 21, categorieID: 9 }, // Kas -16
+  { transactieID: 21, categorieID: 13 }, // materiaal (was 13)
+
+  // 22. -16: Vergoeding leiding weekend
+  { transactieID: 22, categorieID: 9 }, // Kas -16
+  { transactieID: 22, categorieID: 16 }, // leiding (was 16)
+
+  // 23. +20: Onderhoud lokalen (Gebouw)
+  { transactieID: 23, categorieID: 11 }, // Kas +20
+  { transactieID: 23, categorieID: 17 }, // gebouw (was 17)
+
+  // 24. +20: Promomateriaal event (Deel 1)
+  { transactieID: 24, categorieID: 11 }, // Kas +20
+  { transactieID: 24, categorieID: 18 }, // evenement (was 18)
+
+  // 25. +20: Vergoeding vorming (Leiding)
+  { transactieID: 25, categorieID: 11 }, // Kas +20
+  { transactieID: 25, categorieID: 16 }, // leiding (was 16)
 ];
