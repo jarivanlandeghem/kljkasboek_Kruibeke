@@ -26,6 +26,7 @@ export interface DatabaseConfig {
 
 export interface LogConfig {
   levels: LogLevel[];
+  disabled: boolean;
 }
 
 export interface MailConfig {
@@ -70,6 +71,7 @@ export default (): ServerConfig => ({
     levels: process.env.LOG_LEVELS
       ? (JSON.parse(process.env.LOG_LEVELS) as LogLevel[])
       : ['log', 'error', 'warn'],
+    disabled: process.env.LOG_DISABLED === 'true',
   },
   auth: {
     hashLength: parseInt(process.env.AUTH_HASH_LENGTH || '32'),

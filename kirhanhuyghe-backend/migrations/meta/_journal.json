@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1762434072054,
-      "tag": "0000_nasty_joshua_kane",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1762260470025,
-      "tag": "0003_sudden_nightmare",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1762811763899,
-      "tag": "0004_massive_dreaming_celestial",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1762880284892,
-      "tag": "0005_rainy_maddog",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1763911061622,
-      "tag": "0006_lucky_chimera",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1763924236462,
-      "tag": "0007_medical_wild_child",
+      "when": 1764073933850,
+      "tag": "0000_rainy_roland_deschain",
       "breakpoints": true
     }
   ]
