@@ -2,13 +2,13 @@ import { useCallback, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
 import { useAuth } from '../contexts/auth';
-import * as api from '../api'; 
-import { 
-  Box, 
-  Button, 
-  TextField, 
-  Typography, 
-  Grid, 
+import * as api from '../api';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Grid,
   Paper,
   Dialog,
   DialogTitle,
@@ -16,14 +16,13 @@ import {
   DialogContentText,
   DialogActions,
   Divider,
-  CircularProgress 
+  CircularProgress
 } from '@mui/material';
 import { PersonAdd } from '@mui/icons-material';
 import KLJIcon from '../assets/KLJIcon.png';
 import PlayingKids from '../assets/PlayingKids.jpg';
 
-// --- FRAMER MOTION IMPORTS ---
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const validationRules = {
   email: { 
@@ -45,7 +44,6 @@ const validationRules = {
   }
 };
 
-// --- ANIMATIE VARIANTEN ---
 const containerVariants = {
   hidden: { opacity: 0, x: 20 },
   visible: { 
@@ -201,7 +199,6 @@ export default function Login() {
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
       
-      {/* Linkerkant (Afbeelding) - Fade in */}
       <Grid
         item
         xs={false}
@@ -221,7 +218,6 @@ export default function Login() {
         }}
       />
       
-      {/* Rechterkant (Formulier) - Slide in */}
       <Grid 
         item 
         xs={12} sm={8} md={5} 
@@ -243,7 +239,7 @@ export default function Login() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 height: '100%',
-                justifyContent: 'center' // Centreer verticaal
+                justifyContent: 'center' 
             }}
             >
             <motion.div
@@ -355,14 +351,12 @@ export default function Login() {
         </motion.div>
       </Grid>
 
-      {/* --- Dialog 1: Account Aanvragen --- */}
       <Dialog 
         open={requestDialogOpen} 
         onClose={handleCloseRequest}
         maxWidth="sm"
         fullWidth
-        // Voeg eventueel TransitionComponent toe voor Material UI animatie, 
-        // maar standaard slide-in is vaak al mooi.
+
       >
         <DialogTitle>Account Aanvragen</DialogTitle>
         <DialogContent>
@@ -431,7 +425,6 @@ export default function Login() {
         </DialogActions>
       </Dialog>
 
-      {/* --- Dialog 2: Foutmeldingen/Succes POPUP --- */}
       <Dialog
         open={errorDialogOpen}
         onClose={closeErrorDialog}

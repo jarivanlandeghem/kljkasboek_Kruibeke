@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -17,10 +17,8 @@ import AlgemeneLayout from "../components/AlgemeneLayout";
 import kidsPlaying from "../assets/PlayingKids.jpg";
 import UserManagementDialog from '../components/UserManagementDialog';
 
-// --- FRAMER MOTION IMPORTS ---
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- ANIMATIE VARIANTEN ---
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { 
@@ -67,10 +65,6 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
 
-  // ---------------------------------------------------------
-  // BEVEILIGING LOGICA
-  // ---------------------------------------------------------
-  
   if (!ready) {
     return (
       <AlgemeneLayout image={kidsPlaying}>
@@ -125,10 +119,6 @@ export default function RegisterPage() {
       </AlgemeneLayout>
     );
   }
-
-  // ---------------------------------------------------------
-  // REGISTRATIE LOGICA
-  // ---------------------------------------------------------
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -207,7 +197,6 @@ export default function RegisterPage() {
         >
           <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
             
-            {/* Header */}
             <Box sx={{ textAlign: 'center', mb: 4 }}>
               <motion.div 
                 initial={{ scale: 0, rotate: -180 }} 
@@ -331,7 +320,6 @@ export default function RegisterPage() {
               </motion.div>
             </Box>
 
-            {/* Admin beheer knop */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

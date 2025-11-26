@@ -53,7 +53,6 @@ const CsvDialog = ({ open, type, onClose, onComplete }) => {
                     }}
                     onClose={onClose}
                 >
-                    {/* Velden die we verwachten in de Backend DTO */}
                     <ImporterField name="naam" label="Naam" />
                     <ImporterField name="straatEnNummer" label="Straat + Nummer (bv. Kerkstraat 1)" />
                     
@@ -254,7 +253,6 @@ export default function RondePage() {
                                 <motion.div key={item.leidingID} variants={itemVariants}>
                                     <Card variant="outlined" sx={{ borderRadius: 4, height: '100%', display: 'flex', flexDirection: 'column', borderColor: '#f0f0f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
                                         
-                                        {/* HEADER CARD */}
                                         <Box sx={{ p: 2, bgcolor: '#fafafa', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <Stack direction="row" alignItems="center" spacing={1}>
                                                 <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: '#d32f2f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
@@ -265,7 +263,6 @@ export default function RondePage() {
                                             <Chip label={`${item.totaalHuizen} Huizen`} size="small" color="primary" sx={{ fontWeight: 'bold' }} />
                                         </Box>
 
-                                        {/* LIST */}
                                         <CardContent sx={{ p: 0, flex: 1, maxHeight: '400px', overflowY: 'auto' }}>
                                             <List dense>
                                                 {item.route.map((huis, i) => (
@@ -297,7 +294,6 @@ export default function RondePage() {
                                             </List>
                                         </CardContent>
 
-                                        {/* FOOTER ACTIONS */}
                                         <Box sx={{ p: 1.5, borderTop: '1px solid #f0f0f0', display: 'flex', justifyContent: 'center' }}>
                                             <Button 
                                                 size="small" 

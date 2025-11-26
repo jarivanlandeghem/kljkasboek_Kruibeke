@@ -1,6 +1,5 @@
-import React from 'react';
-import Navbar from "../components/Navbar"; // Pas pad aan
-import Kasjes from "../components/Kasjes"; // Pas pad aan
+import Navbar from "../components/Navbar";
+import Kasjes from "../components/Kasjes";
 
 export default function KasjesPage(){
     return(
