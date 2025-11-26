@@ -2,10 +2,10 @@ import { useEffect, useState, useMemo } from 'react';
 import Transaction from './Transaction';
 import { getById } from '../../api';
 import {
-    useReactTable,
-    getCoreRowModel,
-    getSortedRowModel,
-    flexRender,
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
 } from '@tanstack/react-table';
 
 function TransactionsTable({ transacties, onDelete, currentUser, compact = false }) {
@@ -104,7 +104,7 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
   return (
     <div className="w-full">
       {/* Controls: sort-by-date dropdown + column filters are under headers */}
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-end mr-6 mt-3 mb-2">
         <label className="flex items-center gap-2 text-sm text-gray-700">
           <span>Sorteer op datum:</span>
           <select
