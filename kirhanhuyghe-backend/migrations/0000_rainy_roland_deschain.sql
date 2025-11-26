@@ -99,7 +99,6 @@ CREATE TABLE IF NOT EXISTS `transactieCategorie` (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS `transacties` (
     `transactieID` int AUTO_INCREMENT NOT NULL,
-    `rekeningID` int NOT NULL,
     `userID` int NOT NULL,
     `beschrijving` text NOT NULL,
     `in_uit` enum('IN', 'UIT') NOT NULL,
