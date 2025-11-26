@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -212,7 +212,7 @@ export default function ProfilePage() {
                   </Box>
 
                   {/* Animated Alert Message */}
-                  <Box sx={{ minHeight: '50px', mb: 1 }}>
+                  <Box sx={{ minHeight: '0px', mb: 1 }}>
                     <AnimatePresence mode='wait'>
                       {message.text && (
                         <motion.div
