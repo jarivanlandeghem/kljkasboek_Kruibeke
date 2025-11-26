@@ -1,30 +1,30 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { useForm, Controller } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import 'dayjs/locale/nl';
+import { IoTrash } from 'react-icons/io5';
 
 // MUI Imports
 import {
-  Box, Button, Typography, Paper, Dialog, DialogTitle, DialogContent, 
-  DialogActions, TextField, MenuItem, Chip, IconButton, Tooltip, 
-  Stack, ToggleButton, ToggleButtonGroup, Card, CardContent,
-  FormControl, InputLabel, Select
+    Box, Button, Typography, Paper, Dialog, DialogTitle, DialogContent,
+    DialogActions, TextField, MenuItem, Chip, IconButton, Tooltip,
+    Stack, ToggleButton, ToggleButtonGroup, Card, CardContent
 } from '@mui/material';
 
 // Icons
 import {
-  Add, Edit as EditIcon, Delete as DeleteIcon,
-  DirectionsWalk, AccessTime, 
-  CheckCircle, Cancel, QueryBuilder, Groups,
-  AdminPanelSettings, Person, EventBusy
+    Add, DirectionsWalk, AccessTime,
+    CheckCircle, Cancel, QueryBuilder, Groups,
+    AdminPanelSettings, Person, EventBusy
 } from '@mui/icons-material';
 
 // API & Context
 import { getAll, post, deleteById, update, updateAanwezigheid } from '../api';
 import { useAuth } from '../contexts/auth';
 import Navbar from '../components/Navbar';
+import { FiEdit } from 'react-icons/fi';
 
 dayjs.locale('nl');
 
@@ -406,8 +406,39 @@ export default function AanwezighedenPage() {
                                             </Box>
                                             <Stack direction="row" spacing={1}>
                                                 <Tooltip title="Aanwezigen"><IconButton color="info" onClick={() => { setSelectedEvent(ev); setShowAttendeeList(true); }}><Groups /></IconButton></Tooltip>
-                                                <Tooltip title="Bewerken"><IconButton onClick={() => { setSelectedEvent(ev); setShowEventDialog(true); }}><EditIcon /></IconButton></Tooltip>
-                                                <Tooltip title="Verwijderen"><IconButton color="error" onClick={() => handleDeleteEvent(ev.evenementID)}><DeleteIcon /></IconButton></Tooltip>
+                                                <Tooltip title="Bewerken">
+                                                    <IconButton
+                                                        onClick={() => { setSelectedEvent(ev); setShowEventDialog(true); }}
+                                                        aria-label={`Bewerk evenement ${ev.evenementID}`}
+                                                        sx={{
+                                                            backgroundColor: 'black',
+                                                            color: 'white',
+                                                            width: 36,
+                                                            height: 36,
+                                                            borderRadius: '9999px',
+                                                            mr: 1,
+                                                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
+                                                        }}
+                                                    >
+                                                        <FiEdit size={16} />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Verwijderen">
+                                                    <IconButton
+                                                        onClick={() => handleDeleteEvent(ev.evenementID)}
+                                                        aria-label={`Verwijder evenement ${ev.evenementID}`}
+                                                        sx={{
+                                                            backgroundColor: 'black',
+                                                            color: 'white',
+                                                            width: 36,
+                                                            height: 36,
+                                                            borderRadius: '9999px',
+                                                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
+                                                        }}
+                                                    >
+                                                        <IoTrash size={16} />
+                                                    </IconButton>
+                                                </Tooltip>
                                             </Stack>
                                         </Paper>
                                     </motion.div>
