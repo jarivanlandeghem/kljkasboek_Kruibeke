@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useAuth } from '../contexts/auth';
 import useSWR, { useSWRConfig } from 'swr';
 import { getAll, updateKasje } from '../api';
 import Navbar from "../components/Navbar";
@@ -12,7 +13,7 @@ import {
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { motion } from 'framer-motion';
-import { Savings, Edit, Check, Close, ReceiptLong } from '@mui/icons-material';
+import { Edit, Check, Close, ReceiptLong } from '@mui/icons-material';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -87,6 +88,8 @@ export default function BudgetsPage() {
 
 // --- SUBCOMPONENT: BudgetCard ---
 function BudgetCard({ id, groep, spent, transactions, initialBudget, mutate, index }) {
+  const { user } = useAuth();
+  const cannotEditBudget = !user || (Array.isArray(user.roles) && user.roles.length === 1 && String(user.roles[0]).toUpperCase() === 'USER');
   const [isEditing, setIsEditing] = useState(false);
   const [newBudget, setNewBudget] = useState(initialBudget);
   const [isSaving, setIsSaving] = useState(false);
@@ -176,7 +179,7 @@ function BudgetCard({ id, groep, spent, transactions, initialBudget, mutate, ind
         <div className="w-full mb-6 border-b border-gray-100 pb-4">
           <div className="flex justify-between items-end mb-2">
             <span className="text-xs font-bold text-gray-400 uppercase">Jaarbudget</span>
-            {!isEditing && (
+            {!isEditing && !cannotEditBudget && (
                <button onClick={() => { setNewBudget(initialBudget); setIsEditing(true); }} className="text-gray-400 hover:text-blue-600 transition p-1">
                  <Edit fontSize="small" />
                </button>
