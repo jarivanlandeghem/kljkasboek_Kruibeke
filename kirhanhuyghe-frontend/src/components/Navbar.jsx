@@ -4,8 +4,8 @@ import KLJIcon from "../assets/KLJIcon.png";
 import logout from "../assets/logout.png";
 import { useEffect, useRef, useState } from 'react';
 import {
-    Avatar,
-    Tooltip
+  Avatar,
+  Tooltip
 } from '@mui/material';
 
 export default function Navbar() {
@@ -109,11 +109,13 @@ export default function Navbar() {
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
               <div className="py-1">
-                <Link to='/home' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Home</Link>
+                <Link to='/' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Home</Link>
                 <Link to='/transactions' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Transacties</Link>
                 <Link to='/categories' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Categorieën</Link>
                 <Link to='/leiding' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Leiding</Link>
                 <Link to='/aanwezigheden' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Aanwezigheden</Link>
+                <Link to='/ronde' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Ronde maken</Link>
+                <Link to='/kasjes' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Kasjes</Link>
                 <Link to='/profile' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Profiel</Link>
                 <Link to='/logout' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Log uit</Link>
               </div>
