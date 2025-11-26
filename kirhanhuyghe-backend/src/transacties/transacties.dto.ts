@@ -20,8 +20,6 @@ export class CreateTransactieRequestDto {
     description: 'ID van de rekening waaraan deze transactie gekoppeld is',
   })
   @IsNotEmpty()
-  rekeningID: number;
-
   @IsInt()
   @ApiProperty({
     example: 1,
@@ -68,7 +66,6 @@ export class CreateTransactieRequestDto {
 
 export interface TransactieDbOutput {
   transactieID: number;
-  rekeningID: number;
   userID: number;
   beschrijving: string;
   in_uit: 'IN' | 'UIT';
@@ -80,7 +77,6 @@ export class TransactieResponseDto {
   @ApiProperty({ example: 1, description: 'Uniek ID van de transactie' })
   transactieID: number;
   @ApiProperty({ example: 1, description: 'ID van de gekoppelde rekening' })
-  rekeningID: number;
   @ApiProperty({
     example: 1,
     description: 'ID van de gebruiker die de transactie aanmaakte',
@@ -118,14 +114,8 @@ export class TransactieListResponseDto {
 }
 
 export class UpdateTransactieDto {
-  @ApiProperty({
-    required: false,
-    example: 1,
-    description: 'Optionele rekeningID voor update',
-  })
   @IsOptional()
   @IsInt()
-  rekeningID?: number;
   @ApiProperty({
     required: false,
     example: 1,
@@ -193,8 +183,6 @@ export class ReadTransactieDto {
   @ApiProperty({ example: 1, description: 'ID van de transactie' })
   transactieID: number;
   @ApiProperty({ example: 1, description: 'ID van de rekening' })
-  rekeningID: number;
-
   @ApiProperty({ example: 1, description: 'ID van de gebruiker' })
   userID: number;
   @ApiProperty({

@@ -14,14 +14,12 @@ const VERENIGING_DATA = {
 // Rekeningen
 const REKENING_DATA = [
   {
-    rekeningID: 1,
     verenigingID: 1,
     IBAN: "BE1234567890123456789012",
     type: "zichtrekeningKLJSGW",
     houder: "Jasper Huyghe",
   },
   {
-    rekeningID: 2,
     verenigingID: 1,
     IBAN: "BE5556667778889990001112",
     type: "spaarrekeningKLJSGW",
@@ -73,7 +71,6 @@ const USER_DATA = [
 const TRANSACTION_DATA = [
   {
     transactieID: 1,
-    rekeningID: 1,
     userID: 1,
     beschrijving: "Kilometervergoeding daguitstap zee",
     in_uit: "UIT",
@@ -82,7 +79,6 @@ const TRANSACTION_DATA = [
   },
   {
     transactieID: 2,
-    rekeningID: 1,
     userID: 2,
     beschrijving: "Aankoop spelmaterialen voor zomerkamp",
     in_uit: "UIT",
@@ -91,7 +87,6 @@ const TRANSACTION_DATA = [
   },
   {
     transactieID: 3,
-    rekeningID: 1,
     userID: 3,
     beschrijving: "Inschrijving zomerkamp 2024 – 5 deelnemers",
     in_uit: "IN",
@@ -100,7 +95,6 @@ const TRANSACTION_DATA = [
   },
   {
     transactieID: 4,
-    rekeningID: 1,
     userID: 1,
     beschrijving: "Huur zaal Sint-Gillis-Waas – meiviering",
     in_uit: "UIT",
@@ -109,7 +103,6 @@ const TRANSACTION_DATA = [
   },
   {
     transactieID: 5,
-    rekeningID: 2,
     userID: 1,
     beschrijving: "Rente spaarrekening april 2024",
     in_uit: "IN",
@@ -118,7 +111,6 @@ const TRANSACTION_DATA = [
   },
   {
     transactieID: 6,
-    rekeningID: 1,
     userID: 2,
     beschrijving: "Kilometervergoeding vervoer materiaal",
     in_uit: "UIT",

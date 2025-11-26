@@ -22,7 +22,7 @@ import { nlCSV } from '../../utils/csvLocale';
 
 
 // --- ICONS ---
-import { DirectionsWalk, Add, CloudUpload, Assessment, Search } from '@mui/icons-material'; 
+import { DirectionsWalk, Add, CloudUpload, Assessment, Search } from '@mui/icons-material';
 
 // --- FRAMER MOTION ---
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,7 +32,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import 'dayjs/locale/nl'; 
+import 'dayjs/locale/nl';
 
 // CSV IMPORTER
 import { Importer, ImporterField } from 'react-csv-importer';
@@ -227,7 +227,6 @@ export default function TransactionList() {
       }
 
       const newTransactie = {
-        rekeningID: 1,
         userID: userid,
         beschrijving: data.beschrijving,
         in_uit: bedragNum >= 0 ? 'IN' : 'UIT',
@@ -297,7 +296,6 @@ export default function TransactionList() {
             : vrijeMededeling || naamTegenpartij || 'Geen beschrijving';
 
           const newTransactie = {
-            rekeningID: 1,
             userID: userid,
             beschrijving: beschrijving,
             in_uit: bedragNum >= 0 ? 'IN' : 'UIT',

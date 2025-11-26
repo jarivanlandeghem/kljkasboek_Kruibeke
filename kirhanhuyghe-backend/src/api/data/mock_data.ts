@@ -14,7 +14,6 @@ export interface Vereniging {
 }
 
 export interface Rekening {
-  rekeningID: number;
   verenigingID: number;
   IBAN: string;
   type: string;
@@ -28,7 +27,6 @@ export interface Categorie {
 
 export interface Transactie {
   transactieID: number;
-  rekeningID: number;
   userID: number;
   beschrijving: string;
   in_uit: 'IN' | 'UIT';
@@ -59,14 +57,12 @@ export const VERENIGING_DATA: Vereniging = {
 // Rekeningen
 export const REKENING_DATA: Rekening[] = [
   {
-    rekeningID: 1,
     verenigingID: 1,
     IBAN: 'BE1234567890123456789012',
     type: 'zichtrekeningKLJSGW',
     houder: 'Jasper Huyghe',
   },
   {
-    rekeningID: 2,
     verenigingID: 1,
     IBAN: 'BE5556667778889990001112',
     type: 'spaarrekeningKLJSGW',
@@ -150,7 +146,6 @@ export const USER_DATA: any[] = [
 export const TRANSACTION_DATA: Transactie[] = [
   {
     transactieID: 1,
-    rekeningID: 1,
     userID: 1,
     beschrijving: 'kilometervergoeding louise rit sligro gent ouderavond',
     in_uit: 'UIT',
@@ -159,7 +154,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 2,
-    rekeningID: 1,
     userID: 2,
     beschrijving: 'aankoop spelmaterialen voor zomerkamp',
     in_uit: 'UIT',
@@ -168,7 +162,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 3,
-    rekeningID: 1,
     userID: 3,
     beschrijving: 'wijk bert',
     in_uit: 'IN',
@@ -177,7 +170,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 4,
-    rekeningID: 1,
     userID: 1,
     beschrijving: 'factuur klj nationaal inschrijvingen',
     in_uit: 'UIT',
@@ -186,7 +178,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 5,
-    rekeningID: 2,
     userID: 1,
     beschrijving: 'knutselactiviteit -8',
     in_uit: 'IN',
@@ -195,7 +186,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 6,
-    rekeningID: 1,
     userID: 2,
     beschrijving: 'factuur brouwer',
     in_uit: 'UIT',
@@ -204,7 +194,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 7,
-    rekeningID: 1,
     userID: 2,
     beschrijving: 'aankoop kaas ouderavond',
     in_uit: 'UIT',
@@ -213,7 +202,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 8,
-    rekeningID: 1,
     userID: 2,
     beschrijving: 'aankoop vlees ouderavond',
     in_uit: 'UIT',
@@ -222,7 +210,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 9,
-    rekeningID: 1,
     userID: 2,
     beschrijving: 'payconiq inkomsten ouderavond',
     in_uit: 'IN',
@@ -231,7 +218,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 10,
-    rekeningID: 1,
     userID: 1,
     beschrijving: 'stamhoofd inschrijvingen inkomsten ouderavond',
     in_uit: 'IN',
@@ -240,7 +226,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 11,
-    rekeningID: 1,
     userID: 1,
     beschrijving: 'factuur brouwer ouderavond',
     in_uit: 'IN',
@@ -252,7 +237,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   // -8 Transacties (categorieID 7)
   {
     transactieID: 12,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-8: aankoop knutselmateriaal (lijm)',
     in_uit: 'UIT',
@@ -261,7 +245,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 13,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-8: aankoop knutselmateriaal (verf)',
     in_uit: 'UIT',
@@ -270,7 +253,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 14,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-8: nieuwe bal voor buitenactiviteit',
     in_uit: 'UIT',
@@ -279,7 +261,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 15,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-8: ijsjes voor activiteit',
     in_uit: 'UIT',
@@ -290,7 +271,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   // -12 Transacties (categorieID 8)
   {
     transactieID: 16,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-12: inkom zwembad (deel 1)',
     in_uit: 'UIT',
@@ -299,7 +279,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 17,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-12: inkom zwembad (deel 2)',
     in_uit: 'UIT',
@@ -308,7 +287,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 18,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-12: huur busje daguitstap',
     in_uit: 'UIT',
@@ -317,7 +295,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 19,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-12: drank voor quiz',
     in_uit: 'UIT',
@@ -328,7 +305,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   // -16 Transacties (categorieID 9)
   {
     transactieID: 20,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-16: paintball inkom',
     in_uit: 'UIT',
@@ -337,7 +313,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 21,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-16: aankoop tentzeil (materiaal)',
     in_uit: 'UIT',
@@ -346,7 +321,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 22,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '-16: vergoeding leiding weekend',
     in_uit: 'UIT',
@@ -357,7 +331,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   // +20 Transacties (categorieID 11)
   {
     transactieID: 23,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '+20: onderhoud lokalen (gebouw)',
     in_uit: 'UIT',
@@ -366,7 +339,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 24,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '+20: promomateriaal event (deel 1)',
     in_uit: 'UIT',
@@ -375,7 +347,6 @@ export const TRANSACTION_DATA: Transactie[] = [
   },
   {
     transactieID: 25,
-    rekeningID: 1,
     userID: 3,
     beschrijving: '+20: vergoeding vorming (leiding)',
     in_uit: 'UIT',
