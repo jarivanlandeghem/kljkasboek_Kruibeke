@@ -1,4 +1,3 @@
-// src/contexts/Auth.context.jsx
 import {
   useState,
   useCallback,
@@ -7,7 +6,7 @@ import {
 } from 'react';
 import useSWRMutation from 'swr/mutation';
 import useSWR from 'swr';
-import axios from 'axios'; // 👈 1. BELANGRIJK: Importeer axios zodat we de header kunnen zetten
+import axios from 'axios';
 import * as api from '../api';
 import { JWT_TOKEN_KEY, AuthContext } from './auth';
 
@@ -15,7 +14,6 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem(JWT_TOKEN_KEY));
   const [justLoggedIn, setJustLoggedIn] = useState(false);
 
-  // Als we de pagina laden, zetten we direct de header goed als er een token is
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -26,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     data: user,
     isLoading: userLoading,
     error: userError,
-    mutate: mutateUser, // 👈 We hebben deze nodig om handmatig te verversen na login
+    mutate: mutateUser, // nodig om handmatig te verversen na login
   } = useSWR(token ? 'users/me' : null, api.getById);
 
   const {
@@ -40,11 +38,9 @@ export const AuthProvider = ({ children }) => {
         try {
           console.debug('Auth.login: calling doLogin');
 
-          // 1. Haal de token op
           const result = await doLogin({ email, password });
           console.debug('Auth.login: doLogin result', result);
 
-          // 2. Normaliseer waar het token kan zitten (verschillende axios/swr vormen)
           let newToken;
           if (!result) newToken = null;
           else if (typeof result === 'string') newToken = result;
@@ -56,23 +52,16 @@ export const AuthProvider = ({ children }) => {
             throw new Error('Geen token ontvangen bij login');
           }
 
-          // 3. Sla op in state en storage
           setToken(newToken);
           localStorage.setItem(JWT_TOKEN_KEY, newToken);
 
-          // mark that we just logged in to ignore immediate 401s
           setJustLoggedIn(true);
 
-          // 4. Zorg dat de API instantie de header meekrijgt (interceptor leest localStorage),
-          //    en back-up: stel default axios header ook in voor direct gebruik.
           axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
-          // 5. Klein waitje zodat axios instance/interceptor en storage settled
           await new Promise((res) => setTimeout(res, 120));
-          // Vertel SWR dat hij users/me nu opnieuw moet proberen (met de nieuwe header)
           await mutateUser();
 
-          // clear the just-logged-in guard after a short time
           setTimeout(() => setJustLoggedIn(false), 1500);
 
           return true;
@@ -87,16 +76,10 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     setToken(null);
     localStorage.removeItem(JWT_TOKEN_KEY);
-    // Verwijder ook de header bij uitloggen
     delete axios.defaults.headers.common['Authorization'];
   }, []);
 
-  // 👇 DE FIX VOOR DE BUG
   useEffect(() => {
-    // Log alleen automatisch uit als:
-    // 1. Er een userError is
-    // 2. De error daadwerkelijk een 401 (Unauthorized) is
-    // 3. We NIET net bezig zijn met inloggen (loginLoading)
     if (
       userError &&
       userError.response?.status === 401 &&

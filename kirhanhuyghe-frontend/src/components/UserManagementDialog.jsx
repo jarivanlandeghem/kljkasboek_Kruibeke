@@ -1,5 +1,4 @@
-// src/components/UserManagementDialog.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -33,36 +32,30 @@ export default function UserManagementDialog() {
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [error, setError] = useState('');
 
-  // Data fetchen
   const { data: users, isLoading } = useSWR(
     open ? 'users' : null, 
     api.getAll
   );
 
-  // BEVEILIGING: Alleen admins zien de knop
+  // beveilign: Alleen admins zien de knop
   if (!currentUser?.roles?.includes('admin')) {
     return null;
   }
 
   const handleEditClick = (user) => {
     setEditingUser(user.userid);
-    // Zorg dat we altijd een array hebben
     setSelectedRoles(Array.isArray(user.roles) ? user.roles : [user.roles]);
     setError('');
   };
 
   const handleSaveRoles = async (userId) => {
     try {
-      // We sturen 'roles' als array, maar als je DTO 'role' (string) verwacht:
-      // Pas dit aan naar wat je backend updateUserDto verwacht.
-      // Op basis van je vorige inputs leek de DTO 'role' (enkelvoud string) te verwachten, 
-      // maar je database is JSON array. Ik stuur hier beide voor de zekerheid.
       await api.updateUser(userId, { 
-        role: selectedRoles[0], // Legacy support voor DTO
-        roles: selectedRoles    // Toekomst support
+        role: selectedRoles[0], 
+        roles: selectedRoles    
       });
       
-      mutate('users'); // Herlaad de lijst
+      mutate('users'); 
       setEditingUser(null);
     } catch (err) {
       setError('Kon rollen niet opslaan. Ben je zeker dat je admin rechten hebt?');
@@ -72,7 +65,6 @@ export default function UserManagementDialog() {
 
   return (
     <>
-      {/* De Knop op de pagina */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 2 }}>
         <Button 
           variant="outlined" 

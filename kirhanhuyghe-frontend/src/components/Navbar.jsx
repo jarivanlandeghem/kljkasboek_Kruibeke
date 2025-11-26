@@ -11,7 +11,6 @@ import {
 export default function Navbar() {
   const { user } = useAuth();
 
-  // Haal de volledige naam en eerste letter op
   const fullName = user ? `${user.voornaam} ${user.familienaam}` : 'Gebruiker';
   const firstLetter = user?.voornaam ? user.voornaam.charAt(0).toUpperCase() : 'G';
 
@@ -40,7 +39,6 @@ export default function Navbar() {
       {/* Rechts uitgelijnd */}
       <div className="ml-auto flex items-center gap-4 text-white relative"> 
 
-        {/* Navigation Links - zichtbaar op sm+ */}
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/' className="text-white">Home</Link>
         </span>
@@ -63,7 +61,6 @@ export default function Navbar() {
           <Link to='/kasjes' className="text-white">Kasjes</Link>
         </span>
         
-        {/* Full Name Link */}
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/profile' className="text-white">
             {fullName}
@@ -79,7 +76,6 @@ export default function Navbar() {
           </Tooltip>
         </Link>
 
-        {/* Logout Icon - zichtbaar op sm+ */}
         <div className="hidden sm:block">
           <Link to='/logout'>
             <Tooltip title='Log uit'>
@@ -93,7 +89,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Hamburger menu - zichtbaar op kleine schermen */}
+        {/* Hamburger menu */}
         <div className="sm:hidden ml-2" ref={menuRef}>
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}

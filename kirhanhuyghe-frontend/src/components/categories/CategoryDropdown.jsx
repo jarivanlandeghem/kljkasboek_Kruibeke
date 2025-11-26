@@ -4,7 +4,6 @@ import useSWR from 'swr';
 import { getAll } from '../../api';
 
 export default function CategoryDropdown({ value, onChange, categories = [], sx, className, style, fullWidth = true }) {
-  // Fetch categories van backend tenzij meegegeven via props
   const { data: fetched, error, isLoading } = useSWR(
     categories && categories.length ? null : 'categorieen',
     getAll,
@@ -33,15 +32,12 @@ export default function CategoryDropdown({ value, onChange, categories = [], sx,
     if (typeof onChange === 'function') {
       onChange(newValue || null);
     } else {
-      // when parent doesn't control value, manage local state
       setInternalValue(newValue || null);
     }
   };
 
-  // local state when caller does not provide controlled `value`
   const [internalValue, setInternalValue] = useState(value ?? null);
 
-  // sync when parent provides value prop
   useEffect(() => {
     if (value !== undefined) setInternalValue(value ?? null);
   }, [value]);

@@ -10,7 +10,6 @@ import {
 
 function TransactionsTable({ transacties, onDelete, currentUser, compact = false }) {
   const [userMap, setUserMap] = useState({});
-  // default sorting: newest first (datum desc)
   const [sorting, setSorting] = useState([{ id: 'datum', desc: true }]);
 
   useEffect(() => {
@@ -103,7 +102,6 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
 
   return (
     <div className="w-full">
-      {/* Controls: sort-by-date dropdown + column filters are under headers */}
       <div className="flex justify-end mr-6 mt-3 mb-2">
         <label className="flex items-center gap-2 text-sm text-gray-700">
           <span>Sorteer op datum:</span>
@@ -134,7 +132,6 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </div>
                     </div>
-                    {/* no column filter inputs (removed per request) */}
                   </th>
                 ))}
                 {!compact && <th className='py-2 px-4 w-24 text-right'></th>}

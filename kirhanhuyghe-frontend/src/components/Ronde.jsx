@@ -1,30 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Importer, ImporterField } from 'react-csv-importer';
 import 'react-csv-importer/dist/index.css';
 import { nlCSV } from '../utils/csvLocale';
-
-// MUI Imports
 import {
-  Box, Button, Typography, Paper, TextField, 
-  Dialog, DialogTitle, DialogContent, Stack, 
-  Card, CardContent, Chip, IconButton, Tooltip,
-  LinearProgress, Grid, Divider, List, ListItem, ListItemText, ListItemIcon
+    Box, Button, Typography, Paper, TextField,
+    Dialog, DialogTitle, DialogContent, Stack,
+    Card, CardContent, Chip, IconButton, Tooltip,
+    LinearProgress, Grid, Divider, List, ListItem, ListItemText, ListItemIcon
 } from '@mui/material';
-
-// Icons
 import {
-  CloudUpload, Map, CheckCircle, DirectionsRun, 
-  Home, Badge, PlayArrow, ContentCopy, OpenInNew,
-  Warning
+    CloudUpload, Map, CheckCircle, Home, Badge, PlayArrow, ContentCopy, OpenInNew,
+    Warning
 } from '@mui/icons-material';
-
-// API
-import * as api from '../api'; // Zorg dat je hier je post/get import
+import * as api from '../api';
 import Navbar from '../components/Navbar';
 
-// --- STIJLING & CONSTANTEN ---
 const modernButtonStyle = {
   borderRadius: '12px', 
   textTransform: 'none', 
@@ -45,9 +36,6 @@ const itemVariants = {
 
 
 
-// ============================================================================
-// COMPONENT: CSV IMPORT DIALOG
-// ============================================================================
 const CsvDialog = ({ open, type, onClose, onComplete }) => {
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" PaperProps={{ sx: { borderRadius: 3 } }}>
@@ -58,9 +46,8 @@ const CsvDialog = ({ open, type, onClose, onComplete }) => {
             <DialogContent sx={{ minHeight: '400px' }}>
                 <Importer
                     locale={nlCSV}
-                    parserOptions={{ header: true, delimiter: ';', skipEmptyLines: true }} // Pas delimiter aan indien nodig (komma of puntkomma)
+                    parserOptions={{ header: true, delimiter: ';', skipEmptyLines: true }}
                     processChunk={async (rows) => {
-                        // Simuleer verwerking, we slaan het pas later op in state
                         await new Promise((resolve) => setTimeout(resolve, 500));
                         onComplete(rows, type);
                     }}
@@ -78,26 +65,21 @@ const CsvDialog = ({ open, type, onClose, onComplete }) => {
     );
 };
 
-// ============================================================================
-// MAIN PAGE
-// ============================================================================
 export default function RondePage() {
     const [step, setStep] = useState(0); // 0 = Input, 1 = Processing, 2 = Result
     const [rondeNaam, setRondeNaam] = useState('');
     
-    // Data State
     const [huizen, setHuizen] = useState([]);
     const [leiding, setLeiding] = useState([]);
     const [resultaat, setResultaat] = useState(null);
     const [stats, setStats] = useState(null);
 
-    // UI State
     const [importType, setImportType] = useState(null); // 'huizen' of 'leiding'
 
     const handleImportComplete = (rows, type) => {
         if (type === 'huizen') setHuizen(prev => [...prev, ...rows]);
         if (type === 'leiding') setLeiding(prev => [...prev, ...rows]);
-        setImportType(null); // Sluit dialog
+        setImportType(null); 
     };
 
     const handleStartVerdeling = async () => {
@@ -109,7 +91,6 @@ export default function RondePage() {
     setStep(1); 
 
     try {
-        // 1. Upload
         const response = await api.post('ronde/import', { 
             arg: {
                 naam: rondeNaam,
@@ -121,12 +102,9 @@ export default function RondePage() {
         console.log("✅ Import klaar:", response);
         setStats(response);
 
-        // 2. Haal het resultaat op
         const rondeId = response.rondeId;
         const detailResponse = await api.getAll(`ronde/${rondeId}/resultaat`);
         
-        // 👇 AANGEPAST: Haal de array uit de 'leiding' property
-        // Was: setResultaat(detailResponse);
         setResultaat(detailResponse.leiding || []); 
         
         setStep(2); 
@@ -143,7 +121,6 @@ export default function RondePage() {
             <Navbar />
             <div className="max-w-7xl mx-auto p-4 md:p-8">
                 
-                {/* HEADER */}
                 <motion.div initial="hidden" animate="visible" variants={containerVariants} className="mb-8">
                     <Typography variant="h3" fontWeight="800" color="#1a1a1a" sx={{ letterSpacing: '-1px' }}>
                         Ronde Planner
@@ -153,12 +130,10 @@ export default function RondePage() {
                     </Typography>
                 </motion.div>
 
-                {/* STAP 0: INPUT & UPLOAD */}
                 {step === 0 && (
                     <motion.div variants={containerVariants} initial="hidden" animate="visible">
                         <Paper sx={{ p: 4, borderRadius: 4 }}>
                             
-                            {/* NAAM */}
                             <Box sx={{ mb: 4 }}>
                                 <Typography variant="h6" fontWeight="bold" gutterBottom>1. Naam van de actie</Typography>
                                 <TextField 
@@ -172,10 +147,8 @@ export default function RondePage() {
 
                             <Divider sx={{ my: 4 }} />
 
-                            {/* CARDS VOOR CSV */}
                             <Typography variant="h6" fontWeight="bold" gutterBottom>2. Data Importeren</Typography>
                             <Grid container spacing={3}>
-                                {/* HUIZEN CARD */}
                                 <Grid item xs={12} md={6}>
                                     <Card variant="outlined" sx={{ borderRadius: 4, height: '100%', borderColor: huizen.length > 0 ? '#4caf50' : '#e0e0e0', bgcolor: huizen.length > 0 ? '#f1f8e9' : 'white' }}>
                                         <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4 }}>
@@ -196,7 +169,6 @@ export default function RondePage() {
                                     </Card>
                                 </Grid>
 
-                                {/* LEIDING CARD */}
                                 <Grid item xs={12} md={6}>
                                     <Card variant="outlined" sx={{ borderRadius: 4, height: '100%', borderColor: leiding.length > 0 ? '#4caf50' : '#e0e0e0', bgcolor: leiding.length > 0 ? '#f1f8e9' : 'white' }}>
                                         <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4 }}>
@@ -218,7 +190,6 @@ export default function RondePage() {
                                 </Grid>
                             </Grid>
 
-                            {/* ACTIE KNOP */}
                             <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center' }}>
                                 <Button 
                                     variant="contained" 
@@ -241,7 +212,6 @@ export default function RondePage() {
                     </motion.div>
                 )}
 
-                {/* STAP 1: PROCESSING */}
                 {step === 1 && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center min-h-[400px]">
                         <Box sx={{ position: 'relative', width: 100, height: 100, mb: 4 }}>
@@ -262,11 +232,9 @@ export default function RondePage() {
                     </motion.div>
                 )}
 
-                {/* STAP 2: RESULTAAT */}
                 {step === 2 && resultaat && (
                     <motion.div variants={containerVariants} initial="hidden" animate="visible">
                         
-                        {/* STATS HEADER */}
                         <Paper sx={{ p: 3, borderRadius: 3, mb: 4, bgcolor: '#e8eaf6', border: '1px solid #c5cae9' }}>
                             <Stack direction={{xs:'column', md:'row'}} spacing={3} alignItems="center" justifyContent="space-between">
                                 <Box>
@@ -281,7 +249,6 @@ export default function RondePage() {
                             </Stack>
                         </Paper>
 
-                        {/* RESULT GRID */}
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {resultaat.map((item, index) => (
                                 <motion.div key={item.leidingID} variants={itemVariants}>
@@ -354,7 +321,6 @@ export default function RondePage() {
 
             </div>
 
-            {/* CSV IMPORT DIALOG */}
             {importType && (
                 <CsvDialog 
                     open={Boolean(importType)} 
