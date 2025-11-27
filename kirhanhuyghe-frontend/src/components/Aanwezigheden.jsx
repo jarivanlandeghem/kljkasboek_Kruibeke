@@ -9,13 +9,14 @@ import { IoTrash } from 'react-icons/io5';
 import {
     Box, Button, Typography, Paper, Dialog, DialogTitle, DialogContent,
     DialogActions, TextField, MenuItem, Chip, IconButton, Tooltip,
-    Stack, ToggleButton, ToggleButtonGroup, Card, CardContent
+    Stack, ToggleButton, ToggleButtonGroup, Card, CardContent,
+    List, ListItem, ListItemText, ListItemAvatar, Avatar, Divider, CircularProgress
 } from '@mui/material';
 
 import {
     Add, DirectionsWalk, AccessTime,
     CheckCircle, Cancel, QueryBuilder, Groups,
-    AdminPanelSettings, Person, EventBusy
+    AdminPanelSettings, Person, EventBusy, Email
 } from '@mui/icons-material';
 
 import { getAll, post, deleteById, update, updateAanwezigheid } from '../api';
@@ -37,6 +38,15 @@ const STATUS_CONFIG = {
 const modernButtonStyle = {
   borderRadius: '12px', textTransform: 'none', fontWeight: 600, padding: '8px 20px',
   boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+};
+
+const iconButtonStyle = {
+    backgroundColor: 'black',
+    color: 'white',
+    width: 36,
+    height: 36,
+    borderRadius: '9999px',
+    '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
 };
 
 const containerVariants = {
@@ -64,20 +74,16 @@ const AttendanceDialog = ({ open, onClose, attendance, event, onSave }) => {
 
   useEffect(() => {
     if (attendance) {
-      console.log("📝 AttendanceDialog OPENED for:", attendance);
       reset({
         status: attendance.status || 'UNKNOWN',
         reden: attendance.reden || '',
         startuur: attendance.aangepast_startuur ? attendance.aangepast_startuur.slice(0,5) : '',
         einduur: attendance.aangepast_einduur ? attendance.aangepast_einduur.slice(0,5) : '',
       });
-    } else {
-        console.warn("⚠️ AttendanceDialog opened without attendance object!");
     }
   }, [attendance, reset]);
 
   const onSubmit = (data) => {
-    console.log("💾 AttendanceDialog SUBMIT:", data);
     const payload = {
       status: data.status,
       reden: (data.status === 'ABSENT' || data.status === 'PARTIAL') ? data.reden : null,
@@ -133,20 +139,11 @@ const AttendanceDialog = ({ open, onClose, attendance, event, onSave }) => {
 const EventDialog = ({ open, onClose, event, onSave }) => {
     const { control, handleSubmit, reset, formState: { errors } } = useForm();
     useEffect(() => {
-        if (event) {
-            console.log("📝 EventDialog EDIT mode:", event);
-            reset({ ...event, datum: dayjs(event.datum).format('YYYY-MM-DD') });
-        }
-        else {
-            console.log("📝 EventDialog CREATE mode");
-            reset({ naam: '', type: 'ACTIVITEIT', datum: '', startuur: '', einduur: '', beschrijving: '' });
-        }
+        if (event) reset({ ...event, datum: dayjs(event.datum).format('YYYY-MM-DD') });
+        else reset({ naam: '', type: 'ACTIVITEIT', datum: '', startuur: '', einduur: '', beschrijving: '' });
     }, [event, reset, open]);
 
-    const onSubmit = (data) => {
-        console.log("💾 EventDialog SUBMIT:", data);
-        onSave(data);
-    }
+    const onSubmit = (data) => onSave(data);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
@@ -168,10 +165,74 @@ const EventDialog = ({ open, onClose, event, onSave }) => {
     );
 };
 
-const AttendeeListDialog = ({ open, onClose, event, allAttendances, users }) => {
+const AttendeeListDialog = ({ open, onClose, event, onMail }) => {
+    const eventId = event?.evenementID;
+    
+    // Safety check: only fetch if open AND eventId exists
+    const { data: attendees, isLoading } = useSWR(
+        open && eventId ? `aanwezigheden/event/${eventId}` : null, 
+        getAll
+    );
+    
+    const [sending, setSending] = useState(false);
+
+    const handleSend = async () => {
+        setSending(true);
+        await onMail(event);
+        setSending(false);
+    };
+
+    const listItems = attendees?.items || [];
+
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
-            <DialogActions><Button onClick={onClose}>Sluiten</Button></DialogActions>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, minHeight: '50vh' } }}>
+            <DialogTitle sx={{ fontWeight: 'bold', borderBottom: '1px solid #eee' }}>
+                {event?.naam}
+                <Typography variant="body2" color="text.secondary">Lijst van aanwezigen</Typography>
+            </DialogTitle>
+            <DialogContent sx={{ p: 0 }}>
+                {isLoading ? (
+                    <Box display="flex" justifyContent="center" p={4}><CircularProgress /></Box>
+                ) : (
+                    <List sx={{ maxHeight: '400px', overflow: 'auto' }}>
+                        {listItems.length === 0 && <Typography sx={{ p: 2, textAlign: 'center' }}>Nog geen aanwezigen gevonden.</Typography>}
+                        
+                        {listItems.map((att, i) => {
+                            // Safe status lookup
+                            const config = STATUS_CONFIG[att.status] || STATUS_CONFIG['UNKNOWN'];
+                            
+                            return (
+                                <div key={att.aanwezigheidID || i}>
+                                    <ListItem>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{ bgcolor: config.color + '.main' }}>
+                                                {config.icon}
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={`${att.voornaam} ${att.familienaam}`} 
+                                            secondary={att.reden || config.label} 
+                                        />
+                                    </ListItem>
+                                    {i < listItems.length - 1 && <Divider variant="inset" component="li" />}
+                                </div>
+                            );
+                        })}
+                    </List>
+                )}
+            </DialogContent>
+            <DialogActions sx={{ p: 2, borderTop: '1px solid #eee', justifyContent: 'space-between' }}>
+                <Button onClick={onClose} color="inherit">Sluiten</Button>
+                <Button 
+                    onClick={handleSend} 
+                    variant="contained" 
+                    color="primary" 
+                    startIcon={sending ? <CircularProgress size={20} color="inherit"/> : <Email />}
+                    disabled={sending}
+                >
+                    {sending ? 'Verzenden...' : 'Mail PDF naar mij'}
+                </Button>
+            </DialogActions>
         </Dialog>
     );
 };
@@ -180,8 +241,6 @@ export default function AanwezighedenPage() {
   const { user } = useAuth();
   const { mutate } = useSWRConfig();
 
-  
-  
   const hasRole = (roleName) => {
       if (!user || !user.roles) return false;
       return user.roles.some(r => String(r).toUpperCase() === roleName.toUpperCase());
@@ -190,11 +249,6 @@ export default function AanwezighedenPage() {
   const isAdmin = hasRole('ADMIN') || hasRole('HOOFDLEIDING');
   const isGV = hasRole('GROEPSVERANTWOORDELIJKE');
   const canManage = isAdmin || isGV;
-
-  useEffect(() => {
-      console.log("👮 Huidige User Rollen:", user?.roles);
-      console.log("   -> Is Admin?", isAdmin);
-  }, [user]);
 
   const [viewMode, setViewMode] = useState('personal'); 
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -206,13 +260,6 @@ export default function AanwezighedenPage() {
 
   const { data: events, isLoading: loadEvents } = useSWR('evenementen', getAll);
   const { data: allAttendances, isLoading: loadAtt } = useSWR('aanwezigheden', getAll); 
-  const { data: users } = useSWR(canManage ? 'users' : null, getAll); 
-
-  useEffect(() => {
-      if (events) console.log("📡 Events loaded:", events.length);
-      if (allAttendances) console.log("📡 Attendances loaded:", allAttendances.length);
-      if (user) console.log("👤 User ID:", user.userid);
-  }, [events, allAttendances, user]);
 
   const myEventsList = useMemo(() => {
     if (!events || !allAttendances || !user) return [];
@@ -223,11 +270,6 @@ export default function AanwezighedenPage() {
 
     return futureEvents.map(ev => {
         const myAtt = allAttendances.find(a => a.evenementID === ev.evenementID && a.userID === user.userid);
-        
-        if (!myAtt) {
-            console.warn(`⚠️ Geen aanwezigheid gevonden voor Event ${ev.evenementID} (${ev.naam}) en User ${user.userid}`);
-        }
-
         return { ...ev, myAttendance: myAtt };
     });
   }, [events, allAttendances, user]);
@@ -241,60 +283,57 @@ export default function AanwezighedenPage() {
   }, [events, isAdmin, isGV]);
 
   const handleAttendanceClick = (ev) => {
-      console.log("🖱️ Clicked Attendance for:", ev.naam, "ID:", ev.evenementID);
-      console.log("   Linked Attendance Object:", ev.myAttendance);
-      
       setSelectedEvent(ev);
       setSelectedAttendance(ev.myAttendance);
       setShowAttendanceDialog(true);
   };
 
   const handleAttendanceSave = async (id, payload) => {
-      console.log("🚀 Saving Attendance... ID:", id, "Payload:", payload);
       try {
-          if (!id) {
-              console.error("❌ SAVE FAILED: No ID provided!");
-              return alert("Geen record gevonden. Contacteer admin.");
-          }
+          if (!id) return alert("Geen record gevonden. Contacteer admin.");
           await updateAanwezigheid(id, payload);
-          console.log("✅ Save Success!");
           mutate('aanwezigheden'); 
           setShowAttendanceDialog(false);
       } catch (err) {
-          console.error("❌ Save API Error:", err);
           alert('Opslaan mislukt');
       }
   };
 
   const handleEventSave = async (data) => {
-      console.log("🚀 Saving Event...", data);
       try {
           if (selectedEvent?.evenementID) {
-              console.log("   -> Updating existing event:", selectedEvent.evenementID);
               await update(`evenementen/${selectedEvent.evenementID}`, { arg: data });
           } else {
-              console.log("   -> Creating new event");
               await post('evenementen', { arg: data });
           }
           mutate('evenementen');
           mutate('aanwezigheden'); 
           setShowEventDialog(false);
       } catch (err) {
-          console.error("❌ Event Save Error:", err);
           alert('Fout bij opslaan');
       }
   };
 
   const handleDeleteEvent = async (id) => {
-      console.log("🗑️ Deleting Event ID:", id);
       if(window.confirm("Ben je zeker?")) {
           try {
               await deleteById('evenementen', { arg: id });
               mutate('evenementen');
           } catch(err) { 
-              console.error("❌ Delete Error:", err);
               alert("Kon niet verwijderen"); 
           }
+      }
+  };
+
+  const handleMailPdf = async (event) => {
+      try {
+        await post(`evenementen/${event.evenementID}/pdf-aanwezigheden`, { 
+            arg: { email: user.email, naam: user.voornaam } 
+        });
+        alert(`PDF verzonden naar ${user.email}`);
+      } catch (error) {
+        console.error(error);
+        alert('Er ging iets mis bij het versturen van de mail.');
       }
   };
 
@@ -383,37 +422,21 @@ export default function AanwezighedenPage() {
                                                 <Typography variant="body2" color="text.secondary">{dayjs(ev.datum).format('DD MMM YYYY')} • {ev.type} • {ev.startuur?.slice(0,5)}</Typography>
                                             </Box>
                                             <Stack direction="row" spacing={1}>
-                                                <Tooltip title="Aanwezigen"><IconButton color="info" onClick={() => { setSelectedEvent(ev); setShowAttendeeList(true); }}><Groups /></IconButton></Tooltip>
-                                                <Tooltip title="Bewerken">
-                                                    <IconButton
-                                                        onClick={() => { setSelectedEvent(ev); setShowEventDialog(true); }}
-                                                        aria-label={`Bewerk evenement ${ev.evenementID}`}
-                                                        sx={{
-                                                            backgroundColor: 'black',
-                                                            color: 'white',
-                                                            width: 36,
-                                                            height: 36,
-                                                            borderRadius: '9999px',
-                                                            mr: 1,
-                                                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
-                                                        }}
+                                                <Tooltip title="Aanwezigen & PDF">
+                                                    <IconButton 
+                                                        onClick={() => { setSelectedEvent(ev); setShowAttendeeList(true); }}
+                                                        sx={iconButtonStyle}
                                                     >
+                                                        <Groups sx={{ fontSize: 18 }} />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Bewerken">
+                                                    <IconButton onClick={() => { setSelectedEvent(ev); setShowEventDialog(true); }} sx={iconButtonStyle}>
                                                         <FiEdit size={16} />
                                                     </IconButton>
                                                 </Tooltip>
                                                 <Tooltip title="Verwijderen">
-                                                    <IconButton
-                                                        onClick={() => handleDeleteEvent(ev.evenementID)}
-                                                        aria-label={`Verwijder evenement ${ev.evenementID}`}
-                                                        sx={{
-                                                            backgroundColor: 'black',
-                                                            color: 'white',
-                                                            width: 36,
-                                                            height: 36,
-                                                            borderRadius: '9999px',
-                                                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
-                                                        }}
-                                                    >
+                                                    <IconButton onClick={() => handleDeleteEvent(ev.evenementID)} sx={iconButtonStyle}>
                                                         <IoTrash size={16} />
                                                     </IconButton>
                                                 </Tooltip>
@@ -430,6 +453,7 @@ export default function AanwezighedenPage() {
 
         {showAttendanceDialog && <AttendanceDialog open={showAttendanceDialog} onClose={() => setShowAttendanceDialog(false)} attendance={selectedAttendance} event={selectedEvent} onSave={handleAttendanceSave} />}
         {showEventDialog && <EventDialog open={showEventDialog} onClose={() => setShowEventDialog(false)} event={selectedEvent} onSave={handleEventSave} />}
+        {showAttendeeList && <AttendeeListDialog open={showAttendeeList} onClose={() => setShowAttendeeList(false)} event={selectedEvent} onMail={handleMailPdf} />}
       </div>
     </div>
   );

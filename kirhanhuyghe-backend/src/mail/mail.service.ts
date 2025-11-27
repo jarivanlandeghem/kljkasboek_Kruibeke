@@ -47,10 +47,10 @@ export class MailService {
     try {
       await this.mailerService.sendMail({
         to: userEmail,
-        subject: 'Jouw Transactie Rapport - KLJ Portaal',
+        subject: 'Jouw Rapport - KLJ Portaal',
         html: `
           <h3>Dag ${firstName},</h3>
-          <p>In bijlage vind je het gevraagde overzicht van je transacties, opgesplitst per categorie.</p>
+          <p>In bijlage vind je het opgevraagde rapport.</p>
           <p>Met vriendelijke groeten,<br/>Het KLJ Portaal Team</p>
         `,
         attachments: [
