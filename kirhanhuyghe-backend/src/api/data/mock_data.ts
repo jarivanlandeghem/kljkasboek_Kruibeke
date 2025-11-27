@@ -199,7 +199,7 @@ export const TRANSACTION_DATA: Transactie[] = [
     userID: 1,
     beschrijving: 'knutselactiviteit -8',
     in_uit: 'IN',
-    bedrag: 2.35,
+    bedrag: -2.35,
     datum: '2025-04-30',
   },
   {
@@ -207,7 +207,7 @@ export const TRANSACTION_DATA: Transactie[] = [
     userID: 2,
     beschrijving: 'factuur brouwer',
     in_uit: 'UIT',
-    bedrag: 400.78,
+    bedrag: -400.78,
     datum: '2024-05-14',
   },
   {
