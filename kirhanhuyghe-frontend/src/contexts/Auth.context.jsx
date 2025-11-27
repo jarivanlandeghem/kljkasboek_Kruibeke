@@ -11,16 +11,14 @@ import * as api from '../api';
 import { JWT_TOKEN_KEY, AuthContext } from './auth';
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem(JWT_TOKEN_KEY));
+  const [token, setToken] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(JWT_TOKEN_KEY);
+    }
+    return null;
+  });
   const [justLoggedIn, setJustLoggedIn] = useState(false);
 
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-  }, [token]);
-
-  
   useEffect(() => {
     let timeoutId;
     if (justLoggedIn) {
@@ -28,13 +26,18 @@ export const AuthProvider = ({ children }) => {
         setJustLoggedIn(false);
       }, 1500);
     }
-    // Cleanup function
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
     };
   }, [justLoggedIn]);
+
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, [token]);
 
   const {
     data: user,
@@ -78,8 +81,6 @@ export const AuthProvider = ({ children }) => {
           await new Promise((res) => setTimeout(res, 120));
           await mutateUser();
           
-          
-
           return true;
         } catch (error) {
           console.error('Auth.login: login error', error);
