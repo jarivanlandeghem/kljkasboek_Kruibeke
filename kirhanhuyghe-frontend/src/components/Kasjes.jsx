@@ -43,7 +43,7 @@ export default function BudgetsPage() {
         <div className="mb-8 text-center md:text-left">
           <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3 justify-center md:justify-start">
             
-            Budgetten per leeftijdsgroep
+            Kasjes per leeftijdsgroep
           </h1>
           <p className="text-gray-500 mt-2">
              Beheer hier het jaarlijkse budget van je leeftijdsgroep.

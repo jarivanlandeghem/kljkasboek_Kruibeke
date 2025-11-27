@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCategorieRequestDto {
@@ -25,13 +25,13 @@ export class CategorieListResponseDto {
 }
 
 export class UpdateCategorieDto {
-  @ApiProperty({ example: 1, description: 'Uniek ID van de categorie' })
-  categorieID: number;
   @ApiProperty({
     required: false,
     example: 'nieuwe naam',
     description: 'Nieuwe categorienaam (optioneel)',
   })
+  @IsOptional()
+  @IsString()
   categorienaam?: string;
 }
 

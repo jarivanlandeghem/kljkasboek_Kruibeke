@@ -3,6 +3,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import { getAll, deleteById } from '../api';
 import CategoryDropdown from "../components/categories/CategoryDropdown";
 import AddCategoryDialog from "../components/categories/AddCategoryDialog";
+import EditCategoryDialog from "../components/categories/EditCategoryDialog";
 import Navbar from "../components/Navbar";
 import TransactionsTable from '../components/transactions/TransactionTable';
 import AsyncData from '../components/AsyncData';
@@ -50,6 +51,7 @@ export default function CategoriesPage() {
 
   const [selected, setSelected] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   
   const [viewMode, setViewMode] = useState('table'); // 'table' of 'charts'
 
@@ -228,7 +230,7 @@ const chartOptions = {
 
             <div className="flex items-center gap-3">
                 <ButtonGroup variant="outlined" aria-label="view mode" size="medium">
-                    <Button 
+                    <Button className='h-13.5'
                         onClick={() => setViewMode('table')}
                         variant={viewMode === 'table' ? 'contained' : 'outlined'}
                         startIcon={<TableChart />}
@@ -245,18 +247,41 @@ const chartOptions = {
                 </ButtonGroup>
 
                 {user && user.roles && user.roles.includes('admin') && (
-                <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"
-                    onClick={() => setShowAddDialog(true)}
-                >
-                    + Categorie
-                </button>
+                  <>
+                    <Button
+                      onClick={() => setShowAddDialog(true)}
+                      variant="contained"
+                      color="primary"
+                      size="medium"
+                      className="ml-2 h-13.5"
+                      sx={{ backgroundColor: '#2563eb', color: '#fff', '&:hover': { backgroundColor: '#1e40af' } }}
+                    >
+                      + Categorie
+                    </Button>
+
+                    <Button
+                      onClick={() => setShowEditDialog(true)}
+                      variant="outlined"
+                      color="warning"
+                      size="medium"
+                      disabled={!selected}
+                      className="ml-2 h-13.5"
+                    >
+                      Bewerken
+                    </Button>
+                  </>
                 )}
             </div>
             
             <AddCategoryDialog
               open={showAddDialog}
               onClose={() => setShowAddDialog(false)}
+              onSaved={() => mutate('categorieen')}
+            />
+            <EditCategoryDialog
+              open={showEditDialog}
+              onClose={() => setShowEditDialog(false)}
+              category={selected}
               onSaved={() => mutate('categorieen')}
             />
           </div>
@@ -282,13 +307,13 @@ const chartOptions = {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="flex flex-col md:flex-row gap-6">
-                      <div className="md:w-1/2 w-full bg-white p-4 rounded-xl shadow-sm border border-green-100">
+                      <div className="md:w-1/2 w/full bg-white p-4 rounded-xl shadow-sm border border-green-100">
                         <h2 className="text-xl font-bold mb-4 text-green-700 flex items-center gap-2">
                            <span>⬇️</span> Inkomsten: {selected.categorienaam}
                         </h2>
                         <TransactionsTable transacties={inTransacties} onDelete={handleDelete} currentUser={user} compact={true} />
                       </div>
-                      <div className="md:w-1/2 w-full bg-white p-4 rounded-xl shadow-sm border border-red-100">
+                      <div className="md:w-1/2 w/full bg-white p-4 rounded-xl shadow-sm border border-red-100">
                         <h2 className="text-xl font-bold mb-4 text-red-700 flex items-center gap-2">
                            <span>⬆️</span> Uitgaven: {selected.categorienaam}
                         </h2>

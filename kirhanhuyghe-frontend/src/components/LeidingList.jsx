@@ -260,7 +260,7 @@ export default function LeidingList() {
     >
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <Typography variant="h3" component="h1" sx={{ fontWeight: 800, color: '#1a1a1a', letterSpacing: '-1px' }}>
-            Leiding Overzicht
+            Leiding
         </Typography>
 
         <div className="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200 w-full md:w-auto focus-within:ring-2 focus-within:ring-red-500 transition-all">
