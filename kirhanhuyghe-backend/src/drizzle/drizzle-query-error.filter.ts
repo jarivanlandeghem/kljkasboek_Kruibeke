@@ -30,10 +30,8 @@ export class DrizzleQueryErrorFilter implements ExceptionFilter {
         }
       case 'ER_NO_REFERENCED_ROW_2':
         if (message.includes('transactions_user_id')) {
-          // TODO
           throw new NotFoundException('Er bestaan geen users met dit ID');
         } else if (message.includes('transactions_place_id')) {
-          // TODO
           throw new NotFoundException('Er bestaat geen transactie met dit ID');
         }
         break;
