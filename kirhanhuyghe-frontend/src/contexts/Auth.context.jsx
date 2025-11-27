@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Sessie verlopen, automatisch uitloggen...");
       logout();
     }
-  }, [userError, loginLoading, logout]);
+  }, [userError, loginLoading, logout, justLoggedIn]);
 
   const register = useCallback(async (data) => {
     await api.post('users', { arg: data });

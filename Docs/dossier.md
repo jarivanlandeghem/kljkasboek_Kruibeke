@@ -38,7 +38,7 @@
 
 ## 🧐 Testen van onze applicatie
 
-* Email exports testen
+- Email exports testen
   - 1. Ik mailde u de .env gegevens door om de nodemailer te doen werken, maak een .env file in de backend en kopieer deze hierin.
   - 2. Log in als jasper huyghe (<jasper.huyghe@outlook.be> | hashed_pw_123)
   - 3. Maak een gebruiker aan (../register) waar je uw emailadres gebruikt en een wachtwoord van minimum 8 tekens
