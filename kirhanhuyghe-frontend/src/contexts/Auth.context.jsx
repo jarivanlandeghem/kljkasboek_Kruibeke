@@ -11,8 +11,27 @@ import * as api from '../api';
 import { JWT_TOKEN_KEY, AuthContext } from './auth';
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem(JWT_TOKEN_KEY));
+  const [token, setToken] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(JWT_TOKEN_KEY);
+    }
+    return null;
+  });
   const [justLoggedIn, setJustLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let timeoutId;
+    if (justLoggedIn) {
+      timeoutId = setTimeout(() => {
+        setJustLoggedIn(false);
+      }, 1500);
+    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [justLoggedIn]);
 
   useEffect(() => {
     if (token) {
@@ -61,9 +80,7 @@ export const AuthProvider = ({ children }) => {
 
           await new Promise((res) => setTimeout(res, 120));
           await mutateUser();
-
-          setTimeout(() => setJustLoggedIn(false), 1500);
-
+          
           return true;
         } catch (error) {
           console.error('Auth.login: login error', error);
@@ -89,7 +106,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Sessie verlopen, automatisch uitloggen...");
       logout();
     }
-  }, [userError, loginLoading, logout]);
+  }, [userError, loginLoading, logout, justLoggedIn]);
 
   const register = useCallback(async (data) => {
     await api.post('users', { arg: data });
