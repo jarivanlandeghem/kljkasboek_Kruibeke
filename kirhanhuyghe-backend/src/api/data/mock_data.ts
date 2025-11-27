@@ -140,6 +140,24 @@ export const USER_DATA: any[] = [
     paswoord: 'robbebraem',
     roles: [Role.LEIDING, Role.USER, Role.GROEPSVERANTWOORDELIJKE],
   },
+  {
+    userid: 6,
+    // verenigingID: 1,
+    voornaam: 'Karine',
+    familienaam: 'Samyn',
+    email: 'karine.samyn@hogent.be',
+    paswoord: 'karinesamyn',
+    roles: [Role.LEIDING, Role.USER, Role.ADMIN],
+  },
+  {
+    userid: 7,
+    // verenigingID: 1,
+    voornaam: 'Andreas',
+    familienaam: 'De Witte',
+    email: 'andreas.dewitte@hogent.be',
+    paswoord: 'andreasdewitte',
+    roles: [Role.LEIDING, Role.USER, Role.ADMIN],
+  },
 ];
 
 // Transacties
@@ -181,7 +199,7 @@ export const TRANSACTION_DATA: Transactie[] = [
     userID: 1,
     beschrijving: 'knutselactiviteit -8',
     in_uit: 'IN',
-    bedrag: 2.35,
+    bedrag: -2.35,
     datum: '2025-04-30',
   },
   {
@@ -189,7 +207,7 @@ export const TRANSACTION_DATA: Transactie[] = [
     userID: 2,
     beschrijving: 'factuur brouwer',
     in_uit: 'UIT',
-    bedrag: 400.78,
+    bedrag: -400.78,
     datum: '2024-05-14',
   },
   {

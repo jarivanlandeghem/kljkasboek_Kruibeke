@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import {
   CreateEvenementRequestDto,
@@ -18,16 +18,33 @@ import {
 } from '../drizzle/schema';
 import { MailService } from '../mail/mail.service';
 import PDFDocument from 'pdfkit';
+import * as path from 'path';
+import * as fs from 'fs';
+
+const STATUS_TRANSLATIONS: Record<string, string> = {
+  PRESENT: 'Aanwezig',
+  ABSENT: 'Afwezig',
+  PARTIAL: 'Aangepast',
+  UNKNOWN: 'Onbekend',
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  PRESENT: '#2e7d32',
+  ABSENT: '#c62828',
+  PARTIAL: '#ef6c00',
+  UNKNOWN: '#757575',
+};
 
 @Injectable()
 export class EvenementenService {
+  private readonly logger = new Logger(EvenementenService.name);
+
   constructor(
     @InjectDrizzle()
     private readonly db: DatabaseProvider,
     private readonly mailService: MailService,
   ) {}
 
-  // Alle evenementen ophalen
   async getAll(): Promise<EvenementListResponseDto> {
     const items = await this.db.query.evenementen.findMany({
       orderBy: (evenementen, { desc }) => [desc(evenementen.datum)],
@@ -46,7 +63,6 @@ export class EvenementenService {
     return { items: responseItems };
   }
 
-  // Evenement op ID ophalen
   async getById(id: number): Promise<EvenementResponseDto> {
     const evenement = await this.db.query.evenementen.findFirst({
       where: eq(evenementen.evenementID, id),
@@ -72,15 +88,13 @@ export class EvenementenService {
 
     const newEventId = newEvenementIdObject.evenementID;
 
-    //  AUTOMATISCH AANWEZIGHEDEN AANMAKEN
-
     const allUsers = await this.db.select().from(users);
 
     if (allUsers.length > 0) {
       const emptyAttendances = allUsers.map((user) => ({
         evenementID: newEventId,
         userID: user.userid,
-        status: 'UNKNOWN' as const, // Default status
+        status: 'UNKNOWN' as const,
         reminder_sent: false,
       }));
 
@@ -90,7 +104,6 @@ export class EvenementenService {
     return await this.getById(newEventId);
   }
 
-  // UPDATE
   async updateById(
     id: number,
     updateDto: UpdateEvenementDto,
@@ -116,9 +129,7 @@ export class EvenementenService {
     return { ...existingEvenement, ...updateDto };
   }
 
-  // DELETE
   async deleteById(id: number): Promise<void> {
-    // Eerst afhankelijke records verwijderen (aanwezigheden)
     await this.db
       .delete(aanwezigheden)
       .where(eq(aanwezigheden.evenementID, id));
@@ -144,10 +155,6 @@ export class EvenementenService {
     };
   }
 
-  // ---------------------------------------------------------
-  // PDF RAPPORTAGE
-  // ---------------------------------------------------------
-
   async generateAndMailAttendanceList(
     evenementID: number,
     userEmail: string,
@@ -161,16 +168,13 @@ export class EvenementenService {
         familienaam: users.familienaam,
         status: aanwezigheden.status,
         reden: aanwezigheden.reden,
-        telnr: leidingProfiel.telnr,
+        aangepast_startuur: aanwezigheden.aangepast_startuur,
+        aangepast_einduur: aanwezigheden.aangepast_einduur,
       })
       .from(aanwezigheden)
       .innerJoin(users, eq(aanwezigheden.userID, users.userid))
       .leftJoin(leidingProfiel, eq(users.userid, leidingProfiel.userID))
       .where(eq(aanwezigheden.evenementID, evenementID));
-
-    if (rawAanwezigheden.length === 0) {
-      console.warn('Geen aanwezigheden gevonden, PDF zal leeg zijn.');
-    }
 
     const pdfBuffer = await this.createPdfBuffer(
       evenementInfo,
@@ -189,31 +193,70 @@ export class EvenementenService {
     attendees: any[],
   ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ margin: 50 });
-      const buffers: Buffer[] = [];
-
-      doc.on('data', (chunk: Buffer) => buffers.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
-
-      doc.on('error', (err: any) => {
-        if (err instanceof Error) {
-          reject(err);
-        } else {
-          reject(new Error(String(err)));
-        }
+      const doc = new PDFDocument({
+        margin: 40,
+        size: 'A4',
+        bufferPages: true,
       });
+      const buffers: Buffer[] = [];
+      const assetsPath = path.join(process.cwd(), 'assets');
 
-      doc.fontSize(20).text(`Aanwezigheidslijst`, { align: 'center' });
-      doc
-        .fontSize(14)
-        .text(`${eventInfo.naam} (${eventInfo.type})`, { align: 'center' });
-      doc
-        .fontSize(10)
-        .text(
-          `Datum: ${eventInfo.datum} | Tijd: ${eventInfo.startuur} - ${eventInfo.einduur}`,
-          { align: 'center' },
+      const fonts = {
+        Regular: path.join(assetsPath, 'Poppins-Regular.ttf'),
+        Bold: path.join(assetsPath, 'Poppins-Bold.ttf'),
+        SemiBold: path.join(assetsPath, 'Poppins-SemiBold.ttf'),
+        Medium: path.join(assetsPath, 'Poppins-Medium.ttf'),
+        Light: path.join(assetsPath, 'Poppins-Light.ttf'),
+      };
+
+      const logoPath = path.join(assetsPath, 'KLJ_LOGO_MANNETJE.png');
+
+      try {
+        if (fs.existsSync(fonts.Regular))
+          doc.registerFont('Poppins', fonts.Regular);
+        if (fs.existsSync(fonts.Bold))
+          doc.registerFont('Poppins-Bold', fonts.Bold);
+        if (fs.existsSync(fonts.SemiBold))
+          doc.registerFont('Poppins-SemiBold', fonts.SemiBold);
+        if (fs.existsSync(fonts.Medium))
+          doc.registerFont('Poppins-Medium', fonts.Medium);
+        if (fs.existsSync(fonts.Light))
+          doc.registerFont('Poppins-Light', fonts.Light);
+        doc.font('Poppins');
+      } catch (e) {
+        this.logger.warn(
+          'Kon Poppins fonts niet laden, fallback naar Helvetica.',
         );
-      doc.moveDown(2);
+        doc.font('Helvetica');
+      }
+
+      doc.on('data', (chunk) => buffers.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', (err) => reject(err));
+
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 40, 30, { width: 60 });
+      }
+
+      doc.font('Poppins-Bold').fontSize(22).fillColor('#222222');
+      doc.text('Aanwezigheidslijst', 120, 40);
+
+      doc.font('Poppins-Medium').fontSize(10).fillColor('#666666');
+      doc.text(`${eventInfo.naam} (${eventInfo.type})`, 120, 68);
+      doc.text(
+        `${new Date(eventInfo.datum).toLocaleDateString('nl-BE')} • ${eventInfo.startuur.slice(0, 5)} - ${eventInfo.einduur.slice(0, 5)}`,
+        120,
+        82,
+      );
+
+      doc
+        .moveTo(40, 110)
+        .lineTo(550, 110)
+        .lineWidth(2)
+        .strokeColor('#E30613')
+        .stroke();
+      doc.moveDown(3);
+      doc.y = 130;
 
       const presentCount = attendees.filter(
         (a) => a.status === 'PRESENT',
@@ -223,73 +266,103 @@ export class EvenementenService {
         (a) => a.status === 'PARTIAL',
       ).length;
 
-      doc
-        .fontSize(12)
-        .text(
-          `Aanwezig: ${presentCount} | Afwezig: ${absentCount} | Deels: ${partialCount}`,
-        );
-      doc.moveDown(1);
-
-      doc
-        .strokeColor('#aaaaaa')
-        .lineWidth(1)
-        .moveTo(50, doc.y)
-        .lineTo(550, doc.y)
-        .stroke();
+      doc.font('Poppins-SemiBold').fontSize(12).fillColor('black');
+      doc.text(
+        `Aanwezig: ${presentCount}   |   Afwezig: ${absentCount}   |   Aangepast: ${partialCount}`,
+        40,
+        doc.y,
+      );
       doc.moveDown(1);
 
       this.drawAttendanceTable(doc, attendees);
+
+      const range = doc.bufferedPageRange();
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(i);
+        doc.font('Poppins-Light').fontSize(8).fillColor('#999999');
+        doc.text(
+          `Pagina ${i + 1} van ${range.count} - Gegenereerd door KLJ Portaal`,
+          40,
+          doc.page.height - 30,
+          { align: 'center', width: 515 },
+        );
+      }
 
       doc.end();
     });
   }
 
   private drawAttendanceTable(doc: PDFKit.PDFDocument, attendees: any[]) {
-    const startX = 50;
-    let currentY = doc.y + 5;
+    const startX = 40;
+    const colNaam = startX + 10;
+    const colStatus = startX + 160;
+    const colInfo = startX + 260;
 
-    doc.fontSize(10).fillColor('black').font('Helvetica-Bold');
+    const rowHeight = 24;
 
-    doc.text('Naam', startX, currentY, { width: 150 });
-    doc.text('Status', startX + 160, currentY, { width: 80 });
-    doc.text('Info / Reden', startX + 250, currentY, { width: 200 });
-    doc.text('Tel', startX + 460, currentY, { width: 80 });
+    let currentY = doc.y + 10;
 
-    currentY += 15;
-    doc.moveTo(startX, currentY).lineTo(550, currentY).stroke();
-    currentY += 10;
+    doc.rect(startX, currentY, 515, rowHeight).fill('#eeeeee');
+    doc.fillColor('#333333').font('Poppins-SemiBold').fontSize(9);
 
-    doc.font('Helvetica');
+    doc.text('NAAM', colNaam, currentY + 7);
+    doc.text('STATUS', colStatus, currentY + 7);
+    doc.text('REDEN / INFO', colInfo, currentY + 7);
 
-    attendees.forEach((p) => {
-      if (currentY > 700) {
+    currentY += rowHeight;
+    doc.font('Poppins');
+
+    attendees.forEach((p, index) => {
+      if (currentY > 720) {
         doc.addPage();
         currentY = 50;
       }
 
-      const fullName = `${p.voornaam} ${p.familienaam}`;
-      let statusColor = 'black';
-      if (p.status === 'PRESENT') statusColor = 'green';
-      if (p.status === 'ABSENT') statusColor = 'red';
-      if (p.status === 'PARTIAL') statusColor = 'orange';
+      if (index % 2 === 0) {
+        doc.rect(startX, currentY, 515, rowHeight).fill('#f9f9f9');
+      }
 
-      doc.fillColor('black').text(fullName, startX, currentY, { width: 150 });
+      doc.fillColor('#444444').fontSize(9);
 
-      doc
-        .fillColor(statusColor)
-        .text(p.status, startX + 160, currentY, { width: 80 });
+      doc.text(`${p.voornaam} ${p.familienaam}`, colNaam, currentY + 7);
 
-      const redenText = p.reden ? p.reden : '-';
-      doc.fillColor('black').text(redenText, startX + 250, currentY, {
-        width: 200,
-        height: 15,
+      const statusKey = String(p.status);
+      const statusLabel = STATUS_TRANSLATIONS[statusKey] || statusKey;
+      const statusColor = STATUS_COLORS[statusKey] || 'black';
+
+      doc.save();
+      doc.fillColor(statusColor).font('Poppins-SemiBold');
+      doc.text(statusLabel, colStatus, currentY + 7);
+      doc.restore();
+
+      const infoParts: string[] = [];
+
+      if (p.reden) {
+        infoParts.push(p.reden.replace(/\n/g, ' '));
+      }
+
+      if (p.status === 'PARTIAL') {
+        const start = p.aangepast_startuur
+          ? String(p.aangepast_startuur).slice(0, 5)
+          : null;
+        const end = p.aangepast_einduur
+          ? String(p.aangepast_einduur).slice(0, 5)
+          : null;
+
+        if (start || end) {
+          const timeStr = `${start || '?'} - ${end || '?'}`;
+          infoParts.push(`(${timeStr})`);
+        }
+      }
+
+      const finalText = infoParts.length > 0 ? infoParts.join(' ') : '-';
+
+      doc.text(finalText, colInfo, currentY + 7, {
+        width: 250,
         ellipsis: true,
       });
 
-      const tel = p.telnr ? p.telnr : '';
-      doc.text(tel, startX + 460, currentY, { width: 80 });
-
-      currentY += 20;
+      currentY += rowHeight;
     });
 
     doc.y = currentY;

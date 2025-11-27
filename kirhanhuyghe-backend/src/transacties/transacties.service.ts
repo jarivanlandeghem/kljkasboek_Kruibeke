@@ -244,7 +244,9 @@ export class TransactieService {
 
       doc.on('data', (chunk) => buffers.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
-      doc.on('error', (err) => reject(err)); //TODO
+      doc.on('error', (err) => {
+        reject(err instanceof Error ? err : new Error(String(err)));
+      });
 
       // --- HEADER ---
 
