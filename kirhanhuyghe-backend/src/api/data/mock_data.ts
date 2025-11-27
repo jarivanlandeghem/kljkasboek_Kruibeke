@@ -140,6 +140,24 @@ export const USER_DATA: any[] = [
     paswoord: 'robbebraem',
     roles: [Role.LEIDING, Role.USER, Role.GROEPSVERANTWOORDELIJKE],
   },
+  {
+    userid: 6,
+    // verenigingID: 1,
+    voornaam: 'Karine',
+    familienaam: 'Samyn',
+    email: 'karine.samyn@hogent.be',
+    paswoord: 'karinesamyn',
+    roles: [Role.LEIDING, Role.USER, Role.ADMIN],
+  },
+  {
+    userid: 7,
+    // verenigingID: 1,
+    voornaam: 'Andreas',
+    familienaam: 'De Witte',
+    email: 'andreas.dewitte@hogent.be',
+    paswoord: 'andreasdewitte',
+    roles: [Role.LEIDING, Role.USER, Role.ADMIN],
+  },
 ];
 
 // Transacties

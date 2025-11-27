@@ -39,8 +39,9 @@
 ## 🧐 Testen van onze applicatie
 
 - Email exports testen
+*Voor mevrouw Samyn en meneer De Witte maakte ik al logingegevens aan. Jullie kunnen stap 2 tot 4 skippen: (<karine.samyn@hogent.be> | karinesamyn of <andreas.dewitte@hogent.be> || andreasdewitte)*
   - 1. Ik mailde u de .env gegevens door om de nodemailer te doen werken, maak een .env file in de backend en kopieer deze hierin.
-  - 2. Log in als jasper huyghe (<jasper.huyghe@outlook.be> | hashed_pw_123)
+  - 2. Log in als uzelf jasper huyghe (<jasper.huyghe@outlook.be> | hashed_pw_123)
   - 3. Maak een gebruiker aan (../register) waar je uw emailadres gebruikt en een wachtwoord van minimum 8 tekens
   - 4. Klik op "beheer gebruikers" en maak nieuwe testaccount admin, save en sluit
   - 5. Klik bij transacties op 'PDF rapport'
