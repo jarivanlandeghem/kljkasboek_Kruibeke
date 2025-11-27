@@ -1,5 +1,5 @@
 import TransactionsTable from './TransactionTable';
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AsyncData from '../AsyncData';
 import useSWR, { useSWRConfig } from 'swr';
 import { getAll, deleteById, post } from '../../api';
@@ -13,34 +13,27 @@ import {
   Button,
   Box,
   Typography,
-  Paper
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Alert
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import * as api from '../../api';
 import { nlCSV } from '../../utils/csvLocale';
 
-
-
-// ICONS
 import { DirectionsWalk, Add, CloudUpload, Assessment, Search } from '@mui/icons-material';
-
-// FRAMER MOTION
 import { motion, AnimatePresence } from 'framer-motion';
-
-//MUI DATEPICKER 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import 'dayjs/locale/nl';
 
-// CSV IMPORTER
 import { Importer, ImporterField } from 'react-csv-importer';
 import 'react-csv-importer/dist/index.css';
 
-
-
-//  ANIMATIE VARIANTEN 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
@@ -62,7 +55,6 @@ const modernButtonStyle = {
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     letterSpacing: '0.5px',
 };
-
 
 const LoadingState = () => {
   return (
@@ -127,6 +119,9 @@ export default function TransactionList() {
   
   const [duplicateWarning, setDuplicateWarning] = useState(false);
   const [pendingData, setPendingData] = useState(null);
+
+  const [csvReport, setCsvReport] = useState(null);
+  const importStatsRef = useRef({ success: 0, skipped: [] });
 
   const { mutate } = useSWRConfig();
 
@@ -230,7 +225,6 @@ export default function TransactionList() {
       };
 
       const duplicateFound = (transacties || []).find((t) => 
-        t.bedrag === bedragNum && 
         (t.beschrijving || '').trim().toLowerCase() === data.beschrijving.trim().toLowerCase()
       );
 
@@ -256,12 +250,9 @@ export default function TransactionList() {
   const handleCSVImport = async (rows) => {
     try {
       if (!userid) {
-        alert('Fout: Gebruiker niet gevonden. Probeer opnieuw in te loggen.');
         return;
       }
       
-      const importResults = { success: 0, failed: 0, errors: [] };
-
       for (const row of rows) {
         try {
           const rawAmount = row['Bedrag'] || row['bedrag'] || 0;
@@ -296,24 +287,24 @@ export default function TransactionList() {
             bedrag: bedragNum,
             datum: formattedDate,
           };
+
+          const isDuplicate = (transacties || []).some(t => 
+             (t.beschrijving || '').trim().toLowerCase() === beschrijving.trim().toLowerCase()
+          );
+
+          if (isDuplicate) {
+             importStatsRef.current.skipped.push(beschrijving);
+          } else {
+             await post('transacties', { arg: newTransactie });
+             importStatsRef.current.success++;
+          }
           
-          await post('transacties', { arg: newTransactie });
-          importResults.success++;
         } catch (rowError) {
-          importResults.failed++;
-          importResults.errors.push({ row: row, error: rowError.message });
+          console.error("Error processing row", rowError);
         }
       }
-      
-      if (importResults.failed === 0) {
-        alert(`Succesvol ${importResults.success} transacties geïmporteerd!`);
-      } else {
-        alert(`Import voltooid: ${importResults.success} succesvol, ${importResults.failed} gefaald.`);
-      }
-      mutate('transacties');
     } catch (error) {
       console.error('Algemene fout bij CSV import:', error);
-      alert('Er is een fout opgetreden bij het importeren van de CSV.');
     }
   };
 
@@ -360,7 +351,10 @@ export default function TransactionList() {
             <Button 
                 variant="contained" 
                 startIcon={<CloudUpload />}
-                onClick={() => setOpenDialog('importcsv')} 
+                onClick={() => {
+                   importStatsRef.current = { success: 0, skipped: [] };
+                   setOpenDialog('importcsv');
+                }} 
                 sx={{ ...modernButtonStyle, bgcolor: '#263238', '&:hover': { bgcolor: '#102027' } }}
             >
                 CSV Importeren
@@ -487,7 +481,7 @@ export default function TransactionList() {
         </DialogTitle>
         <DialogContent>
           <Typography>
-            Er bestaat al een transactie met de beschrijving <strong>"{pendingData?.beschrijving}"</strong> en bedrag <strong>€{pendingData?.bedrag}</strong>.
+            Er bestaat al een transactie met de beschrijving <strong>"{pendingData?.beschrijving}"</strong>.
           </Typography>
           <Typography sx={{ mt: 2, fontSize: '0.9rem', color: 'text.secondary' }}>
             Weet je zeker dat je deze nogmaals wilt toevoegen?
@@ -527,8 +521,13 @@ export default function TransactionList() {
             }}
             processChunk={handleCSVImport}
             onComplete={() => {
-              console.log('CSV import voltooid');
+              mutate('transacties');
               setOpenDialog(null);
+              if (importStatsRef.current.skipped.length > 0) {
+                 setCsvReport(importStatsRef.current);
+              } else {
+                 alert(`Succesvol ${importStatsRef.current.success} transacties geïmporteerd!`);
+              }
             }}
             onError={(error) => {
               console.error('CSV import fout:', error);
@@ -543,6 +542,38 @@ export default function TransactionList() {
           </Importer>
         </DialogContent>
       </Dialog>
+
+      <Dialog 
+        open={!!csvReport} 
+        onClose={() => setCsvReport(null)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+         <DialogTitle sx={{ fontWeight: 'bold' }}>Import Rapport</DialogTitle>
+         <DialogContent>
+            <Alert severity="success" sx={{ mb: 2 }}>
+               {csvReport?.success} transacties succesvol toegevoegd.
+            </Alert>
+            <Alert severity="warning" sx={{ mb: 1 }}>
+               {csvReport?.skipped?.length} transacties overgeslagen omdat ze al bestaan.
+            </Alert>
+            <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Niet geüploade records:</Typography>
+            <Paper variant="outlined" sx={{ maxHeight: 200, overflow: 'auto' }}>
+                <List dense>
+                    {csvReport?.skipped?.map((desc, index) => (
+                        <ListItem key={index} divider>
+                            <ListItemText primary={desc} />
+                        </ListItem>
+                    ))}
+                </List>
+            </Paper>
+         </DialogContent>
+         <DialogActions>
+            <Button onClick={() => setCsvReport(null)}>Sluiten</Button>
+         </DialogActions>
+      </Dialog>
+
     </motion.div>
   );
 }
