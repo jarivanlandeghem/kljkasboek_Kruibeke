@@ -20,6 +20,22 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  
+  useEffect(() => {
+    let timeoutId;
+    if (justLoggedIn) {
+      timeoutId = setTimeout(() => {
+        setJustLoggedIn(false);
+      }, 1500);
+    }
+    // Cleanup function
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [justLoggedIn]);
+
   const {
     data: user,
     isLoading: userLoading,
@@ -61,8 +77,8 @@ export const AuthProvider = ({ children }) => {
 
           await new Promise((res) => setTimeout(res, 120));
           await mutateUser();
-
-          setTimeout(() => setJustLoggedIn(false), 1500);
+          
+          
 
           return true;
         } catch (error) {
