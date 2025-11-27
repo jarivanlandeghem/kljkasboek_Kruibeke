@@ -17,12 +17,10 @@ export default function AddCategoryDialog({ open, onClose, onSaved }) {
       const result = await post('categorieen', { arg: { categorienaam: name.trim() } });
       console.debug('Categorie aangemaakt, server response:', result);
       setName('');
-      // await onSaved in case it returns a promise (e.g. mutate)
       try {
         await onSaved?.();
       } catch (mutErr) {
         console.error('Fout bij verversen categorieën (mutate):', mutErr);
-        // don't block closing the modal, but inform the user
         alert('Categorie toegevoegd, maar verversen mislukt. Herlaad de pagina.');
         onClose?.();
         return;
@@ -30,7 +28,6 @@ export default function AddCategoryDialog({ open, onClose, onSaved }) {
       onClose?.();
       alert('Categorie succesvol toegevoegd.');
     } catch (err) {
-      // richer error logging to help diagnose why the request appears to succeed server-side
       console.error('Fout bij toevoegen categorie:', err);
       console.error('err.response?.status =', err?.response?.status);
       console.error('err.response?.data =', err?.response?.data);

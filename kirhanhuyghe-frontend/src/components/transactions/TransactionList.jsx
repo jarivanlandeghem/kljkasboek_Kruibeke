@@ -21,18 +21,18 @@ import { nlCSV } from '../../utils/csvLocale';
 
 
 
-// --- ICONS ---
-import { DirectionsWalk, Add, CloudUpload, Assessment, Search } from '@mui/icons-material'; 
+// ICONS
+import { DirectionsWalk, Add, CloudUpload, Assessment, Search } from '@mui/icons-material';
 
-// --- FRAMER MOTION ---
+// FRAMER MOTION
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- MUI DATEPICKER ---
+//MUI DATEPICKER 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import 'dayjs/locale/nl'; 
+import 'dayjs/locale/nl';
 
 // CSV IMPORTER
 import { Importer, ImporterField } from 'react-csv-importer';
@@ -40,7 +40,7 @@ import 'react-csv-importer/dist/index.css';
 
 
 
-// --- ANIMATIE VARIANTEN ---
+//  ANIMATIE VARIANTEN 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
@@ -54,17 +54,16 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 }
 };
 
-// --- MODERNE BUTTON STYLE ---
 const modernButtonStyle = {
-    borderRadius: '12px', // Mooie ronde hoeken
-    textTransform: 'none', // Geen hoofdletters
+    borderRadius: '12px', 
+    textTransform: 'none',
     fontWeight: 600,
     padding: '8px 20px',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     letterSpacing: '0.5px',
 };
 
-// --- CUSTOM LOADING COMPONENT ---
+
 const LoadingState = () => {
   return (
     <Box
@@ -126,10 +125,8 @@ export default function TransactionList() {
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');
   
-  // --- NIEUW: State voor duplicate detectie ---
   const [duplicateWarning, setDuplicateWarning] = useState(false);
   const [pendingData, setPendingData] = useState(null);
-  // --------------------------------------------
 
   const { mutate } = useSWRConfig();
 
@@ -200,7 +197,6 @@ export default function TransactionList() {
     }
   };
 
-  // --- NIEUW: Functie die de daadwerkelijke opslag doet ---
   const handleFinalSave = async (transactieData) => {
     try {
       await post('transacties', { arg: transactieData });
@@ -215,7 +211,6 @@ export default function TransactionList() {
     }
   };
 
-  // --- AANGEPAST: onSubmit checkt nu eerst op duplicaten ---
   const onSubmit = async (data) => {
     try {
       const bedragNum = parseFloat(String(data.bedrag).replace(',', '.'));
@@ -227,7 +222,6 @@ export default function TransactionList() {
       }
 
       const newTransactie = {
-        rekeningID: 1,
         userID: userid,
         beschrijving: data.beschrijving,
         in_uit: bedragNum >= 0 ? 'IN' : 'UIT',
@@ -235,7 +229,6 @@ export default function TransactionList() {
         datum: formattedDate,
       };
 
-      // Check op duplicaten (zelfde bedrag en vergelijkbare beschrijving)
       const duplicateFound = (transacties || []).find((t) => 
         t.bedrag === bedragNum && 
         (t.beschrijving || '').trim().toLowerCase() === data.beschrijving.trim().toLowerCase()
@@ -297,7 +290,6 @@ export default function TransactionList() {
             : vrijeMededeling || naamTegenpartij || 'Geen beschrijving';
 
           const newTransactie = {
-            rekeningID: 1,
             userID: userid,
             beschrijving: beschrijving,
             in_uit: bedragNum >= 0 ? 'IN' : 'UIT',
@@ -353,7 +345,6 @@ export default function TransactionList() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="flex flex-wrap gap-3 mb-6">
-        {/* KNOP 1: VOEG TOE (ROOD) */}
         <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
             <Button 
                 variant="contained" 
@@ -365,7 +356,6 @@ export default function TransactionList() {
             </Button>
         </motion.div>
 
-        {/* KNOP 2: IMPORT (DONKER) */}
         <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
             <Button 
                 variant="contained" 
@@ -377,7 +367,6 @@ export default function TransactionList() {
             </Button>
         </motion.div>
 
-        {/* KNOP 3: RAPPORT (PAARS/INDIGO) */}
         <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
             <Button 
                 variant="contained" 
@@ -390,7 +379,6 @@ export default function TransactionList() {
         </motion.div>
       </motion.div>
 
-      {/* CONTENT AREA */}
       <div className="relative" style={{ minHeight: '500px' }}>
          <AnimatePresence>
             {showLoading && (
@@ -427,7 +415,6 @@ export default function TransactionList() {
          </motion.div>
       </div>
 
-      {/* MODALS */}
       <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="nl">
         <Dialog 
             open={openDialog === 'voegtoe'} 
@@ -490,7 +477,6 @@ export default function TransactionList() {
         </Dialog>
       </LocalizationProvider>
 
-      {/* --- NIEUW: DUPLICATE WARNING DIALOG --- */}
       <Dialog 
         open={duplicateWarning} 
         onClose={() => setDuplicateWarning(false)}
@@ -526,7 +512,6 @@ export default function TransactionList() {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* --------------------------------------- */}
 
       <Dialog open={openDialog === 'importcsv'} onClose={handleClose} fullWidth maxWidth="md" PaperProps={{ sx: { borderRadius: 3 } }}>
         <DialogTitle sx={{ fontWeight: 'bold' }}>CSV importeren</DialogTitle>

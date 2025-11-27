@@ -11,16 +11,15 @@ import TransactionsPage from './pages/TransactionsPage.jsx';
 import About from './pages/about/About.jsx';
 import NotFound from './pages/NotFound.jsx';
 import UsersPage from './pages/UsersPage.jsx';
-import AddUser from './pages/AddUser.jsx';
 import Login from './pages/Login.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import { AuthProvider } from './contexts/Auth.context';
 import PrivateRoute from './components/PrivateRoute';
 import Logout from './pages/Logout.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
-import LeidingPage from './pages/LeidingPage.jsx'
+import LeidingPage from './pages/LeidingPage.jsx';
 import AanwezighedenPage from './pages/AanwezighedenPage.jsx';
-import RondePage from './pages/RondePage.jsx'
+import RondePage from './pages/RondePage.jsx';
 import KasjesPage from './pages/KasjesPage.jsx';
 
 const router = createBrowserRouter([
@@ -58,13 +57,6 @@ const router = createBrowserRouter([
         element: <PrivateRoute />,
         children: [
           { index: true, element: <UsersPage /> }
-        ]
-      },
-      { 
-        path: 'adduser', 
-        element: <PrivateRoute />,
-        children: [
-          { index: true, element: <AddUser /> }
         ]
       },
       { path: 'login', element: <Login /> },

@@ -1,14 +1,13 @@
-// src/pages/Logout.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../contexts/auth';
-import { 
-  Box, 
-  Button, 
-  Typography, 
-  Grid, 
+import {
+  Box,
+  Button,
+  Typography,
+  Grid,
   Paper,
-  CircularProgress 
+  CircularProgress
 } from '@mui/material';
 import KLJIcon from '../assets/KLJIcon.png';
 import PlayingKids from '../assets/PlayingKids.jpg';
@@ -19,7 +18,6 @@ export default function Logout() {
   const [isLoggingOut, setIsLoggingOut] = useState(true);
 
   useEffect(() => {
-    // Voer logout uit bij het laden van de component
     const performLogout = async () => {
       try {
         await logout();
@@ -39,7 +37,6 @@ export default function Logout() {
 
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
-      {/* Linkerkant – Afbeelding */}
       <Grid
         item
         xs={false}
@@ -55,7 +52,6 @@ export default function Logout() {
         }}
       />
       
-      {/* Rechterkant – Logout bericht */}
       <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <Box
           sx={{
@@ -68,7 +64,6 @@ export default function Logout() {
             minHeight: '60vh',
           }}
         >
-          {/* Logo */}
           <img src={KLJIcon} alt="KLJ Logo" style={{ width: '100px', marginBottom: '20px' }} />
           
           {isLoggingOut ? (

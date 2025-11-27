@@ -25,7 +25,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Assessment, TableChart, PieChart } from '@mui/icons-material';
 import { Button, ButtonGroup } from '@mui/material';
 
-// Registreer ChartJS componenten
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -52,7 +51,6 @@ export default function CategoriesPage() {
   const [selected, setSelected] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   
-  // --- NIEUW: Hier ontbrak de state voor de weergave modus ---
   const [viewMode, setViewMode] = useState('table'); // 'table' of 'charts'
 
   const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
@@ -67,7 +65,6 @@ export default function CategoriesPage() {
     }
   }, [mutate]);
 
-  // --- LOGICA VOOR SPECIFIEKE CATEGORIE ---
   const matchesCategory = useCallback((t, cat) => {
     if (!cat) return false;
     const cid = cat.categorieID;
@@ -86,7 +83,6 @@ export default function CategoriesPage() {
   const inTransacties = useMemo(() => filtered.filter((t) => String(t.in_uit).toUpperCase() === 'IN'), [filtered]);
   const uitTransacties = useMemo(() => filtered.filter((t) => String(t.in_uit).toUpperCase() === 'UIT'), [filtered]);
 
-  // --- DATA VOOR GESELECTEERDE CATEGORIE GRAFIEKEN ---
   const specificChartData = useMemo(() => {
     const totalIn = inTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
     const totalUit = uitTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
@@ -124,7 +120,6 @@ export default function CategoriesPage() {
     };
   }, [inTransacties, uitTransacties, filtered]);
 
-  // totals = total IN and total UIT for the selected category
   const totals = useMemo(() => {
     const totalIn = inTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
     const totalUit = uitTransacties.reduce((acc, curr) => acc + Math.abs(Number(curr.bedrag || 0)), 0);
@@ -132,13 +127,10 @@ export default function CategoriesPage() {
     return { totalIn, totalUit, saldo: saldoValue };
   }, [inTransacties, uitTransacties]);
 
-  // --- DATA VOOR GLOBALE GRAFIEKEN (ALLE CATEGORIEËN) ---
   const globalChartData = useMemo(() => {
-    // 1. Groepeer transacties per categorie
     const categoryStats = {};
     
     transacties.forEach(t => {
-        // Probeer categorienaam te vinden, fallback naar 'Overig'
         const catName = t.categorieDetails?.[0]?.categorienaam || t.categorienaam || 'Ongecategoriseerd';
         
         if (!categoryStats[catName]) {
@@ -157,7 +149,6 @@ export default function CategoriesPage() {
     const dataIn = labels.map(l => categoryStats[l].in);
     const dataUit = labels.map(l => categoryStats[l].uit);
 
-    // Kleurenpalet
     const colors = [
         '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'
     ];
@@ -230,15 +221,12 @@ const chartOptions = {
       <div className="p-4">
         <div className="max-w-5xl mx-auto">
           
-          {/* --- HEADER CONTROLS --- */}
           <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            {/* Dropdown */}
             <div className="flex-1 min-w-[250px]">
               <CategoryDropdown value={selected} onChange={setSelected} />
             </div>
 
             <div className="flex items-center gap-3">
-                {/* --- NIEUW: KNOPPEN OM TE WISSELEN TUSSEN TABEL EN GRAFIEK --- */}
                 <ButtonGroup variant="outlined" aria-label="view mode" size="medium">
                     <Button 
                         onClick={() => setViewMode('table')}
@@ -276,7 +264,6 @@ const chartOptions = {
           <AsyncData loading={isLoading} error={error}>
              <AnimatePresence mode="wait">
                 
-                {/* SCENARIO 1: TABEL MODUS + GEEN SELECTIE */}
                 {viewMode === 'table' && !selected && (
                      <motion.div 
                         key="no-selection-table"
@@ -288,7 +275,6 @@ const chartOptions = {
                     </motion.div>
                 )}
 
-                {/* SCENARIO 2: TABEL MODUS + WEL SELECTIE */}
                 {viewMode === 'table' && selected && (
                   <motion.div
                     key="table-view"
@@ -312,7 +298,6 @@ const chartOptions = {
                   </motion.div>
                 )}
 
-                {/* SCENARIO 3: GRAFIEKEN MODUS + GEEN SELECTIE (GLOBAL OVERVIEW) */}
                 {viewMode === 'charts' && !selected && (
                     <motion.div
                         key="global-charts"
@@ -325,7 +310,6 @@ const chartOptions = {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             {/* Globale Doughnut */}
                              <div className="bg-white p-6 rounded-xl shadow-md h-96 flex flex-col items-center">
                                 <h3 className="text-gray-700 font-semibold mb-4 flex items-center gap-2"><PieChart/> Uitgaven Verdeling</h3>
                                 <div className="w-full h-full relative">
@@ -336,7 +320,6 @@ const chartOptions = {
                                 </div>
                             </div>
 
-                            {/* Globale Bar Chart */}
                             <div className="bg-white p-6 rounded-xl shadow-md h-96">
                                 <h3 className="text-gray-700 font-semibold mb-4 flex items-center gap-2"><Assessment/> Inkomsten vs Uitgaven per Categorie</h3>
                                 <Bar 
@@ -348,7 +331,6 @@ const chartOptions = {
                     </motion.div>
                 )}
 
-                {/* SCENARIO 4: GRAFIEKEN MODUS + WEL SELECTIE (SPECIFIEKE GRAFIEKEN) */}
                 {viewMode === 'charts' && selected && (
                   <motion.div
                     key="specific-charts"
@@ -360,13 +342,11 @@ const chartOptions = {
                         <h2 className="text-2xl font-bold text-gray-800">Analyse: {selected.categorienaam}</h2>
                       </div>
 
-                    {/* Specifieke Bar Chart */}
                     <div className="bg-white p-6 rounded-xl shadow-md h-80">
                         <h3 className="text-gray-700 font-semibold mb-4">Balans (In vs Uit)</h3>
                         <Bar data={specificChartData.comparison} options={chartOptions} />
                     </div>
 
-                    {/* Specifieke Doughnut */}
                     <div className="bg-white p-6 rounded-xl shadow-md h-80 flex flex-col items-center">
                         <h3 className="text-gray-700 font-semibold mb-4">Verhouding</h3>
                         <div className="w-full h-full relative">
@@ -374,7 +354,6 @@ const chartOptions = {
                         </div>
                     </div>
 
-                    {/* Specifieke Line Chart */}
                     <div className="bg-white p-6 rounded-xl shadow-md h-80 md:col-span-2">
                         <h3 className="text-gray-700 font-semibold mb-4">Verloop over tijd</h3>
                         <Line data={specificChartData.timeline} options={chartOptions} />
@@ -384,7 +363,6 @@ const chartOptions = {
 
               </AnimatePresence>
           </AsyncData>
-             {/* Bottom-centered balance for selected category */}
              {selected && (
                <div className="fixed bottom-6 left-0 right-0 pointer-events-none">
                  <div className="max-w-3xl mx-auto flex justify-center">

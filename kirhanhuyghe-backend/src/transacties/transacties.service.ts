@@ -1,6 +1,6 @@
 // src/transactie/transactie.service.ts
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { TRANSACTION_DATA, Transactie } from '../api/data/mock_data';
+import { Transactie } from '../api/data/mock_data';
 import { eq } from 'drizzle-orm';
 import {
   CreateTransactieRequestDto,
@@ -86,7 +86,6 @@ export class TransactieService {
 
     return {
       transactieID: transactie.transactieID,
-      rekeningID: transactie.rekeningID,
       userID: transactie.userID,
       beschrijving: transactie.beschrijving,
       in_uit: transactie.in_uit,

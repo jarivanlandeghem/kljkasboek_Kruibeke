@@ -7,7 +7,7 @@ export default function AlgemeneLayout({ image, children }) {
       <Navbar />
 
       <div className="relative w-full">
-        <div className="hidden md:block fixed top-20 left-0 w-[50vw] h-[calc(100vh-5rem)] z-0">
+        <div className="hidden md:block fixed top-20 left-0 w-[600px] h-[calc(100vh-5rem)] z-0">
           <img
             src={image}
             alt="Kinderen die spelen"
@@ -23,7 +23,7 @@ export default function AlgemeneLayout({ image, children }) {
           />
         </div>
 
-        <div className="relative z-10 w-full md:w-[50vw] md:ml-[50vw] min-h-[calc(100vh-5rem)] flex items-center justify-center bg-white p-4">
+        <div className="relative z-10 w-full min-h-[calc(100vh-5rem)] flex items-center justify-center p-4 md:pl-[600px]">
           {children}
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -16,10 +16,8 @@ import { useAuth } from '../contexts/auth';
 import AlgemeneLayout from "../components/AlgemeneLayout";
 import kidsPlaying from "../assets/PlayingKids.jpg";
 
-// --- FRAMER MOTION IMPORTS ---
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- ANIMATIE VARIANTEN ---
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
@@ -82,7 +80,6 @@ export default function ProfilePage() {
     e.preventDefault();
     setMessage({ type: '', text: '' });
 
-    // Validatie
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setMessage({ type: 'error', text: 'Nieuwe wachtwoorden komen niet overeen' });
       return;
@@ -114,20 +111,18 @@ export default function ProfilePage() {
   return (
     <AlgemeneLayout image={kidsPlaying}>
       <Container maxWidth="md" sx={{ py: 4 }}>
-        {/* Wrap Paper in motion.div voor het 'opkomen' effect */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={containerVariants}
         >
           <Paper 
-            component={motion.div} // Laat MUI Paper zich gedragen als een motion div
+            component={motion.div} 
             variants={cardVariants}
             elevation={3} 
             sx={{ p: 4, borderRadius: 2, overflow: 'hidden' }}
           >
             
-            {/* Profiel Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
               <motion.div 
                 initial={{ scale: 0 }} 
@@ -164,7 +159,6 @@ export default function ProfilePage() {
 
             <Grid container spacing={6}>
               
-              {/* Linkerkant: Profiel Informatie */}
               <Grid item xs={12} md={6}>
                 <motion.div variants={itemVariants}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -203,16 +197,14 @@ export default function ProfilePage() {
                 </motion.div>
               </Grid>
 
-              {/* Rechterkant: Wachtwoord Wijzigen */}
               <Grid item xs={12} md={6}>
-                <motion.div variants={itemVariants} custom={1}> {/* custom delay mogelijkheid */}
+                <motion.div variants={itemVariants} custom={1}> 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Lock sx={{ mr: 1, color: 'error.main' }} />
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>Wachtwoord wijzigen</Typography>
                   </Box>
 
-                  {/* Animated Alert Message */}
-                  <Box sx={{ minHeight: '50px', mb: 1 }}>
+                  <Box sx={{ minHeight: '0px', mb: 1 }}>
                     <AnimatePresence mode='wait'>
                       {message.text && (
                         <motion.div

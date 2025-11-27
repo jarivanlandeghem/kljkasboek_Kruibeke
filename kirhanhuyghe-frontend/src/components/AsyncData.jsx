@@ -1,4 +1,3 @@
-// src/components/AsyncData.jsx
 import Loader from './Loader';
 import Error from './Error';
 

@@ -11,9 +11,6 @@ import {
 import useSWR, { useSWRConfig } from 'swr';
 import { useForm, Controller } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
-// dayjs import verwijderd want je gebruikte het niet in dit bestand
-
-// MUI Imports
 import {
   Box,
   Button,
@@ -40,23 +37,17 @@ import {
   OutlinedInput,
 } from '@mui/material';
 
-// Icons
 import {
   Search,
   Add, DirectionsWalk
 } from '@mui/icons-material';
 
-// 👇 HIER ZAT DE FOUT: Named imports gebruiken!
 import { getAll, post, deleteById, update } from '../api';
-
-
-// Pas dit pad aan indien nodig (vaak ../../contexts/auth of ../contexts/auth afhankelijk van mapstructuur)
 
 import { useAuth } from '../contexts/auth';
 import AsyncData from './AsyncData';
 
 
-// --- CONSTANTEN & STIJLEN ---
 const LEEFTIJDSGROEPEN = ['-8', '-12', '-16', '+16'];
 const FUNCTIES_OPTIES = ['Hoofdleiding', 'Kassier', 'Materiaalmeester', 'EHBO', 'Kookouder', 'Lid'];
 
@@ -79,7 +70,6 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-// --- CUSTOM LOADING COMPONENT ---
 const LoadingState = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', width: '100%', bgcolor: '#ffffff', borderRadius: 4 }}>
     <style>{`
@@ -98,7 +88,6 @@ const LoadingState = () => (
   </Box>
 );
 
-// --- KLEUREN VOOR TAGS ---
 const getGroupColor = (group) => {
   switch (group) {
     case '-8': return 'info';     // Blauw
@@ -139,7 +128,6 @@ export default function LeidingList() {
   
   const showLoading = forceLoading || loadingProfielen || (!leidingProfielen && !error);
 
-  // --- HANDLERS ---
 
   const handleEditClick = useCallback((row) => {
     setEditingId(row.profielID);
@@ -178,8 +166,6 @@ export default function LeidingList() {
       alert('Er ging iets mis bij het opslaan.');
     }
   };
-
-  // --- TANSTACK TABLE CONFIG ---
 
   const columns = useMemo(() => [
     {

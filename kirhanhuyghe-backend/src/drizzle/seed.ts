@@ -98,7 +98,6 @@ async function seedStaticData() {
   // Transacties
   const transactionsToInsert = TRANSACTION_DATA.map((t) => ({
     transactieID: t.transactieID,
-    rekeningID: t.rekeningID,
     userID: t.userID,
     beschrijving: t.beschrijving,
     in_uit: t.in_uit,

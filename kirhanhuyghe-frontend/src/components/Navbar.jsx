@@ -4,14 +4,13 @@ import KLJIcon from "../assets/KLJIcon.png";
 import logout from "../assets/logout.png";
 import { useEffect, useRef, useState } from 'react';
 import {
-    Avatar,
-    Tooltip
+  Avatar,
+  Tooltip
 } from '@mui/material';
 
 export default function Navbar() {
   const { user } = useAuth();
 
-  // Haal de volledige naam en eerste letter op
   const fullName = user ? `${user.voornaam} ${user.familienaam}` : 'Gebruiker';
   const firstLetter = user?.voornaam ? user.voornaam.charAt(0).toUpperCase() : 'G';
 
@@ -40,7 +39,6 @@ export default function Navbar() {
       {/* Rechts uitgelijnd */}
       <div className="ml-auto flex items-center gap-4 text-white relative"> 
 
-        {/* Navigation Links - zichtbaar op sm+ */}
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/' className="text-white">Home</Link>
         </span>
@@ -63,7 +61,6 @@ export default function Navbar() {
           <Link to='/kasjes' className="text-white">Kasjes</Link>
         </span>
         
-        {/* Full Name Link */}
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/profile' className="text-white">
             {fullName}
@@ -79,7 +76,6 @@ export default function Navbar() {
           </Tooltip>
         </Link>
 
-        {/* Logout Icon - zichtbaar op sm+ */}
         <div className="hidden sm:block">
           <Link to='/logout'>
             <Tooltip title='Log uit'>
@@ -93,7 +89,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Hamburger menu - zichtbaar op kleine schermen */}
+        {/* Hamburger menu */}
         <div className="sm:hidden ml-2" ref={menuRef}>
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
@@ -109,11 +105,13 @@ export default function Navbar() {
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
               <div className="py-1">
-                <Link to='/home' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Home</Link>
+                <Link to='/' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Home</Link>
                 <Link to='/transactions' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Transacties</Link>
                 <Link to='/categories' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Categorieën</Link>
                 <Link to='/leiding' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Leiding</Link>
                 <Link to='/aanwezigheden' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Aanwezigheden</Link>
+                <Link to='/ronde' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Ronde maken</Link>
+                <Link to='/kasjes' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Kasjes</Link>
                 <Link to='/profile' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Profiel</Link>
                 <Link to='/logout' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Log uit</Link>
               </div>

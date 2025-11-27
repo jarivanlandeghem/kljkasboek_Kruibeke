@@ -1,34 +1,30 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { useForm, Controller } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import 'dayjs/locale/nl';
+import { IoTrash } from 'react-icons/io5';
 
-// MUI Imports
 import {
-  Box, Button, Typography, Paper, Dialog, DialogTitle, DialogContent, 
-  DialogActions, TextField, MenuItem, Chip, IconButton, Tooltip, 
-  Stack, ToggleButton, ToggleButtonGroup, Card, CardContent,
-  FormControl, InputLabel, Select
+    Box, Button, Typography, Paper, Dialog, DialogTitle, DialogContent,
+    DialogActions, TextField, MenuItem, Chip, IconButton, Tooltip,
+    Stack, ToggleButton, ToggleButtonGroup, Card, CardContent
 } from '@mui/material';
 
-// Icons
 import {
-  Add, Edit as EditIcon, Delete as DeleteIcon,
-  DirectionsWalk, AccessTime, 
-  CheckCircle, Cancel, QueryBuilder, Groups,
-  AdminPanelSettings, Person, EventBusy
+    Add, DirectionsWalk, AccessTime,
+    CheckCircle, Cancel, QueryBuilder, Groups,
+    AdminPanelSettings, Person, EventBusy
 } from '@mui/icons-material';
 
-// API & Context
 import { getAll, post, deleteById, update, updateAanwezigheid } from '../api';
 import { useAuth } from '../contexts/auth';
 import Navbar from '../components/Navbar';
+import { FiEdit } from 'react-icons/fi';
 
 dayjs.locale('nl');
 
-// --- CONSTANTEN ---
 const EVENT_TYPES = ['ACTIVITEIT', 'EVENEMENT', 'VERGADERING', 'OVERIGE'];
 
 const STATUS_CONFIG = {
@@ -53,7 +49,6 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-// --- LOADING COMPONENT ---
 const LoadingState = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px', width: '100%' }}>
     <DirectionsWalk sx={{ fontSize: 60, color: '#d32f2f' }} />
@@ -61,7 +56,6 @@ const LoadingState = () => (
   </Box>
 );
 
-// --- DIALOGS ---
 const AttendanceDialog = ({ open, onClose, attendance, event, onSave }) => {
   const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues: { status: 'UNKNOWN', reden: '', startuur: '', einduur: '' }
@@ -175,18 +169,13 @@ const EventDialog = ({ open, onClose, event, onSave }) => {
 };
 
 const AttendeeListDialog = ({ open, onClose, event, allAttendances, users }) => {
-    // ... (code ongewijzigd, logs niet echt nodig hier)
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
-            {/* ... */}
             <DialogActions><Button onClick={onClose}>Sluiten</Button></DialogActions>
         </Dialog>
     );
 };
 
-// ============================================================================
-// MAIN PAGE
-// ============================================================================
 export default function AanwezighedenPage() {
   const { user } = useAuth();
   const { mutate } = useSWRConfig();
@@ -195,7 +184,6 @@ export default function AanwezighedenPage() {
   
   const hasRole = (roleName) => {
       if (!user || !user.roles) return false;
-      // Zet alles om naar strings en uppercase voor de check
       return user.roles.some(r => String(r).toUpperCase() === roleName.toUpperCase());
   };
 
@@ -203,7 +191,6 @@ export default function AanwezighedenPage() {
   const isGV = hasRole('GROEPSVERANTWOORDELIJKE');
   const canManage = isAdmin || isGV;
 
-  // 👇 DEBUG: Zie in de console wat je rollen écht zijn
   useEffect(() => {
       console.log("👮 Huidige User Rollen:", user?.roles);
       console.log("   -> Is Admin?", isAdmin);
@@ -217,7 +204,6 @@ export default function AanwezighedenPage() {
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [showAttendeeList, setShowAttendeeList] = useState(false);
 
-  // DATA FETCHING
   const { data: events, isLoading: loadEvents } = useSWR('evenementen', getAll);
   const { data: allAttendances, isLoading: loadAtt } = useSWR('aanwezigheden', getAll); 
   const { data: users } = useSWR(canManage ? 'users' : null, getAll); 
@@ -228,7 +214,6 @@ export default function AanwezighedenPage() {
       if (user) console.log("👤 User ID:", user.userid);
   }, [events, allAttendances, user]);
 
-  // --- LOGICA: PERSOONLIJKE LIJST ---
   const myEventsList = useMemo(() => {
     if (!events || !allAttendances || !user) return [];
     
@@ -239,7 +224,6 @@ export default function AanwezighedenPage() {
     return futureEvents.map(ev => {
         const myAtt = allAttendances.find(a => a.evenementID === ev.evenementID && a.userID === user.userid);
         
-        // LOG ALS ER GEEN MATCH IS
         if (!myAtt) {
             console.warn(`⚠️ Geen aanwezigheid gevonden voor Event ${ev.evenementID} (${ev.naam}) en User ${user.userid}`);
         }
@@ -248,7 +232,6 @@ export default function AanwezighedenPage() {
     });
   }, [events, allAttendances, user]);
 
-  // --- LOGICA: ADMIN LIJST ---
   const adminEventsList = useMemo(() => {
       if (!events) return [];
       let list = [...events];
@@ -257,7 +240,6 @@ export default function AanwezighedenPage() {
       return list;
   }, [events, isAdmin, isGV]);
 
-  // HANDLERS
   const handleAttendanceClick = (ev) => {
       console.log("🖱️ Clicked Attendance for:", ev.naam, "ID:", ev.evenementID);
       console.log("   Linked Attendance Object:", ev.myAttendance);
@@ -323,7 +305,6 @@ export default function AanwezighedenPage() {
       <Navbar />
       <div className="max-w-5xl mx-auto p-4 md:p-6">
         
-        {/* HEADER */}
         <motion.div initial="hidden" animate="visible" variants={containerVariants} className="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
              <div>
                 <Typography variant="h4" fontWeight="800" color="#1a1a1a">
@@ -338,7 +319,6 @@ export default function AanwezighedenPage() {
              )}
         </motion.div>
 
-        {/* CONTENT */}
         <AnimatePresence mode="wait">
             {loading ? (
                 <motion.div key="loader" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity:0}}>
@@ -347,7 +327,6 @@ export default function AanwezighedenPage() {
             ) : (
                 <motion.div key="content" variants={containerVariants} initial="hidden" animate="visible">
                     
-                    {/* VIEW: PERSOONLIJK */}
                     {viewMode === 'personal' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {myEventsList.length === 0 ? (
@@ -385,7 +364,6 @@ export default function AanwezighedenPage() {
                         </div>
                     )}
 
-                    {/* VIEW: ADMIN */}
                     {viewMode === 'admin' && canManage && (
                         <>
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
@@ -406,8 +384,39 @@ export default function AanwezighedenPage() {
                                             </Box>
                                             <Stack direction="row" spacing={1}>
                                                 <Tooltip title="Aanwezigen"><IconButton color="info" onClick={() => { setSelectedEvent(ev); setShowAttendeeList(true); }}><Groups /></IconButton></Tooltip>
-                                                <Tooltip title="Bewerken"><IconButton onClick={() => { setSelectedEvent(ev); setShowEventDialog(true); }}><EditIcon /></IconButton></Tooltip>
-                                                <Tooltip title="Verwijderen"><IconButton color="error" onClick={() => handleDeleteEvent(ev.evenementID)}><DeleteIcon /></IconButton></Tooltip>
+                                                <Tooltip title="Bewerken">
+                                                    <IconButton
+                                                        onClick={() => { setSelectedEvent(ev); setShowEventDialog(true); }}
+                                                        aria-label={`Bewerk evenement ${ev.evenementID}`}
+                                                        sx={{
+                                                            backgroundColor: 'black',
+                                                            color: 'white',
+                                                            width: 36,
+                                                            height: 36,
+                                                            borderRadius: '9999px',
+                                                            mr: 1,
+                                                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
+                                                        }}
+                                                    >
+                                                        <FiEdit size={16} />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Verwijderen">
+                                                    <IconButton
+                                                        onClick={() => handleDeleteEvent(ev.evenementID)}
+                                                        aria-label={`Verwijder evenement ${ev.evenementID}`}
+                                                        sx={{
+                                                            backgroundColor: 'black',
+                                                            color: 'white',
+                                                            width: 36,
+                                                            height: 36,
+                                                            borderRadius: '9999px',
+                                                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
+                                                        }}
+                                                    >
+                                                        <IoTrash size={16} />
+                                                    </IconButton>
+                                                </Tooltip>
                                             </Stack>
                                         </Paper>
                                     </motion.div>
@@ -421,7 +430,6 @@ export default function AanwezighedenPage() {
 
         {showAttendanceDialog && <AttendanceDialog open={showAttendanceDialog} onClose={() => setShowAttendanceDialog(false)} attendance={selectedAttendance} event={selectedEvent} onSave={handleAttendanceSave} />}
         {showEventDialog && <EventDialog open={showEventDialog} onClose={() => setShowEventDialog(false)} event={selectedEvent} onSave={handleEventSave} />}
-        {/* AttendeeListDialog (ongewijzigd, voeg toe indien nodig) */}
       </div>
     </div>
   );

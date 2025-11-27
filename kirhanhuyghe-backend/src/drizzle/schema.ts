@@ -24,7 +24,6 @@ import { relations } from 'drizzle-orm';
 // Transacties
 export const transacties = mysqlTable('transacties', {
   transactieID: int('transactieID').autoincrement().primaryKey(),
-  rekeningID: int('rekeningID').notNull(),
   userID: int('userID').notNull(),
   beschrijving: text('beschrijving').notNull(),
   in_uit: mysqlEnum('in_uit', ['IN', 'UIT']).notNull(),

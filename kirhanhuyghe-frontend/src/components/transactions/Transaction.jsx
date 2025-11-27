@@ -39,7 +39,6 @@ function Transaction({
   const [cat2, setCat2] = useState(null);
 
   useEffect(() => {
-    // Simple, reliable initialization from props provided by the parent
     if (categorieDetails && Array.isArray(categorieDetails) && categorieDetails.length > 0) {
       setCat1(categorieDetails[0] ?? null);
       setCat2(categorieDetails[1] ?? null);
@@ -65,7 +64,6 @@ function Transaction({
     onDelete(transactieID);
   };
 
-  // Edit dialog state
   const [editOpen, setEditOpen] = useState(false);
   const [editError, setEditError] = useState('');
   const [form, setForm] = useState({ beschrijving: '', datum: '', bedrag: '' });
@@ -80,20 +78,17 @@ function Transaction({
       return;
     }
     const in_uit = amt < 0 ? 'UIT' : 'IN';
-    // Build payload with only fields that exist to avoid sending nulls
     const payload = {};
     if (form.beschrijving !== undefined) payload.beschrijving = form.beschrijving;
-    if (form.datum) payload.datum = form.datum; // only include if non-empty
+    if (form.datum) payload.datum = form.datum; 
     payload.bedrag = Math.abs(amt);
     payload.in_uit = in_uit;
     try {
       console.log('Updating transaction payload:', payload);
-      // Use putById helper to call PUT /transacties/:id
       await putById('transacties', { id: transactieID, arg: payload });
       mutate('transacties');
       setEditOpen(false);
     } catch (err) {
-      // Try to log server response body if available for easier debugging
       console.error('Error updating transaction', err?.response?.data || err.message || err);
       const serverMsg = err?.response?.data?.message || err?.response?.data || err.message;
       setEditError(serverMsg || 'Kon transactie niet opslaan');
@@ -103,7 +98,6 @@ function Transaction({
   const saveCategories = async (newCat1, newCat2) => {
     const ids = [newCat1?.categorieID, newCat2?.categorieID].filter((v) => v != null);
     try {
-      // Call the dedicated endpoint that updates only the join table
       await put(`transacties/${transactieID}/categorieen`, { categorieIDs: ids });
       mutate('transacties');
     } catch (err) {
@@ -119,7 +113,6 @@ function Transaction({
     await saveCategories(newCat1, newCat2);
   };
 
-  // Safely format the date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {

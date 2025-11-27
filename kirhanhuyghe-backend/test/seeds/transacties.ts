@@ -5,7 +5,6 @@ import { transacties } from '../../src/drizzle/schema';
 export const TRANSACTIES_SEED = [
   {
     transactieID: 1,
-    rekeningID: 1,
     userID: 1,
     beschrijving: 'Loon',
     in_uit: 'IN' as const,
@@ -14,7 +13,6 @@ export const TRANSACTIES_SEED = [
   },
   {
     transactieID: 2,
-    rekeningID: 1,
     userID: 2,
     beschrijving: 'Benzine',
     in_uit: 'UIT' as const,
@@ -23,7 +21,6 @@ export const TRANSACTIES_SEED = [
   },
   {
     transactieID: 3,
-    rekeningID: 2,
     userID: 3,
     beschrijving: 'Irish pub',
     in_uit: 'UIT' as const,
