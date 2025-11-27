@@ -1,4 +1,3 @@
-// test/seeds/users.ts
 import { DatabaseProvider } from '../../src/drizzle/drizzle.provider';
 import { users } from '../../src/drizzle/schema';
 import { eq } from 'drizzle-orm';

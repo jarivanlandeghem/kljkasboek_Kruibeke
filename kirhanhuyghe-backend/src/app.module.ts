@@ -14,6 +14,7 @@ import { MailModule } from './mail/mail.module';
 import { LeidingprofielModule } from './leidingprofiel/leidingprofiel.module';
 import { EvenementenModule } from './evenementen/evenementen.module';
 import { AanwezighedenModule } from './aanwezigheden/aanwezigheden.module';
+import { HealthModule } from './health/health.module';
 import { RondeModule } from './ronde/ronde.module';
 import { KasjesModule } from './kasjes/kasjes.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -49,6 +50,7 @@ import { join } from 'path';
     AanwezighedenModule,
     RondeModule,
     KasjesModule,
+    HealthModule,
   ],
   providers: [
     {
