@@ -43,6 +43,15 @@ describe('Transactions flows', () => {
     cy.get('[data-cy=transaction_add_beschrijving]').should('not.exist');
   });
 
+  it('hides add/import buttons for normal user', () => {
+    // intercept as regular user
+    cy.intercept('GET', 'http://localhost:3000/api/users/me', { statusCode: 200, body: { userid: 2, voornaam: 'Test', roles: ['user'] } }).as('meUser');
+    cy.visit('http://localhost:5173/transactions');
+    cy.wait('@meUser');
+    cy.get('[data-cy=transactions_new]').should('not.exist');
+    cy.get('[data-cy=transactions_import]').should('not.exist');
+  });
+
   it('shows validation errors when adding invalid transaction', () => {
     cy.visit('http://localhost:5173/transactions');
     cy.wait(['@me', '@getTransacties']);

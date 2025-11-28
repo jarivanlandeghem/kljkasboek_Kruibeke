@@ -54,4 +54,10 @@ describe('Dashboard navigation', () => {
     cy.get('[data-cy=home_ronde]').click();
     cy.location('pathname').should('include', '/ronde');
   });
+
+  it('does not show register link for normal user', () => {
+    cy.visit('http://localhost:5173/');
+    cy.wait('@me');
+    cy.get('[data-cy=home_register]').should('not.exist');
+  });
 });

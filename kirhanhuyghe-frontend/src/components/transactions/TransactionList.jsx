@@ -112,6 +112,7 @@ const LoadingState = () => {
 export default function TransactionList() {
   const { user } = useAuth();
   const userid = user.userid;
+  const isAdmin = user?.roles?.includes('admin');
   const cannotAddTransactie = !user || (Array.isArray(user.roles) && user.roles.length === 1 && String(user.roles[0]).toUpperCase() === 'USER');
   
   const [openDialog, setOpenDialog] = useState(null);
@@ -340,32 +341,36 @@ export default function TransactionList() {
       <motion.div variants={itemVariants} className="flex flex-wrap gap-3 mb-6">
         {!cannotAddTransactie && (
           <>
-          <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
-            <Button 
+          {isAdmin && (
+            <>
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Button 
                 variant="contained" 
                 startIcon={<Add />}
-              onClick={() => setOpenDialog('voegtoe')} 
+                onClick={() => setOpenDialog('voegtoe')} 
                 sx={{ ...modernButtonStyle, bgcolor: '#d32f2f', '&:hover': { bgcolor: '#b71c1c' } }}
-              data-cy="transactions_new"
-            >
-              Nieuwe Transactie
-            </Button>
-          </motion.div>
+                data-cy="transactions_new"
+              >
+                Nieuwe Transactie
+              </Button>
+            </motion.div>
 
-          <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="contained" 
-              startIcon={<CloudUpload />}
-              onClick={() => {
-                 importStatsRef.current = { success: 0, skipped: [] };
-                 setOpenDialog('importcsv');
-              }} 
-              sx={{ ...modernButtonStyle, bgcolor: '#263238', '&:hover': { bgcolor: '#102027' } }}
-              data-cy="transactions_import"
-            >
-              CSV Importeren
-            </Button>
-          </motion.div>
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                variant="contained" 
+                startIcon={<CloudUpload />}
+                onClick={() => {
+                   importStatsRef.current = { success: 0, skipped: [] };
+                   setOpenDialog('importcsv');
+                }} 
+                sx={{ ...modernButtonStyle, bgcolor: '#263238', '&:hover': { bgcolor: '#102027' } }}
+                data-cy="transactions_import"
+              >
+                CSV Importeren
+              </Button>
+            </motion.div>
+            </>
+          )}
           </>
         )}
 
