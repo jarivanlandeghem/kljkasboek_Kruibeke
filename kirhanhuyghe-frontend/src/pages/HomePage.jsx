@@ -138,7 +138,7 @@ export default function HomePage() {
                  <div className="flex items-center gap-2 text-violet-700 mb-4 font-semibold">
                     <AdminPanelSettings /> Admin Acties
                  </div>
-                <Link to='/register' className="w-full block h-24">
+                <Link to='/register' className="w-full block h-24" data-cy="home_register">
                   <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
                      <div className={`flex items-center justify-center gap-4 p-4 h-full w-full rounded-2xl border-2 transition-all bg-violet-50 text-violet-700 border-violet-100 hover:border-violet-300`}>
                       <PersonAdd sx={{ fontSize: 36 }} className="opacity-90" />
