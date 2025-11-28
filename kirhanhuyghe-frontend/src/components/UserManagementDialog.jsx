@@ -71,6 +71,7 @@ export default function UserManagementDialog() {
           color="warning" 
           startIcon={<AdminPanelSettings />}
           onClick={() => setOpen(true)}
+          data-cy="users_open_button"
         >
           Admin: Beheer Gebruikers
         </Button>
@@ -79,7 +80,7 @@ export default function UserManagementDialog() {
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Gebruikers & Rollen
-          <IconButton onClick={() => setOpen(false)}>
+          <IconButton onClick={() => setOpen(false)} data-cy="users_close_button">
             <Close />
           </IconButton>
         </DialogTitle>
@@ -100,15 +101,15 @@ export default function UserManagementDialog() {
                   secondaryAction={
                     editingUser === u.userid ? (
                       <Box>
-                        <IconButton color="primary" onClick={() => handleSaveRoles(u.userid)}>
+                        <IconButton color="primary" onClick={() => handleSaveRoles(u.userid)} data-cy={`users_save_${u.userid}`}>
                           <Save />
                         </IconButton>
-                        <IconButton color="error" onClick={() => setEditingUser(null)}>
+                        <IconButton color="error" onClick={() => setEditingUser(null)} data-cy={`users_cancel_${u.userid}`}>
                           <Close />
                         </IconButton>
                       </Box>
                     ) : (
-                      <IconButton onClick={() => handleEditClick(u)}>
+                      <IconButton onClick={() => handleEditClick(u)} data-cy={`users_edit_${u.userid}`}>
                         <Edit />
                       </IconButton>
                     )
@@ -130,8 +131,9 @@ export default function UserManagementDialog() {
                            <FormControl size="small" fullWidth sx={{ mt: 1 }}>
                              <Select
                                multiple
-                               value={selectedRoles}
-                               onChange={(e) => setSelectedRoles(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
+                                value={selectedRoles}
+                                onChange={(e) => setSelectedRoles(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
+                                data-cy={`users_select_${u.userid}`}
                                renderValue={(selected) => selected.join(', ')}
                              >
                                {AVAILABLE_ROLES.map((role) => (
@@ -144,7 +146,7 @@ export default function UserManagementDialog() {
                         ) : (
                           <Box component="span">
                             {u.roles?.map(r => (
-                              <Chip key={r} label={r} size="small" color={r === 'admin' ? 'error' : 'primary'} variant="outlined" sx={{ mr: 0.5 }} />
+                                <Chip key={r} label={r} size="small" color={r === 'admin' ? 'error' : 'primary'} variant="outlined" sx={{ mr: 0.5 }} data-cy={`users_role_${u.userid}_${r}`} />
                             ))}
                           </Box>
                         )}
