@@ -81,7 +81,7 @@ export default function HomePage() {
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             
             <motion.div variants={itemVariants}>
-              <Link to='/transactions' className="block h-full">
+              <Link to='/transactions' className="block h-full" data-cy="home_transactions">
                 <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
                   <DashboardBlock icon={ReceiptLong} label="Transacties" theme="blue" />
                 </motion.div>
@@ -89,7 +89,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link to='/categories' className="block h-full"> 
+              <Link to='/categories' className="block h-full" data-cy="home_categories"> 
                 <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
                   <DashboardBlock icon={Category} label="Categorieën" theme="blue" />
                 </motion.div>
@@ -97,7 +97,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link to='/kasjes' className="block h-full"> 
+              <Link to='/kasjes' className="block h-full" data-cy="home_kasjes"> 
                 <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
                   <DashboardBlock icon={Savings} label="Budgetten" theme="blue" />
                 </motion.div>
@@ -105,7 +105,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link to='/leiding' className="block h-full">
+              <Link to='/leiding' className="block h-full" data-cy="home_leiding">
                 <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
                   <DashboardBlock icon={Group} label="Leiding Lijst" theme="green" />
                 </motion.div>
@@ -113,7 +113,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link to='/aanwezigheden' className="block h-full">
+              <Link to='/aanwezigheden' className="block h-full" data-cy="home_aanwezigheden">
                 <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
                   <DashboardBlock icon={EventAvailable} label="Aanwezigheden" theme="green" />
                 </motion.div>
@@ -121,7 +121,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link to='/ronde' className="block h-full">
+              <Link to='/ronde' className="block h-full" data-cy="home_ronde">
                 <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
                   <DashboardBlock icon={DirectionsWalk} label="Ronde Planner" theme="green" />
                 </motion.div>
