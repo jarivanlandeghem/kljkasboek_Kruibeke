@@ -1,0 +1,22 @@
+[
+  {
+    "transactieID": 1,
+    "beschrijving": "Boodschappen",
+    "datum": "2025-11-01",
+    "bedrag": 50,
+    "in_uit": "UIT",
+    "userID": 2,
+    "categorieDetails": [],
+    "categorieKoppelingen": []
+  },
+  {
+    "transactieID": 2,
+    "beschrijving": "Salaris",
+    "datum": "2025-11-15",
+    "bedrag": 1500,
+    "in_uit": "IN",
+    "userID": 2,
+    "categorieDetails": [],
+    "categorieKoppelingen": []
+  }
+]

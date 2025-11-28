@@ -3,7 +3,7 @@ import { CircularProgress, TextField, Autocomplete } from '@mui/material';
 import useSWR from 'swr';
 import { getAll } from '../../api';
 
-export default function CategoryDropdown({ value, onChange, categories = [], sx, className, style, fullWidth = true }) {
+export default function CategoryDropdown({ value, onChange, categories = [], sx, className, style, fullWidth = true, inputDataCy }) {
   const { data: fetched, error, isLoading } = useSWR(
     categories && categories.length ? null : 'categorieen',
     getAll,
@@ -89,6 +89,10 @@ export default function CategoryDropdown({ value, onChange, categories = [], sx,
                 {params.InputProps.endAdornment}
               </>
             ),
+          }}
+          inputProps={{
+            ...params.inputProps,
+            ...(inputDataCy ? { 'data-cy': inputDataCy } : {}),
           }}
         />
       )}
