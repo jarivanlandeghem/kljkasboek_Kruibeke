@@ -28,6 +28,19 @@ export default function CategoryDropdown({ value, onChange, categories = [], sx,
         { categorieID: null, categorienaam: 'Huur' },
       ];
 
+  // Always sort options alphabetically by `categorienaam` (case-insensitive)
+  const sortedOptions = useMemo(() => {
+    const copy = Array.isArray(options) ? [...options] : [];
+    copy.sort((a, b) => {
+      const an = (typeof a === 'string' ? a : a?.categorienaam || '').toString().toLowerCase();
+      const bn = (typeof b === 'string' ? b : b?.categorienaam || '').toString().toLowerCase();
+      if (an < bn) return -1;
+      if (an > bn) return 1;
+      return 0;
+    });
+    return copy;
+  }, [options]);
+
   const handleChange = (_, newValue) => {
     if (typeof onChange === 'function') {
       onChange(newValue || null);
@@ -48,7 +61,7 @@ export default function CategoryDropdown({ value, onChange, categories = [], sx,
     <Autocomplete
       value={controlledValue}
       onChange={handleChange}
-      options={options}
+      options={sortedOptions}
       getOptionLabel={(option) => (typeof option === 'string' ? option : option?.categorienaam ?? '')}
       isOptionEqualToValue={(option, val) => {
         if (!option || !val) return false;
