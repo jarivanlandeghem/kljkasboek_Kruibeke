@@ -123,7 +123,7 @@ export default function HomePage() {
             <motion.div variants={itemVariants}>
               <Link to='/ronde' className="block h-full">
                 <motion.div variants={blockHoverVariants} whileHover="hover" whileTap="tap" className="h-full">
-                  <DashboardBlock icon={DirectionsWalk} label="Ronde Maken" theme="green" />
+                  <DashboardBlock icon={DirectionsWalk} label="Ronde Planner" theme="green" />
                 </motion.div>
               </Link>
             </motion.div>

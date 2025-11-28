@@ -55,7 +55,7 @@ export default function Navbar() {
           <Link to='/aanwezigheden' className="text-white">Aanwezigheden</Link>
         </span>
          <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
-          <Link to='/ronde' className="text-white">Ronde maken</Link>
+          <Link to='/ronde' className="text-white">Ronde planner</Link>
         </span>
         <span className="text-sm font-medium hidden sm:inline leading-none hover:text-sky-300 transition-colors">
           <Link to='/kasjes' className="text-white">Kasjes</Link>
@@ -110,7 +110,7 @@ export default function Navbar() {
                 <Link to='/categories' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Categorieën</Link>
                 <Link to='/leiding' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Leiding</Link>
                 <Link to='/aanwezigheden' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Aanwezigheden</Link>
-                <Link to='/ronde' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Ronde maken</Link>
+                <Link to='/ronde' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Ronde planner</Link>
                 <Link to='/kasjes' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Kasjes</Link>
                 <Link to='/profile' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Profiel</Link>
                 <Link to='/logout' className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Log uit</Link>
