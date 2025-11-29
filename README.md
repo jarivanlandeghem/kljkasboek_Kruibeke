@@ -57,7 +57,13 @@ pnpm run preview
 
 ### Testen
 
-- TODO
+1. Voer het volgende commando uit in je frontend map
+
+```bash
+pnpm test
+```
+
+2. Selecteer een van de testen. De testen worden dan automatisch uitgevoerd.
 
 ---
 
@@ -109,6 +115,47 @@ pnpm run start:dev
 ```
 
 - De backend is standaard beschikbaar op [http://localhost:3000](http://localhost:3000).
+
+### Docker (database via Docker Compose)
+
+Het backend-project bevat een `docker-compose.yml` die een MySQL-container start. Gebruik Docker Compose om snel een lokale database te draaien voor development of tests.
+
+- Ga naar de backend map:
+
+```bash
+cd kirhanhuyghe-backend
+```
+
+- Start de database:
+
+```bash
+docker compose up
+```
+
+- Stop en verwijder containers:
+
+```bash
+docker compose down
+```
+
+#### Test-database
+
+Er is ook een `docker-compose.test.yml` aanwezig die een aparte MySQL-instance voor de testen start. Gebruik deze wanneer je de testomgeving wil opzetten:
+
+```bash
+docker compose -f docker-compose.test.yml up
+```
+
+Opmerkingen / tip
+
+- Na het opstarten van de database kun je lokaal de migraties uitvoeren zodat de schema's worden aangemaakt:
+
+```bash
+cd kirhanhuyghe-backend
+pnpm db:migrate
+```
+
+- Als de backend nog niet in een container draait, draait de app lokaal (via `pnpm run start:dev`) en praat die met de DB-container via `localhost:3307`.
 
 ### Production
 
