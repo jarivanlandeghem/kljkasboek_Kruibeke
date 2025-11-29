@@ -10,6 +10,7 @@ import {
   HttpCode,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/roles';
 import { AuthService } from '../auth/auth.service';
@@ -32,6 +33,8 @@ import { MailService } from '../mail/mail.service';
 import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('users')
+@ApiTags('Users')
+@ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
 export class UserController {
   constructor(
@@ -42,12 +45,22 @@ export class UserController {
 
   @Get()
   @Roles(Role.ADMIN)
+  @ApiResponse({
+    status: 200,
+    description: 'Lijst van gebruikers',
+    type: UserListResponseDto,
+  })
   async getAllUsers(): Promise<UserListResponseDto> {
     return await this.userService.getAll();
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiResponse({
+    status: 201,
+    description: 'Gebruiker geregistreerd en token geretourneerd',
+    type: LoginResponseDto,
+  })
   async registerUser(
     @Body() registerDto: RegisterUserRequestDto,
   ): Promise<LoginResponseDto> {
@@ -59,6 +72,8 @@ export class UserController {
   // 👇 EN VERWIJDER @UseGuards(CheckUserAccessGuard)
   @Put('me/password')
   // @UseGuards(CheckUserAccessGuard) ❌ DEZE WEGHALEN!
+  @ApiResponse({ status: 200, description: 'Wachtwoord succesvol gewijzigd' })
+  @ApiResponse({ status: 400, description: 'Fout bij wijzigen wachtwoord' })
   async updatePassword(
     @CurrentUser() user: Session,
     @Body() dto: ChangePasswordRequestDto,
@@ -71,6 +86,11 @@ export class UserController {
 
   @Get(':id')
   @UseGuards(CheckUserAccessGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Haal gebruiker op',
+    type: PublicUserResponseDto,
+  })
   async getUserById(
     @Param('id', ParseUserIdPipe) id: 'me' | number,
     @CurrentUser() user: Session,
@@ -81,6 +101,11 @@ export class UserController {
 
   @Put(':id')
   @UseGuards(CheckUserAccessGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Gebruiker geüpdatet',
+    type: PublicUserResponseDto,
+  })
   async updateUserById(
     @Param('id', ParseUserIdPipe) id: 'me' | number,
     @CurrentUser() user: Session,
@@ -94,6 +119,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(CheckUserAccessGuard)
+  @ApiResponse({ status: 204, description: 'Gebruiker verwijderd' })
   async deleteUserById(
     @Param('id', ParseUserIdPipe) id: 'me' | number,
     @CurrentUser() user: Session,
@@ -103,6 +129,7 @@ export class UserController {
 
   @Public() // 👈 Heel belangrijk: geen login nodig
   @Post('request-account')
+  @ApiResponse({ status: 200, description: 'Account aanvraag verzonden' })
   async requestAccount(@Body() dto: RequestAccountDto): Promise<void> {
     await this.mailService.sendAccountRequest(
       dto.firstName,

@@ -10,6 +10,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import {
   CreateCategorieRequestDto,
   CategorieListResponseDto,
@@ -24,6 +25,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/roles';
 
 @Controller('categorieen')
+@ApiTags('Categorieën')
+@ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
 export class CategorieenController {
   constructor(
@@ -32,11 +35,21 @@ export class CategorieenController {
   ) {}
 
   @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Lijst met categorieën',
+    type: CategorieListResponseDto,
+  })
   async getAllCategorieen(): Promise<CategorieListResponseDto> {
     return this.categorieenService.getAll();
   }
 
   @Get(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Haal categorie op via ID',
+    type: CategorieResponseDto,
+  })
   async getCategorieById(
     @Param('id') id: string,
   ): Promise<CategorieResponseDto | undefined> {
@@ -46,6 +59,11 @@ export class CategorieenController {
   @Post()
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
+  @ApiResponse({
+    status: 201,
+    description: 'Categorie aangemaakt',
+    type: CategorieResponseDto,
+  })
   async createCategorie(
     @Body() createCategorieDto: CreateCategorieRequestDto,
   ): Promise<CategorieResponseDto> {
@@ -55,6 +73,11 @@ export class CategorieenController {
   @Put(':id')
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: 200,
+    description: 'Categorie geüpdatet',
+    type: CategorieResponseDto,
+  })
   async updateCategorieById(
     @Param('id') id: string,
     @Body() updateDto: UpdateCategorieDto,
@@ -65,6 +88,7 @@ export class CategorieenController {
   @Delete(':id')
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiResponse({ status: 204, description: 'Categorie verwijderd' })
   async deleteCategorie(@Param('id') id: string): Promise<void> {
     await this.categorieenService.deleteById(Number(id));
   }
