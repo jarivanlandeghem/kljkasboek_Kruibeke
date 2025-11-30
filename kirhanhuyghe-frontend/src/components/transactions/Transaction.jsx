@@ -154,6 +154,7 @@ function Transaction({
         <CategoryDropdown
           value={cat1}
           onChange={(v) => handleCategoryChange(1, v)}
+          inputDataCy={`transaction_${transactieID}_cat1`}
           fullWidth={true}
           sx={{ width: 250 }}
         />
@@ -162,6 +163,7 @@ function Transaction({
         <CategoryDropdown
           value={cat2}
           onChange={(v) => handleCategoryChange(2, v)}
+          inputDataCy={`transaction_${transactieID}_cat2`}
           fullWidth={false}
           sx={{ width: 250 }}
         />
@@ -170,18 +172,20 @@ function Transaction({
       <td className="py-2 px-4 hidden sm:table-cell">{displayUserName}</td>
       <td className="py-2 px-4">{amountFormat.format(in_uit === 'UIT' ? -Math.abs(bedrag || 0) : Math.abs(bedrag || 0))}</td>
       <td className='text-right py-2 pr-4'>
-        <button
+            <button
           className='inline-flex items-center justify-center w-9 h-9 bg-black text-white rounded-full mr-2'
-          onClick={() => { setForm({ beschrijving: beschrijving || '', datum: datum ? new Date(datum).toISOString().slice(0,10) : '', bedrag: typeof bedrag === 'number' ? String(in_uit === 'UIT' ? -Math.abs(bedrag) : Math.abs(bedrag)) : (bedrag || '') }); setEditError(''); setEditOpen(true); }}
+              onClick={() => { setForm({ beschrijving: beschrijving || '', datum: datum ? new Date(datum).toISOString().slice(0,10) : '', bedrag: typeof bedrag === 'number' ? String(in_uit === 'UIT' ? -Math.abs(bedrag) : Math.abs(bedrag)) : (bedrag || '') }); setEditError(''); setEditOpen(true); }}
+              data-cy={`transaction_edit_${transactieID}`}
           aria-label={`Bewerk transactie ${transactieID}`}
         >
           <FiEdit size={16} />
         </button>
       </td>
       <td>
-        <button
+            <button
           className='inline-flex items-center justify-center w-9 h-9 bg-black text-white rounded-full'
-          onClick={handleDelete}
+              onClick={handleDelete}
+              data-cy={`transaction_delete_${transactieID}`}
           aria-label={`Verwijder transactie ${transactieID}`}
         >
           <IoTrash size={16} />
@@ -191,13 +195,14 @@ function Transaction({
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Bewerk transactie</DialogTitle>
         <DialogContent>
-          {editError && <Alert severity="error" sx={{ mb: 2 }}>{editError}</Alert>}
+          {editError && <Alert severity="error" sx={{ mb: 2 }} data-cy={`transaction_edit_error_${transactieID}`}>{editError}</Alert>}
           <TextField
             label="Beschrijving"
             fullWidth
             margin="normal"
             value={form.beschrijving}
             onChange={(e) => setForm((s) => ({ ...s, beschrijving: e.target.value }))}
+            inputProps={{ 'data-cy': `transaction_edit_beschrijving_${transactieID}` }}
           />
           <TextField
             label="Datum"
@@ -207,6 +212,7 @@ function Transaction({
             value={form.datum}
             onChange={(e) => setForm((s) => ({ ...s, datum: e.target.value }))}
             InputLabelProps={{ shrink: true }}
+            inputProps={{ 'data-cy': `transaction_edit_datum_${transactieID}` }}
           />
           <TextField
             label="Bedrag"
@@ -215,11 +221,12 @@ function Transaction({
             margin="normal"
             value={form.bedrag}
             onChange={(e) => setForm((s) => ({ ...s, bedrag: e.target.value }))}
+            inputProps={{ 'data-cy': `transaction_edit_bedrag_${transactieID}` }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>Annuleer</Button>
-          <Button onClick={handleEditSave} variant="contained">Opslaan</Button>
+          <Button onClick={() => setEditOpen(false)} data-cy={`transaction_edit_cancel_${transactieID}`}>Annuleer</Button>
+          <Button onClick={handleEditSave} variant="contained" data-cy={`transaction_edit_save_${transactieID}`}>Opslaan</Button>
         </DialogActions>
       </Dialog>
     </>

@@ -244,6 +244,7 @@ export default function RegisterPage() {
                       label="Voornaam *"
                       name="voornaam"
                       value={formData.voornaam}
+                      inputProps={{ 'data-cy': 'register_voornaam' }}
                       onChange={handleChange}
                     />
                   </motion.div>
@@ -255,6 +256,7 @@ export default function RegisterPage() {
                       label="Familienaam *"
                       name="familienaam"
                       value={formData.familienaam}
+                      inputProps={{ 'data-cy': 'register_familienaam' }}
                       onChange={handleChange}
                     />
                   </motion.div>
@@ -268,6 +270,7 @@ export default function RegisterPage() {
                       name="email"
                       type="email"
                       value={formData.email}
+                      inputProps={{ 'data-cy': 'register_email' }}
                       onChange={handleChange}
                     />
                   </motion.div>
@@ -281,6 +284,7 @@ export default function RegisterPage() {
                       name="password"
                       type="password"
                       value={formData.password}
+                      inputProps={{ 'data-cy': 'register_password' }}
                       onChange={handleChange}
                       helperText="Minimaal 8 tekens"
                     />
@@ -294,6 +298,7 @@ export default function RegisterPage() {
                       name="confirmPassword"
                       type="password"
                       value={formData.confirmPassword}
+                      inputProps={{ 'data-cy': 'register_confirmPassword' }}
                       onChange={handleChange}
                     />
                   </motion.div>
@@ -314,6 +319,7 @@ export default function RegisterPage() {
                   disabled={isLoading}
                   sx={{ mt: 4, mb: 2, py: 1.5, fontWeight: 'bold', fontSize: '1rem' }}
                   startIcon={<Lock />}
+                  data-cy="register_submit"
                 >
                   {isLoading ? 'Aanmaken...' : 'Gebruiker Aanmaken'}
                 </Button>

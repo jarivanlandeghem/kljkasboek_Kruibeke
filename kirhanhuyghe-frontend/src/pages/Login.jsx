@@ -284,6 +284,7 @@ export default function Login() {
                             required
                             fullWidth
                             id="email"
+                          inputProps={{ 'data-cy': 'email_input' }}
                             label="Email"
                             autoComplete="email"
                             autoFocus
@@ -308,6 +309,7 @@ export default function Login() {
                             label="Paswoord"
                             type="password"
                             id="password"
+                          inputProps={{ 'data-cy': 'password_input' }}
                             autoComplete="current-password"
                             error={!!fieldState.error}
                             helperText={fieldState.error?.message}
@@ -321,6 +323,7 @@ export default function Login() {
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                             <Button
                             type="submit"
+                            data-cy="login_submit"
                             fullWidth
                             variant="contained"
                             disabled={loading}

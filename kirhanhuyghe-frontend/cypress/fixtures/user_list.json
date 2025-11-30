@@ -1,0 +1,16 @@
+[
+  {
+    "userid": 2,
+    "voornaam": "Pieter",
+    "familienaam": "Peeters",
+    "email": "pieter@example.com",
+    "roles": ["user"]
+  },
+  {
+    "userid": 3,
+    "voornaam": "Anna",
+    "familienaam": "Aerts",
+    "email": "anna@example.com",
+    "roles": ["user", "leiding"]
+  }
+]
