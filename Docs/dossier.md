@@ -52,6 +52,8 @@ TODO hier zit nog een bug
   - Onder Docs/testbestanden zit de csv bestanden die hier nodig zijn.
 TODO bug
 
+Opmerking: op het transactiescherm, klik zeker nog eens op de headers om de sorting te testen!
+
 ### Lokale omgeving
 
 - **E-mailadres**: <test@example.com>
