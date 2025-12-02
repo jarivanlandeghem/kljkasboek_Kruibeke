@@ -1,9 +1,10 @@
 // src/transactie/transactie.service.ts
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { Transactie } from '../api/data/mock_data';
-import { eq } from 'drizzle-orm';
+import { eq, sql, and, like, desc, asc } from 'drizzle-orm';
 import {
   CreateTransactieRequestDto,
+  GetTransactiesDto,
   TransactieListResponseDto,
   TransactieResponseDto,
   UpdateTransactieDto,
@@ -29,10 +30,50 @@ export class TransactieService {
     private readonly mailService: MailService,
   ) {}
 
-  async getAll(): Promise<TransactieListResponseDto> {
+  async getAll(query: GetTransactiesDto): Promise<TransactieListResponseDto> {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const search = query.search || '';
+    const offset = (page - 1) * limit;
+
+    const whereClause = search
+      ? and(like(transacties.beschrijving, `%${search}%`))
+      : undefined;
+
+    // 1. Haal totaal aantal op voor pagination
+    const [countResult] = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(transacties)
+      .where(whereClause);
+
+    const total = Number(countResult.count);
+
+    // 2. Haal de data op met limit/offset + dynamische sortering
+    const sortField = query.sort || 'datum';
+    const direction = query.direction || 'desc';
+    const dirFunc = direction === 'asc' ? asc : desc;
+
+    let orderByClause: any = dirFunc(transacties.datum);
+    switch (sortField) {
+      case 'bedrag':
+        orderByClause = dirFunc(transacties.bedrag);
+        break;
+      case 'beschrijving':
+        orderByClause = dirFunc(transacties.beschrijving);
+        break;
+      default:
+        orderByClause = dirFunc(transacties.datum);
+    }
+
     const items = await this.db.query.transacties.findMany({
+      where: search ? like(transacties.beschrijving, `%${search}%`) : undefined,
+      limit: limit,
+      offset: offset,
+      orderBy: [orderByClause],
       with: { categorieKoppelingen: true },
     });
+
+    // 3. Verrijk data (categorieën & users)
     const allCategories = await this.db.query.categorieen.findMany();
     const catMap = new Map(
       allCategories.map((c) => [c.categorieID, c.categorienaam]),
@@ -55,24 +96,37 @@ export class TransactieService {
       { voornaam: string; familienaam: string }
     >();
 
-    for (const id of userIds) {
-      const [dbUser] = await this.db
+    if (userIds.length > 0) {
+      const dbUsers = await this.db
         .select()
         .from(users)
-        .where(eq(users.userid, id))
-        .limit(1);
-      if (dbUser)
-        userMap.set(id, {
-          voornaam: dbUser.voornaam,
-          familienaam: dbUser.familienaam,
+        .where(sql`${users.userid} IN ${userIds}`);
+
+      dbUsers.forEach((u) => {
+        userMap.set(u.userid, {
+          voornaam: u.voornaam,
+          familienaam: u.familienaam,
         });
+      });
     }
+    const responseItems: TransactieResponseDto[] = itemsWithDetails.map(
+      (it) => ({
+        transactieID: it.transactieID,
+        userID: it.userID,
+        beschrijving: it.beschrijving,
+        in_uit: it.in_uit,
+        bedrag: Number(it.bedrag),
+        datum: String(it.datum),
+        author: userMap.get(it.userID) || undefined,
+        categorieDetails: it.categorieDetails,
+      }),
+    );
 
     return {
-      items: itemsWithDetails.map((it) => ({
-        ...it,
-        author: userMap.get(it.userID) || null,
-      })),
+      items: responseItems,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -135,14 +189,6 @@ export class TransactieService {
       .delete(transacties)
       .where(eq(transacties.transactieID, id));
     if (res.affectedRows === 0) throw new NotFoundException('Niet gevonden');
-  }
-
-  private toResponseDto(transactie: Transactie): TransactieResponseDto {
-    return {
-      ...transactie,
-      bedrag: Number(transactie.bedrag),
-      datum: String(transactie.datum),
-    };
   }
 
   //  PDF RAPPORTAGE LOGICA

@@ -1,127 +1,90 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import Transaction from './Transaction';
-import { getById } from '../../api';
 import {
   useReactTable,
   getCoreRowModel,
-  getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
 
-function TransactionsTable({ transacties, onDelete, currentUser, compact = false }) {
-  const [userMap, setUserMap] = useState({});
-  const [sorting, setSorting] = useState([{ id: 'datum', desc: true }]);
-
-  useEffect(() => {
-    const ids = Array.from(
-      new Set(
-        (transacties || [])
-          .filter((t) => !t.author)
-          .map((t) => t.userID)
-          .filter(Boolean),
-      ),
-    );
-    const missing = ids.filter((id) => !(String(id) in userMap));
-    if (missing.length === 0) return;
-
-    let cancelled = false;
-    const loadingMap = { ...userMap };
-    missing.forEach((id) => {
-      loadingMap[String(id)] = undefined;
-    });
-    setUserMap(loadingMap);
-
-    Promise.all(missing.map((id) => getById(`users/${id}`).catch(() => null))).then((results) => {
-      if (cancelled) return;
-      const next = { ...loadingMap };
-      missing.forEach((id, idx) => {
-        const user = results[idx];
-        next[String(id)] = user || null;
-      });
-      setUserMap(next);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [transacties]);
-
+function TransactionsTable({ 
+  transacties, 
+  onDelete, 
+  currentUser, 
+  compact = false,
+  pagination,
+  setPagination,
+  rowCount,
+  isLoading,
+  sorting,
+  setSorting,
+}) {
   const rows = useMemo(() => {
     return (transacties || []).map((transaction) => {
       let authorName;
       if (transaction.author) {
         authorName = `${transaction.author.voornaam || ''} ${transaction.author.familienaam || ''}`.trim();
       } else {
-        const entry = userMap[String(transaction.userID)];
-        if (entry === undefined) authorName = undefined;
-        else if (entry === null) authorName = null;
-        else authorName = `${entry.voornaam || ''} ${entry.familienaam || ''}`.trim();
+        authorName = 'Onbekend';
       }
       return { ...transaction, authorName };
     });
-  }, [transacties, userMap]);
+  }, [transacties]);
 
   const columns = useMemo(() => {
     if (compact) {
       return [
-        { accessorKey: 'beschrijving', header: 'Beschrijving', enableColumnFilter: true },
-        { accessorKey: 'datum', header: 'Datum', cell: (info) => new Date(info.getValue() || '').toLocaleDateString('nl-BE'), enableColumnFilter: true, enableSorting: true },
+        { accessorKey: 'beschrijving', header: 'Beschrijving' },
+        { accessorKey: 'datum', header: 'Datum', cell: (info) => new Date(info.getValue() || '').toLocaleDateString('nl-BE') },
         { accessorKey: 'bedrag', header: 'Bedrag', cell: (info) => {
             const v = Number(info.getValue() || 0);
             return new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(v < 0 ? v : Math.abs(v));
-          }, enableSorting: true },
+          } },
       ];
     }
 
     return [
-      { accessorKey: 'beschrijving', header: 'Beschrijving', enableColumnFilter: true },
-      { accessorFn: (row) => (row.categorieDetails?.[0]?.categorienaam || row.categorienaam || ''), id: 'cat1', header: 'Categorie 1', enableColumnFilter: true },
-      { accessorFn: (row) => (row.categorieDetails?.[1]?.categorienaam || ''), id: 'cat2', header: 'Categorie 2', enableColumnFilter: true },
-      { accessorKey: 'datum', header: 'Datum', cell: (info) => new Date(info.getValue() || '').toLocaleDateString('nl-BE'), enableColumnFilter: true, enableSorting: true },
-      { accessorKey: 'authorName', header: 'Gebruiker', cell: (info) => info.getValue(), enableColumnFilter: true },
+      { accessorKey: 'beschrijving', header: 'Beschrijving' },
+      { accessorFn: (row) => (row.categorieDetails?.[0]?.categorienaam || row.categorienaam || ''), id: 'cat1', header: 'Categorie 1' },
+      { accessorFn: (row) => (row.categorieDetails?.[1]?.categorienaam || ''), id: 'cat2', header: 'Categorie 2' },
+      { accessorKey: 'datum', header: 'Datum', cell: (info) => new Date(info.getValue() || '').toLocaleDateString('nl-BE') },
+      { accessorKey: 'authorName', header: 'Gebruiker', cell: (info) => info.getValue() },
       { accessorKey: 'bedrag', header: 'Bedrag', cell: (info) => {
           const v = Number(info.getValue() || 0);
           return new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(v < 0 ? v : Math.abs(v));
-        }, enableSorting: true },
+        } },
     ];
   }, [compact]);
 
   const table = useReactTable({
     data: rows,
     columns,
-    state: { sorting },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    pageCount: Math.ceil((rowCount || 0) / (pagination?.pageSize || 10)),
+    state: {
+      pagination: pagination || { pageIndex: 0, pageSize: 10 },
+      sorting: sorting || [],
+    },
+    onPaginationChange: setPagination,
     onSortingChange: setSorting,
+    manualPagination: true,
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel(),
   });
 
-  if ((transacties || []).length === 0) {
+  if (!isLoading && (transacties || []).length === 0) {
     return (
-      <div className='p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-100'>Er zijn nog geen transacties toegevoegd.</div>
+      <div className='p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-100'>Er zijn nog geen transacties gevonden.</div>
     );
   }
 
   return (
     <div className="w-full">
-      <div className="flex justify-end mr-6 mt-3 mb-2">
-        <label className="flex items-center gap-2 text-sm text-gray-700">
-          <span>Sorteer op datum:</span>
-          <select
-            value={sorting.find(s => s.id === 'datum') ? (sorting.find(s => s.id === 'datum').desc ? 'new' : 'old') : 'new'}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === 'new') setSorting([{ id: 'datum', desc: true }]);
-              else if (v === 'old') setSorting([{ id: 'datum', desc: false }]);
-            }}
-            className="px-2 py-1 border rounded bg-white"
-          >
-            <option value="new">Nieuw → Oud</option>
-            <option value="old">Oud → Nieuw</option>
-          </select>
-        </label>
-      </div>
-
-      <div className="overflow-x-auto w-full">
-        <table className='min-w-full table-auto border-collapse'>
+      <div className="overflow-x-auto w-full relative">
+        {isLoading && (
+           <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
+             <span className="text-gray-500 font-semibold">Laden...</span>
+           </div>
+        )}
+        <table className='min-w-full table-auto border-collapse mt-2'>
           <thead className='text-black'>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b-2 border-gray-300">
@@ -129,7 +92,15 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
                   <th key={header.id} className="text-start py-2 px-4 align-top">
                     <div className="flex items-center gap-2">
                       <div>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                {header.isPlaceholder ? null : (
+                                  <div
+                                    onClick={header.column.getToggleSortingHandler()}
+                                    style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                                  >
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                    {header.column.getIsSorted() ? (header.column.getIsSorted() === 'asc' ? ' ↑' : ' ↓') : ''}
+                                  </div>
+                                )}
                       </div>
                     </div>
                   </th>
@@ -138,7 +109,7 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
               </tr>
             ))}
           </thead>
-          <tbody>
+          <tbody className={isLoading ? 'opacity-50' : ''}>
             {table.getRowModel().rows.map((row) => {
               const data = row.original;
               return (
@@ -155,6 +126,47 @@ function TransactionsTable({ transacties, onDelete, currentUser, compact = false
           </tbody>
         </table>
       </div>
+
+      {!compact && pagination && (
+        <div className="flex items-center justify-between mt-4 px-2">
+          <div className="flex items-center gap-2">
+            <button
+              className="border rounded p-1 px-3 disabled:opacity-50 ml-5 mb-5"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<'}
+            </button>
+            <button
+              className="border rounded p-1 px-3 disabled:opacity-50 mb-5"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>'}
+            </button>
+            <span className="flex items-center gap-1 text-sm mb-5">
+              <div>Pagina</div>
+              <strong>
+                {table.getState().pagination.pageIndex + 1} van{' '}
+                {table.getPageCount()}
+              </strong>
+            </span>
+          </div>
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={e => {
+              table.setPageSize(Number(e.target.value))
+            }}
+            className="border p-1 rounded mr-10 mb-5"
+          >
+            {[10, 20, 30, 40, 50].map(pageSize => (
+              <option key={pageSize} value={pageSize}>
+                Toon {pageSize}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 }

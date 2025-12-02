@@ -1,4 +1,4 @@
-import TransactionsTable from './TransactionTable';
+import TransactionsTable from '../transactions/TransactionTable';
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AsyncData from '../AsyncData';
 import useSWR, { useSWRConfig } from 'swr';
@@ -33,7 +33,6 @@ import 'dayjs/locale/nl';
 
 import { Importer, ImporterField } from 'react-csv-importer';
 import 'react-csv-importer/dist/index.css';
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
@@ -116,11 +115,22 @@ export default function TransactionList() {
   const cannotAddTransactie = !user || (Array.isArray(user.roles) && user.roles.length === 1 && String(user.roles[0]).toUpperCase() === 'USER');
   
   const [openDialog, setOpenDialog] = useState(null);
-  const [text, setText] = useState('');
+  
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
   
   const [duplicateWarning, setDuplicateWarning] = useState(false);
   const [pendingData, setPendingData] = useState(null);
+
+  const [sorting, setSorting] = useState([{ id: 'datum', desc: true }]);
 
   const [csvReport, setCsvReport] = useState(null);
   const importStatsRef = useRef({ success: 0, skipped: [] });
@@ -136,8 +146,24 @@ export default function TransactionList() {
     },
   });
 
-  const { data: transacties, isLoading, error } = useSWR('transacties', getAll);
-  const { data: gebruikers = [] } = useSWR('users', getAll);
+  const fetchKey = ['transacties', { 
+    page: pagination.pageIndex + 1, 
+    limit: pagination.pageSize, 
+    search: debouncedSearch,
+    sort: sorting[0]?.id || 'datum',
+    direction: sorting[0]?.desc ? 'desc' : 'asc'
+  }];
+
+  const { data: responseData, isLoading, error } = useSWR(
+    fetchKey,
+    ([path, params]) => getAll(path, params),
+    { keepPreviousData: true }
+  );
+
+  const transacties = responseData?.items || [];
+  const totalRows = responseData?.total || 0;
+
+  const { data: gebruikers = [] } = useSWR('users', (path) => getAll(path));
 
   const [forceLoading, setForceLoading] = useState(true); 
   useEffect(() => {
@@ -145,41 +171,35 @@ export default function TransactionList() {
     return () => clearTimeout(timer);
   }, []);
 
-  const showLoading = forceLoading || isLoading || (!transacties && !error);
+  const showLoading = forceLoading || (isLoading && !transacties.length);
 
   const gebruikerMapping = useMemo(() => {
     const mapping = {};
-    gebruikers.forEach(gebruiker => {
-      mapping[gebruiker.userid] = gebruiker.voornaam;
-    });
+    if (Array.isArray(gebruikers)) {
+        gebruikers.forEach(gebruiker => {
+        mapping[gebruiker.userid] = gebruiker.voornaam;
+        });
+    }
     return mapping;
   }, [gebruikers]);
 
   const verrijkteTransacties = useMemo(() => 
-    (transacties || []).map(transactie => ({
+    transacties.map(transactie => ({
       ...transactie,
       displayVoornaam: gebruikerMapping[transactie.userID] || `User ${transactie.userID}`
     })),
     [transacties, gebruikerMapping]
   );
 
-  const filteredTransacties = useMemo(() =>
-    verrijkteTransacties.filter((t) => {
-      const beschrijving = (t.beschrijving || t.description || '').toString();
-      return beschrijving.toLowerCase().includes(search.toLowerCase());
-    }),
-    [search, verrijkteTransacties]
-  );
-
   const handleDelete = useCallback(async (transactieID) => {
     try {
       await deleteById('transacties', { arg: transactieID });
-      mutate('transacties');
+      mutate(fetchKey);
     } catch (err) {
       console.error(err);
       alert('Er is een fout opgetreden bij het verwijderen van de transactie.');
     }
-  }, [mutate]);
+  }, [mutate, fetchKey]);
 
   const handleGenerateReport =  async () => {
     const confirm = window.confirm("Wil je een PDF rapport van al je transacties per categorie ontvangen via e-mail?");
@@ -197,7 +217,7 @@ export default function TransactionList() {
   const handleFinalSave = async (transactieData) => {
     try {
       await post('transacties', { arg: transactieData });
-      mutate('transacties');
+      mutate(fetchKey);
       reset();
       setOpenDialog(null);
       setDuplicateWarning(false);
@@ -226,7 +246,7 @@ export default function TransactionList() {
         datum: formattedDate,
       };
 
-      const duplicateFound = (transacties || []).find((t) => 
+      const duplicateFound = transacties.find((t) => 
         (t.beschrijving || '').trim().toLowerCase() === data.beschrijving.trim().toLowerCase()
       );
 
@@ -290,7 +310,7 @@ export default function TransactionList() {
             datum: formattedDate,
           };
 
-          const isDuplicate = (transacties || []).some(t => 
+          const isDuplicate = transacties.some(t => 
              (t.beschrijving || '').trim().toLowerCase() === beschrijving.trim().toLowerCase()
           );
 
@@ -329,10 +349,10 @@ export default function TransactionList() {
               data-cy="transactions_search"
               className="bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full"
               placeholder="Zoek op beschrijving..."
-              value={text}
+              value={search}
               onChange={(e) => {
-                setText(e.target.value);
                 setSearch(e.target.value);
+                setPagination(prev => ({ ...prev, pageIndex: 0 }));
               }}
             />
         </div>
@@ -417,7 +437,16 @@ export default function TransactionList() {
          >
             <AsyncData loading={false} error={error}>
                 <Paper elevation={0} sx={{ borderRadius: 4, overflow: 'hidden', border: '1px solid #f0f0f0' }}>
-                    <TransactionsTable transacties={filteredTransacties} onDelete={handleDelete} />
+                    <TransactionsTable 
+                        transacties={verrijkteTransacties} 
+                        onDelete={handleDelete} 
+                        pagination={pagination}
+                        setPagination={setPagination}
+                        rowCount={totalRows}
+                        isLoading={isLoading}
+                        sorting={sorting}
+                      setSorting={setSorting}
+                    />
                 </Paper>
             </AsyncData>
          </motion.div>
@@ -527,7 +556,6 @@ export default function TransactionList() {
       <Dialog open={openDialog === 'importcsv'} onClose={handleClose} fullWidth maxWidth="md" PaperProps={{ sx: { borderRadius: 3 } }}>
         <DialogTitle sx={{ fontWeight: 'bold' }}>CSV importeren</DialogTitle>
         <DialogContent>
-          {/* Hidden file input fallback for tests: reads CSV and calls handleCSVImport */}
           <input
             type="file"
             accept=".csv"
@@ -551,9 +579,8 @@ export default function TransactionList() {
                     });
                     return obj;
                   });
-                  // call the existing handler and then run onComplete logic to mimic Importer behavior
                   Promise.resolve(handleCSVImport(rows)).then(() => {
-                    mutate('transacties');
+                    mutate(fetchKey);
                     setOpenDialog(null);
                     if (importStatsRef.current.skipped.length > 0) {
                       setCsvReport(importStatsRef.current);
@@ -582,7 +609,7 @@ export default function TransactionList() {
             }}
             processChunk={handleCSVImport}
             onComplete={() => {
-              mutate('transacties');
+              mutate(fetchKey);
               setOpenDialog(null);
               if (importStatsRef.current.skipped.length > 0) {
                  setCsvReport(importStatsRef.current);

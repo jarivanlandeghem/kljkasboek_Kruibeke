@@ -16,8 +16,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const getAll = (path) =>
-  api.get(`/${path}`).then((r) => {
+
+export const getAll = (path, params = {}) =>
+  api.get(`/${path}`, { params }).then((r) => {
+    
+    if (r.data && r.data.items && typeof r.data.total !== 'undefined') {
+        return r.data;
+    }
+    
     if (r.data && Array.isArray(r.data.items)) return r.data.items;
     return r.data;
   });
@@ -49,25 +55,15 @@ export const putById = async (url, { id, arg }) => {
   return data;
 };
 
-// 1. USERS
 export const getAllUsers = () => getAll('users');
 export const updateUser = (id, data) => api.put(`/users/${id}`, data).then(r => r.data);
-
-// 2. AANWEZIGHEDEN
 export const getAanwezigheden = () => getAll('aanwezigheden');
 export const getAanwezighedenByEvent = (eventId) => getAll(`evenementen/${eventId}/aanwezigheden`);
-
 export const updateAanwezigheid = async (id, data) => {
-  // Let op: Backend verwacht PATCH voor gedeeltelijke updates
   const { data: response } = await api.patch(`/aanwezigheden/${id}`, data);
   return response;
 };
-
-// 3. RONDE 
 export const importRonde = (payload) => post('ronde/import', { arg: payload });
 export const getRondeResultaat = (rondeId) => getAll(`ronde/${rondeId}/resultaat`);
-
-// 4. KASJES / BUDGETTEN
 export const getKasjes = () => getAll('kasjes');
-
 export const updateKasje = (id, data) => api.put(`/kasjes/${id}`, data).then(r => r.data);

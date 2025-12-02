@@ -1,5 +1,3 @@
-// src/transactie/transactie.dto.ts
-
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsInt,
@@ -11,158 +9,126 @@ import {
   IsOptional,
   IsNumber,
   IsArray,
+  Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateTransactieRequestDto {
   @IsInt()
-  @ApiProperty({
-    example: 1,
-    description: 'ID van de rekening waaraan deze transactie gekoppeld is',
-  })
+  @ApiProperty({ example: 1, description: 'ID van de rekening' })
   @IsNotEmpty()
+  accountID?: number;
+
   @IsInt()
-  @ApiProperty({
-    example: 1,
-    description: 'ID van de gebruiker die de transactie registreert',
-  })
+  @ApiProperty({ example: 1, description: 'ID van de gebruiker' })
   @IsNotEmpty()
   userID: number;
 
   @IsString()
-  @ApiProperty({
-    example: 'Lunch met klant',
-    description: 'Korte omschrijving van de transactie',
-  })
+  @ApiProperty({ example: 'Lunch met klant', description: 'Omschrijving' })
   @IsNotEmpty()
   @MaxLength(255)
   @Length(1, 255)
   beschrijving: string;
 
   @IsNotEmpty()
-  @ApiProperty({
-    example: 'IN',
-    enum: ['IN', 'UIT'],
-    description: "Type transactie: 'IN' voor inkomsten, 'UIT' voor uitgaven",
-  })
+  @ApiProperty({ example: 'IN', enum: ['IN', 'UIT'] })
   @IsIn(['IN', 'UIT'])
   in_uit: 'IN' | 'UIT';
 
   @IsNotEmpty()
-  @ApiProperty({
-    example: 12.5,
-    description: 'Bedrag van de transactie (in EUR)',
-  })
-  bedrag: number; // Wordt bij insert als string opgeslagen in decimal kolom
+  @ApiProperty({ example: 12.5 })
+  bedrag: number;
 
   @IsString()
-  @ApiProperty({
-    example: '2025-05-25',
-    description: 'Datum van de transactie in YYYY-MM-DD formaat',
-  })
+  @ApiProperty({ example: '2025-05-25' })
   @IsNotEmpty()
   @MaxLength(255)
-  datum: string; // YYYY-MM-DD
-}
-
-export interface TransactieDbOutput {
-  transactieID: number;
-  userID: number;
-  beschrijving: string;
-  in_uit: 'IN' | 'UIT';
-  bedrag: string;
-  datum: Date;
-}
-
-export class TransactieResponseDto {
-  @ApiProperty({ example: 1, description: 'Uniek ID van de transactie' })
-  transactieID: number;
-  @ApiProperty({ example: 1, description: 'ID van de gekoppelde rekening' })
-  @ApiProperty({
-    example: 1,
-    description: 'ID van de gebruiker die de transactie aanmaakte',
-  })
-  userID: number;
-  @ApiProperty({
-    example: 'Aankoop materialen',
-    description: 'Omschrijving van de transactie',
-  })
-  beschrijving: string;
-  @ApiProperty({
-    example: 'IN',
-    enum: ['IN', 'UIT'],
-    description: "Type transactie: 'IN' voor inkomsten, 'UIT' voor uitgaven",
-  })
-  in_uit: 'IN' | 'UIT';
-  @ApiProperty({
-    example: 20.5,
-    description: 'Bedrag van de transactie (in EUR)',
-  })
-  bedrag: number;
-  @ApiProperty({
-    example: '2025-05-25',
-    description: 'Datum van de transactie in YYYY-MM-DD formaat',
-  })
   datum: string;
 }
 
+export class GetTransactiesDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @ApiProperty({ required: false, default: 1 })
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @ApiProperty({ required: false, default: 10 })
+  limit?: number = 10;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false })
+  search?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false, default: 'datum' })
+  sort?: string = 'datum';
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['asc', 'desc'])
+  @ApiProperty({ required: false, default: 'desc', enum: ['asc', 'desc'] })
+  direction?: 'asc' | 'desc' = 'desc';
+}
+
+export class TransactieResponseDto {
+  @ApiProperty({ example: 1 })
+  transactieID: number;
+  @ApiProperty({ example: 1 })
+  userID: number;
+  @ApiProperty({ example: 'Aankoop materialen' })
+  beschrijving: string;
+  @ApiProperty({ example: 'IN', enum: ['IN', 'UIT'] })
+  in_uit: 'IN' | 'UIT';
+  @ApiProperty({ example: 20.5 })
+  bedrag: number;
+  @ApiProperty({ example: '2025-05-25' })
+  datum: string;
+  @ApiProperty({ required: false })
+  author?: { voornaam: string; familienaam: string };
+  @ApiProperty({ required: false })
+  categorieDetails?: any[];
+}
+
 export class TransactieListResponseDto {
-  @ApiProperty({
-    type: [TransactieResponseDto],
-    description: 'Lijst van transacties',
-  })
+  @ApiProperty({ type: [TransactieResponseDto] })
   items: TransactieResponseDto[];
+
+  @ApiProperty({ example: 100 })
+  total: number;
+
+  @ApiProperty({ example: 1 })
+  page: number;
+
+  @ApiProperty({ example: 10 })
+  totalPages: number;
 }
 
 export class UpdateTransactieDto {
   @IsOptional()
   @IsInt()
-  @ApiProperty({
-    required: false,
-    example: 1,
-    description: 'Optionele userID voor update',
-  })
-  @IsOptional()
-  @IsInt()
   userID?: number;
-  @ApiProperty({
-    required: false,
-    example: 'Aangepaste beschrijving',
-    description: 'Optionele nieuwe beschrijving',
-  })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   beschrijving?: string;
-  @ApiProperty({
-    required: false,
-    enum: ['IN', 'UIT'],
-    description: 'Optioneel type: IN of UIT',
-  })
   @IsOptional()
   @IsIn(['IN', 'UIT'])
   in_uit?: 'IN' | 'UIT';
-  @ApiProperty({
-    required: false,
-    example: 10.0,
-    description: 'Optioneel nieuw bedrag',
-  })
   @IsOptional()
   @IsNumber()
   bedrag?: number;
-  @ApiProperty({
-    required: false,
-    example: '2025-05-25',
-    description: 'Optionele nieuwe datum (YYYY-MM-DD)',
-  })
   @IsOptional()
   @IsString()
-  datum?: string; // YYYY-MM-DD
-
-  @ApiProperty({
-    required: false,
-    type: [Number],
-    description: 'Lijst met categorieIDs om te koppelen',
-  })
+  datum?: string;
   @IsOptional()
   @IsArray()
   @IsInt({ each: true })
@@ -170,46 +136,8 @@ export class UpdateTransactieDto {
 }
 
 export class TransactieCategorieDetails {
-  @ApiProperty({ example: 1, description: 'ID van de categorie' })
+  @ApiProperty({ example: 1 })
   categorieID: number;
-  @ApiProperty({
-    example: 'kilometervergoeding',
-    description: 'Naam van de categorie',
-  })
+  @ApiProperty({ example: 'kilometervergoeding' })
   naam: string;
-}
-
-export class ReadTransactieDto {
-  @ApiProperty({ example: 1, description: 'ID van de transactie' })
-  transactieID: number;
-  @ApiProperty({ example: 1, description: 'ID van de rekening' })
-  @ApiProperty({ example: 1, description: 'ID van de gebruiker' })
-  userID: number;
-  @ApiProperty({
-    example: 'Jasper Huyghe',
-    description: 'Volledige naam van de gebruiker',
-  })
-  userName: string; // bijvoorbeeld 'Jasper Huyghe'
-
-  @ApiProperty({
-    example: 'Aankoop materiaal uitstap',
-    description: 'Omschrijving van de transactie',
-  })
-  beschrijving: string;
-  @ApiProperty({ example: 'IN', description: "Type transactie: 'IN' of 'UIT'" })
-  in_uit: 'IN' | 'UIT';
-  @ApiProperty({ example: 20, description: 'Bedrag van de transactie' })
-  bedrag: number;
-  @ApiProperty({
-    example: '2025-05-25',
-    description: 'Datum van de transactie (YYYY-MM-DD)',
-  })
-  datum: string; // YYYY-MM-DD
-
-  // Categorie details
-  @ApiProperty({
-    type: [TransactieCategorieDetails],
-    description: 'Lijst met gekoppelde categorie details',
-  })
-  categorieen: TransactieCategorieDetails[];
 }

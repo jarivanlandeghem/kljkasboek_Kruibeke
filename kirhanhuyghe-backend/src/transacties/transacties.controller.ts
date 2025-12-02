@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,17 +23,13 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/roles';
 import {
   CreateTransactieRequestDto,
+  GetTransactiesDto,
   TransactieListResponseDto,
   TransactieResponseDto,
   UpdateTransactieDto,
 } from './transacties.dto';
 import { TransactieService } from './transacties.service';
 import { CurrentUser } from '../auth/decorators/currentUser.decorator';
-
-// 👇 VERWIJDER DE REACT-ROUTER IMPORT
-// import { Session } from 'react-router';
-
-// 👇 GEBRUIK JE EIGEN TYPE (pas pad aan indien nodig)
 import type { Session } from '../types/auth';
 
 @ApiTags('Transacties')
@@ -43,14 +40,16 @@ export class TransactiesController {
   constructor(private readonly transactieService: TransactieService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Haal alle transacties op' })
+  @ApiOperation({ summary: 'Haal alle transacties op met pagination' })
   @ApiResponse({
     status: 200,
     description: 'Lijst met transacties',
     type: TransactieListResponseDto,
   })
-  async getAllTransacties(): Promise<TransactieListResponseDto> {
-    return this.transactieService.getAll();
+  async getAllTransacties(
+    @Query() query: GetTransactiesDto,
+  ): Promise<TransactieListResponseDto> {
+    return this.transactieService.getAll(query);
   }
 
   @Get(':id')
@@ -119,7 +118,6 @@ export class TransactiesController {
     await this.transactieService.deleteById(Number(id));
   }
 
-  // rapport eindpunt
   @Post('report')
   @ApiOperation({ summary: 'Genereer en stuur transactierapport' })
   @ApiResponse({ status: 200, description: 'Rapport gegenereerd en verzonden' })
