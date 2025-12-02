@@ -1,0 +1,18 @@
+services:
+  klj-portaal-backend:
+    container_name: klj-portaal-backend
+    image: klj-portaal-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # 👇 1
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      CORS_ORIGINS: "[\"http://localhost:5173\", \"http://localhost\"]" # 👈 2
+      CORS_MAX_AGE: 10800
+      #DATABASE_URL: mysql://devusr:devpwd@host.docker.internal:3306/budget # 👈 3
+      DATABASE_URL: mysql://devusr:devpwd@host.docker.internal:3307/kirhanhuyghe
+      AUTH_JWT_SECRET: eensuperveiligsecretvoorindevelopment
+    ports:
+      - '3000:3000'

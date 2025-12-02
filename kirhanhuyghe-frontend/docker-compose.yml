@@ -1,0 +1,11 @@
+services:
+  klj-portaal-frontend:
+    image: klj-portaal-frontend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000/api
+    container_name: klj-portaal-frontend
+    ports:
+      - '80:80'

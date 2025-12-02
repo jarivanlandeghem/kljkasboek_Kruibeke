@@ -46,11 +46,13 @@
   - 4. Klik op "beheer gebruikers" en maak nieuwe testaccount admin, save en sluit
   - 5. Klik bij transacties op 'PDF rapport'
   - 6. Als alles goed loopt, is deze binnen de minuut zeker bezorgd. Check zeker de spamfolder!
-TODO hier zit nog een bug
 
 - Ronde maken/transacties csv import testen
   - Onder Docs/testbestanden zit de csv bestanden die hier nodig zijn.
-TODO bug
+
+1. Importeer het bestand voor leden bij leden
+2. Importeer het bestand voor leiding bij leiding
+3. Klik op de knop (het is normaal dat de verwerking even duurt.)
 
 Opmerking: op het transactiescherm, klik zeker nog eens op de headers om de sorting te testen!
 
@@ -100,7 +102,7 @@ Aanwezigheden
   Een knop om aan te geven of je aanwezigheid toe te voegen
   Evenementen toevoegen, wijzigen of verwijderen (alleen admins of hoofdleiding of groepsverantwoordelijke)
   De lijst van aanwezigheden bekijken
-  TODO weghalen indien we dit nietmeer doen - De mogelijkheid om aanwezigheden als PDF te exporteren (alleen admins of hoofdleiding of groepsverantwoordelijke)
+  De mogelijkheid om aanwezigheden als PDF door te mailen (alleen admins of hoofdleiding of groepsverantwoordelijke)
   Als een leiding 7 dagen voordat een evenement begint nog geen antwoord heeft gegeven krijgt deze een reminder toegestuurd per mail
   Als een leiding 4 dagen op voorhand nog steeds geen antwoord heeft krijgt de hoofdleiding hier een mail van.
   Als er te weinig mankracht is voor een activiteit krijgen de groepsverantwoordelijke hier een mail van zodat ze kunnen schuiven met de leiding die wél kan.
@@ -112,7 +114,7 @@ Ronde maken
 
 Kasjes
   *Elke leeftijdsgroep heeft jaarlijks een budget om op te doen. Om redundante toevoegingen te voorkomen wordt deze in het systeem gezet door als categorie een leeftijdsgroep in te geven.*
-  Jaarbudget aanpassen (Alleen admin/hoofdleiding) TODO klopt dit?
+  Jaarbudget aanpassen (Alleen admin/hoofdleiding)
   Bekijken van budget per leeftijdsgroep en een overzicht van de recente transacties
 
 Profielpagina
