@@ -1,21 +1,35 @@
-import { Module, OnModuleDestroy } from '@nestjs/common'; // 👈 1
+import { Logger, Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import {
-  type DatabaseProvider, // 👈 3
+  type DatabaseProvider,
   DrizzleAsyncProvider,
   drizzleProvider,
   InjectDrizzle,
 } from './drizzle.provider';
+import path from 'path';
+import { migrate } from 'drizzle-orm/mysql2/migrator';
 
 @Module({
   providers: [...drizzleProvider],
   exports: [DrizzleAsyncProvider],
 })
-// 👇 1
-export class DrizzleModule implements OnModuleDestroy {
-  constructor(@InjectDrizzle() private readonly db: DatabaseProvider) {} // 👈 3
+export class DrizzleModule implements OnModuleDestroy, OnModuleInit {
+  private readonly logger = new Logger(DrizzleModule.name);
 
-  // 👇 2
+  constructor(@InjectDrizzle() private readonly db: DatabaseProvider) {}
+
+  // 👇 Nieuw: Voert migraties uit bij het opstarten
+  async onModuleInit() {
+    this.logger.log('⏳ Running migrations...');
+
+    await migrate(this.db, {
+      // Zorg dat dit pad klopt met de locatie van je gegenereerde migraties
+      migrationsFolder: path.resolve(__dirname, '../../migrations'),
+    });
+
+    this.logger.log('✅ Migrations completed!');
+  }
+
   async onModuleDestroy() {
-    await this.db.$client.end(); // 👈 4
+    await this.db.$client.end();
   }
 }
