@@ -183,7 +183,7 @@ function Transaction({
       </td>
       <td>
             <button
-          className='inline-flex items-center justify-center w-9 h-9 bg-black text-white rounded-full'
+          className='inline-flex items-center justify-center w-9 h-9 bg-black text-white rounded-full mr-5'
               onClick={handleDelete}
               data-cy={`transaction_delete_${transactieID}`}
           aria-label={`Verwijder transactie ${transactieID}`}
