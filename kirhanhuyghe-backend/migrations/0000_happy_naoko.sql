@@ -1,4 +1,4 @@
-CREATE TABLE `aanwezigheid` (
+CREATE TABLE IF NOT EXISTS `aanwezigheid` (
 	`aanwezigheidID` int AUTO_INCREMENT NOT NULL,
 	`evenementID` int NOT NULL,
 	`userID` int NOT NULL,
@@ -10,13 +10,13 @@ CREATE TABLE `aanwezigheid` (
 	CONSTRAINT `aanwezigheid_aanwezigheidID` PRIMARY KEY(`aanwezigheidID`)
 );
 --> statement-breakpoint
-CREATE TABLE `categorieen` (
+CREATE TABLE IF NOT EXISTS `categorieen` (
 	`categorieID` int AUTO_INCREMENT NOT NULL,
 	`categorienaam` text NOT NULL,
 	CONSTRAINT `categorieen_categorieID` PRIMARY KEY(`categorieID`)
 );
 --> statement-breakpoint
-CREATE TABLE `evenementen` (
+CREATE TABLE IF NOT EXISTS `evenementen` (
 	`evenementID` int AUTO_INCREMENT NOT NULL,
 	`type` enum('ACTIVITEIT','EVENEMENT','VERGADERING','OVERIGE') NOT NULL,
 	`naam` varchar(255) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE `evenementen` (
 	CONSTRAINT `evenementen_evenementID` PRIMARY KEY(`evenementID`)
 );
 --> statement-breakpoint
-CREATE TABLE `kasjes` (
+CREATE TABLE IF NOT EXISTS `kasjes` (
 	`kasjeID` int AUTO_INCREMENT NOT NULL,
 	`groep` varchar(50) NOT NULL,
 	`jaar` int NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `kasjes` (
 	CONSTRAINT `idx_kasje_groep_jaar` UNIQUE(`groep`,`jaar`)
 );
 --> statement-breakpoint
-CREATE TABLE `leidingProfiel` (
+CREATE TABLE IF NOT EXISTS `leidingProfiel` (
 	`profielID` int AUTO_INCREMENT NOT NULL,
 	`userID` int NOT NULL,
 	`telnr` varchar(20) NOT NULL,
@@ -45,14 +45,14 @@ CREATE TABLE `leidingProfiel` (
 	CONSTRAINT `leidingProfiel_profielID` PRIMARY KEY(`profielID`)
 );
 --> statement-breakpoint
-CREATE TABLE `ronde_bewoners` (
+CREATE TABLE IF NOT EXISTS `ronde_bewoners` (
 	`bewoner_id` int AUTO_INCREMENT NOT NULL,
 	`ronde_huis_id` int NOT NULL,
 	`naam` varchar(255) NOT NULL,
 	CONSTRAINT `ronde_bewoners_bewoner_id` PRIMARY KEY(`bewoner_id`)
 );
 --> statement-breakpoint
-CREATE TABLE `ronde_huizen` (
+CREATE TABLE IF NOT EXISTS `ronde_huizen` (
 	`ronde_huis_id` int AUTO_INCREMENT NOT NULL,
 	`ronde_id` int NOT NULL,
 	`adres` varchar(255) NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE `ronde_huizen` (
 	CONSTRAINT `ronde_huizen_ronde_huis_id` PRIMARY KEY(`ronde_huis_id`)
 );
 --> statement-breakpoint
-CREATE TABLE `ronde_leiding` (
+CREATE TABLE IF NOT EXISTS `ronde_leiding` (
 	`ronde_leiding_id` int AUTO_INCREMENT NOT NULL,
 	`ronde_id` int NOT NULL,
 	`naam` varchar(255) NOT NULL,
@@ -74,20 +74,20 @@ CREATE TABLE `ronde_leiding` (
 	CONSTRAINT `ronde_leiding_ronde_leiding_id` PRIMARY KEY(`ronde_leiding_id`)
 );
 --> statement-breakpoint
-CREATE TABLE `rondes` (
+CREATE TABLE IF NOT EXISTS `rondes` (
 	`ronde_id` int AUTO_INCREMENT NOT NULL,
 	`naam` varchar(255) NOT NULL,
 	`datum` timestamp DEFAULT (now()),
 	CONSTRAINT `rondes_ronde_id` PRIMARY KEY(`ronde_id`)
 );
 --> statement-breakpoint
-CREATE TABLE `transactieCategorie` (
+CREATE TABLE IF NOT EXISTS `transactieCategorie` (
 	`transactieID` int NOT NULL,
 	`categorieID` int NOT NULL,
 	CONSTRAINT `transactieCategorie_transactieID_categorieID_pk` PRIMARY KEY(`transactieID`,`categorieID`)
 );
 --> statement-breakpoint
-CREATE TABLE `transacties` (
+CREATE TABLE IF NOT EXISTS `transacties` (
 	`transactieID` int AUTO_INCREMENT NOT NULL,
 	`userID` int NOT NULL,
 	`beschrijving` text NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE `transacties` (
 	CONSTRAINT `transacties_transactieID` PRIMARY KEY(`transactieID`)
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 	`id` int unsigned AUTO_INCREMENT NOT NULL,
 	`voornaam` varchar(255) NOT NULL,
 	`familienaam` varchar(255) NOT NULL,
@@ -108,6 +108,8 @@ CREATE TABLE `users` (
 	CONSTRAINT `idx_user_email_unique` UNIQUE(`email`)
 );
 --> statement-breakpoint
-CREATE INDEX `huizen_ronde_idx` ON `ronde_huizen` (`ronde_id`);--> statement-breakpoint
-CREATE INDEX `huizen_leiding_idx` ON `ronde_huizen` (`toegewezen_leiding_id`);--> statement-breakpoint
-CREATE INDEX `leiding_ronde_idx` ON `ronde_leiding` (`ronde_id`);
+-- Indexes: Skip if they already exist (manually handled)
+-- CREATE INDEX `huizen_ronde_idx` ON `ronde_huizen` (`ronde_id`);
+-- CREATE INDEX `huizen_leiding_idx` ON `ronde_huizen` (`toegewezen_leiding_id`);
+-- CREATE INDEX `leiding_ronde_idx` ON `ronde_leiding` (`ronde_id`);
+SELECT 1;
