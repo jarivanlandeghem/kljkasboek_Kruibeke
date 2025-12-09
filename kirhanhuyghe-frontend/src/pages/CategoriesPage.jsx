@@ -55,7 +55,19 @@ export default function CategoriesPage() {
   
   const [viewMode, setViewMode] = useState('table'); // 'table' of 'charts'
 
-  const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
+  // Fetch all transactions (large limit) for charts/aggregation.
+  const { data: transacties = [], isLoading, error } = useSWR(
+    'transacties',
+    () => getAll('transacties', { page: 1, limit: 100000 })
+  );
+
+  // Normalize response: `getAll` may return an object { items, total } or an array.
+  const transactiesArray = useMemo(() => {
+    if (Array.isArray(transacties)) return transacties;
+    if (transacties && Array.isArray(transacties.items)) return transacties.items;
+    return [];
+  }, [transacties]);
+  
 
   const handleDelete = useCallback(async (id) => {
     try {
@@ -79,8 +91,8 @@ export default function CategoriesPage() {
 
   const filtered = useMemo(() => {
     if (!selected) return [];
-    return (transacties || []).filter((t) => matchesCategory(t, selected));
-  }, [transacties, selected, matchesCategory]);
+    return transactiesArray.filter((t) => matchesCategory(t, selected));
+  }, [transactiesArray, selected, matchesCategory]);
 
   const inTransacties = useMemo(() => filtered.filter((t) => String(t.in_uit).toUpperCase() === 'IN'), [filtered]);
   const uitTransacties = useMemo(() => filtered.filter((t) => String(t.in_uit).toUpperCase() === 'UIT'), [filtered]);
@@ -132,7 +144,7 @@ export default function CategoriesPage() {
   const globalChartData = useMemo(() => {
     const categoryStats = {};
     
-    transacties.forEach(t => {
+    transactiesArray.forEach(t => {
         const catName = t.categorieDetails?.[0]?.categorienaam || t.categorienaam || 'Ongecategoriseerd';
         
         if (!categoryStats[catName]) {
@@ -185,7 +197,7 @@ export default function CategoriesPage() {
             ]
         }
     };
-  }, [transacties]);
+    }, [transactiesArray]);
 
 const chartOptions = {
     responsive: true,
