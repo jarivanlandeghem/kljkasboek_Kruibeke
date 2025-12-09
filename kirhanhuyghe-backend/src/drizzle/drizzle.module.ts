@@ -17,13 +17,11 @@ export class DrizzleModule implements OnModuleDestroy, OnModuleInit {
 
   constructor(@InjectDrizzle() private readonly db: DatabaseProvider) {}
 
-  // 👇 Nieuw: Voert migraties uit bij het opstarten
   async onModuleInit() {
     this.logger.log('⏳ Running migrations...');
 
     await migrate(this.db, {
-      // Zorg dat dit pad klopt met de locatie van je gegenereerde migraties
-      migrationsFolder: path.resolve(__dirname, '../../migrations'),
+      migrationsFolder: path.resolve('migrations'),
     });
 
     this.logger.log('✅ Migrations completed!');
