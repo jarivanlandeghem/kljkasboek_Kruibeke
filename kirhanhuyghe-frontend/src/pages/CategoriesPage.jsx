@@ -53,7 +53,7 @@ export default function CategoriesPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   
-  const [viewMode, setViewMode] = useState('table'); // 'table' of 'charts'
+  const [viewMode, setViewMode] = useState('table');
 
   const { data: transacties = [], isLoading, error } = useSWR('transacties', getAll);
 
@@ -79,7 +79,8 @@ export default function CategoriesPage() {
 
   const filtered = useMemo(() => {
     if (!selected) return [];
-    return (transacties || []).filter((t) => matchesCategory(t, selected));
+    const safeTransacties = Array.isArray(transacties) ? transacties : [];
+    return safeTransacties.filter((t) => matchesCategory(t, selected));
   }, [transacties, selected, matchesCategory]);
 
   const inTransacties = useMemo(() => filtered.filter((t) => String(t.in_uit).toUpperCase() === 'IN'), [filtered]);
@@ -131,8 +132,9 @@ export default function CategoriesPage() {
 
   const globalChartData = useMemo(() => {
     const categoryStats = {};
+    const safeTransacties = Array.isArray(transacties) ? transacties : [];
     
-    transacties.forEach(t => {
+    safeTransacties.forEach(t => {
         const catName = t.categorieDetails?.[0]?.categorienaam || t.categorienaam || 'Ongecategoriseerd';
         
         if (!categoryStats[catName]) {
@@ -156,7 +158,6 @@ export default function CategoriesPage() {
     ];
 
     return {
-        // Grafiek 1: Uitgaven per Categorie (Doughnut)
         expensesByCategory: {
             labels: labels,
             datasets: [{
@@ -166,7 +167,6 @@ export default function CategoriesPage() {
                 borderWidth: 0,
             }]
         },
-        // Grafiek 2: Inkomsten vs Uitgaven per Categorie (Bar)
         comparisonPerCategory: {
             labels: labels,
             datasets: [
@@ -287,7 +287,7 @@ const chartOptions = {
           </div>
 
           <AsyncData loading={isLoading} error={error}>
-             <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait">
                 
                 {viewMode === 'table' && !selected && (
                      <motion.div 
@@ -391,10 +391,10 @@ const chartOptions = {
              {selected && (
                <div className="fixed bottom-6 left-0 right-0 pointer-events-none">
                  <div className="max-w-3xl mx-auto flex justify-center">
-                         <div className={`pointer-events-auto px-6 py-3 rounded-lg shadow-lg text-white font-semibold ${totals.saldo >= 0 ? 'bg-green-600' : 'bg-red-600'}`}>
-                           <div className="text-sm opacity-90">IN: {amountFormat.format(totals.totalIn)} — UIT: {amountFormat.format(totals.totalUit)}</div>
-                           <div className="text-lg font-bold">Saldo {selected.categorienaam}: {totals.saldo < 0 ? `-${amountFormat.format(Math.abs(totals.saldo))}` : amountFormat.format(totals.saldo)}</div>
-                         </div>
+                          <div className={`pointer-events-auto px-6 py-3 rounded-lg shadow-lg text-white font-semibold ${totals.saldo >= 0 ? 'bg-green-600' : 'bg-red-600'}`}>
+                            <div className="text-sm opacity-90">IN: {amountFormat.format(totals.totalIn)} — UIT: {amountFormat.format(totals.totalUit)}</div>
+                            <div className="text-lg font-bold">Saldo {selected.categorienaam}: {totals.saldo < 0 ? `-${amountFormat.format(Math.abs(totals.saldo))}` : amountFormat.format(totals.saldo)}</div>
+                          </div>
                  </div>
                </div>
              )}
