@@ -5,7 +5,7 @@ import {
   drizzleProvider,
   InjectDrizzle,
 } from './drizzle.provider';
-import path from 'path';
+import * as path from 'path';
 import { migrate } from 'drizzle-orm/mysql2/migrator';
 
 @Module({
@@ -21,7 +21,7 @@ export class DrizzleModule implements OnModuleDestroy, OnModuleInit {
     this.logger.log('⏳ Running migrations...');
 
     await migrate(this.db, {
-      migrationsFolder: path.resolve(__dirname, '../../../migrations'),
+      migrationsFolder: path.join(process.cwd(), 'migrations'),
     });
 
     this.logger.log('✅ Migrations completed!');
