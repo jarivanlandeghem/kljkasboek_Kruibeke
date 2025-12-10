@@ -7,7 +7,7 @@ services:
       - db_data_test:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: budget_test
+      MYSQL_DATABASE: kirhanhuyghe_test
       MYSQL_USER: devusr
       MYSQL_PASSWORD: devpwd
     healthcheck:

@@ -1,6 +1,10 @@
 import { execSync } from 'child_process';
 import path from 'path';
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export default async function globalSetup() {
   const cwd = path.resolve(__dirname, '..');
   console.log('Global setup: starting test DB via docker-compose.test.yml');
@@ -11,7 +15,8 @@ export default async function globalSetup() {
     });
     console.log('Waiting for DB to become healthy...');
 
-    execSync('sleep 12', { cwd });
+    // cross-platform wait instead of shell `sleep` which is not available on Windows
+    await delay(12_000);
 
     console.log('Running migrations for test DB (with retries)');
 
@@ -29,7 +34,8 @@ export default async function globalSetup() {
         if (attempt >= maxAttempts) {
           throw e;
         }
-        execSync('sleep 4', { cwd });
+        // wait a bit before next attempt
+        await delay(4_000);
       }
     }
   } catch (err) {
