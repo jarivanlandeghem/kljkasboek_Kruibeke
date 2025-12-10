@@ -5,17 +5,50 @@ describe('Transactions flows', () => {
       win.localStorage.setItem('jwtToken', 'fake-jwt-token');
     });
 
-    cy.intercept('GET', 'http://localhost:3000/api/users/me', { statusCode: 200, body: { userid: 2, voornaam: 'Test', roles: ['admin'] } }).as('me');
+    cy.intercept('GET', '**/api/users/me', { statusCode: 200, body: { userid: 2, voornaam: 'Test', roles: ['admin'] } }).as('me');
     cy.fixture('transacties.json').then((data) => {
-      cy.intercept('GET', 'http://localhost:3000/api/transacties', { statusCode: 200, body: data }).as('getTransacties');
+      cy.intercept('GET', '**/api/transacties*', (req) => {
+        // make a shallow copy
+        let items = Array.isArray(data) ? [...data] : (data.items || []);
+
+        // support server-side search (query param 'search')
+        const q = req.query || {};
+        if (q.search) {
+          const s = String(q.search).toLowerCase();
+          items = items.filter(it => (it.beschrijving || '').toLowerCase().includes(s));
+        }
+
+        // support simple server-side sorting by date
+        const sortField = q.sort || q.orderBy || 'datum';
+        const direction = (q.direction || q.direction === '') ? q.direction : (q.direction || (q.direction === undefined ? (q.dir || q.direction) : undefined));
+        const dir = (q.direction === 'asc' || q.direction === 'desc') ? q.direction : (q.direction || (q.direction === undefined ? (q.direction) : undefined));
+        if (sortField === 'datum' || (q.orderBy && q.orderBy.includes('datum'))) {
+          // determine direction from known query shapes: orderBy=datum_desc or sort/direction
+          if (q.orderBy && typeof q.orderBy === 'string' && q.orderBy.includes('datum_desc')) {
+            items.sort((a, b) => new Date(b.datum) - new Date(a.datum));
+          } else if (q.orderBy && typeof q.orderBy === 'string' && q.orderBy.includes('datum_asc')) {
+            items.sort((a, b) => new Date(a.datum) - new Date(b.datum));
+          } else if (q.direction === 'asc') {
+            items.sort((a, b) => new Date(a.datum) - new Date(b.datum));
+          } else if (q.direction === 'desc') {
+            items.sort((a, b) => new Date(b.datum) - new Date(a.datum));
+          } else {
+            // default: newest first
+            items.sort((a, b) => new Date(b.datum) - new Date(a.datum));
+          }
+        }
+
+        // if the client expects paginated shape, return { items, total }
+        req.reply({ statusCode: 200, body: { items, total: items.length } });
+      }).as('getTransacties');
     });
     cy.fixture('categories.json').then((cats) => {
-      cy.intercept('GET', 'http://localhost:3000/api/categorieen', { statusCode: 200, body: cats }).as('getCategories');
+      cy.intercept('GET', '**/api/categorieen*', { statusCode: 200, body: cats }).as('getCategories');
     });
   });
 
   it('adds a new transaction successfully', () => {
-    cy.intercept('POST', 'http://localhost:3000/api/transacties', (req) => {
+    cy.intercept('POST', '**/api/transacties', (req) => {
       req.reply({ statusCode: 201, body: { transactieID: 99, ...req.body } });
     }).as('createTrans');
 
@@ -65,7 +98,7 @@ describe('Transactions flows', () => {
   });
 
   it('imports CSV file and shows success alert', () => {
-    cy.intercept('POST', 'http://localhost:3000/api/transacties', { statusCode: 201, body: { ok: true } }).as('postImported');
+    cy.intercept('POST', '**/api/transacties', { statusCode: 201, body: { ok: true } }).as('postImported');
 
     cy.visit('http://localhost:5173/transactions');
     cy.wait(['@me', '@getTransacties']);
@@ -88,7 +121,7 @@ describe('Transactions flows', () => {
   });
 
   it('sends PDF report when confirmed', () => {
-    cy.intercept('POST', 'http://localhost:3000/api/transacties/report', { statusCode: 200, body: { ok: true } }).as('postReport');
+    cy.intercept('POST', '**/api/transacties/report', { statusCode: 200, body: { ok: true } }).as('postReport');
 
     cy.visit('http://localhost:5173/transactions');
     cy.wait(['@me', '@getTransacties']);
@@ -105,7 +138,7 @@ describe('Transactions flows', () => {
   });
 
   it('changes category via dropdown and sends PUT', () => {
-    cy.intercept('PUT', 'http://localhost:3000/api/transacties/*/categorieen', (req) => {
+    cy.intercept('PUT', '**/api/transacties/*/categorieen', (req) => {
       req.reply({ statusCode: 200, body: { ok: true, ...req.body } });
     }).as('putCats');
 
@@ -128,14 +161,15 @@ describe('Transactions flows', () => {
     // initial sort is new->old, first row should contain 'Salaris' (most recent)
     cy.get('table tbody tr').first().contains('Salaris');
 
-    // change sort to old->new
-    cy.get('select').select('old');
-    // now first row should be 'Boodschappen'
+    // change sort to old->new by clicking the 'Datum' header to toggle sorting
+    cy.contains('th', 'Datum').click();
+    // wait for the new fetch to complete and assert first row now is older transaction
+    cy.wait('@getTransacties');
     cy.get('table tbody tr').first().contains('Boodschappen');
   });
 
   it('edits a transaction and handles invalid input', () => {
-    cy.intercept('PUT', 'http://localhost:3000/api/transacties/*', (req) => {
+    cy.intercept('PUT', '**/api/transacties/*', (req) => {
       req.reply({ statusCode: 200, body: { ok: true, ...req.body } });
     }).as('putTrans');
 
@@ -152,7 +186,7 @@ describe('Transactions flows', () => {
     });
 
     // simulate server-side validation error: intercept PUT and return 400
-    cy.intercept('PUT', 'http://localhost:3000/api/transacties/*', (req) => {
+    cy.intercept('PUT', '**/api/transacties/*', (req) => {
       req.reply(400, { message: 'Ongeldig bedrag' });
     }).as('putTransFail');
 
@@ -162,7 +196,7 @@ describe('Transactions flows', () => {
     cy.contains('Ongeldig bedrag').should('be.visible');
 
     // now set valid amount and save — stub a successful PUT for this action
-    cy.intercept('PUT', 'http://localhost:3000/api/transacties/*', (req) => {
+    cy.intercept('PUT', '**/api/transacties/*', (req) => {
       req.reply({ statusCode: 200, body: { ok: true, ...req.body } });
     }).as('putTransSuccess');
     cy.get('[data-cy=transaction_edit_bedrag_1]').clear();
@@ -174,7 +208,7 @@ describe('Transactions flows', () => {
   });
 
   it('deletes a transaction', () => {
-    cy.intercept('DELETE', 'http://localhost:3000/api/transacties/*', { statusCode: 200, body: { ok: true } }).as('deleteTrans');
+    cy.intercept('DELETE', '**/api/transacties/*', { statusCode: 200, body: { ok: true } }).as('deleteTrans');
 
     cy.visit('http://localhost:5173/transactions');
     cy.wait(['@me', '@getTransacties']);
@@ -188,6 +222,8 @@ describe('Transactions flows', () => {
     cy.wait(['@me', '@getTransacties']);
 
     cy.get('[data-cy=transactions_search]').type('Salaris');
+    // wait for the debounced search request to be issued and intercepted
+    cy.wait('@getTransacties');
     cy.get('table tbody tr').should('have.length', 1).and('contain.text', 'Salaris');
   });
 });

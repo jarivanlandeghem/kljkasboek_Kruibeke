@@ -5,19 +5,19 @@ import useSWR, { useSWRConfig } from 'swr';
 import { getAll, deleteById, post } from '../../api';
 import { useAuth } from '../../contexts/auth';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Alert
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Button,
+    Box,
+    Typography,
+    Paper,
+    List,
+    ListItem,
+    ListItemText,
+    Alert
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import * as api from '../../api';
@@ -160,8 +160,9 @@ export default function TransactionList() {
     { keepPreviousData: true }
   );
 
-  const transacties = responseData?.items || [];
-  const totalRows = responseData?.total || 0;
+  // support both paginated responses ({ items, total }) and legacy array responses
+  const transacties = Array.isArray(responseData) ? responseData : responseData?.items || [];
+  const totalRows = Array.isArray(responseData) ? (responseData.length || 0) : (responseData?.total || 0);
 
   const { data: gebruikers = [] } = useSWR('users', (path) => getAll(path));
 

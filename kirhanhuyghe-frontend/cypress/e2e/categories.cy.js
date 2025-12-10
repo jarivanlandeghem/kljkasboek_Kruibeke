@@ -5,15 +5,15 @@ describe('Categories page flows', () => {
       win.localStorage.setItem('jwtToken', 'fake-jwt-token');
     });
 
-    cy.intercept('GET', 'http://localhost:3000/api/users/me', { statusCode: 200, body: { userid: 2, voornaam: 'Test', roles: ['admin'] } }).as('me');
+    cy.intercept('GET', '**/api/users/me', { statusCode: 200, body: { userid: 2, voornaam: 'Test', roles: ['admin'] } }).as('me');
     cy.fixture('categories.json').then((cats) => {
-      cy.intercept('GET', 'http://localhost:3000/api/categorieen', { statusCode: 200, body: cats }).as('getCategories');
+      cy.intercept('GET', '**/api/categorieen*', { statusCode: 200, body: cats }).as('getCategories');
     });
   });
 
   it('shows table view by default and prompts selection', () => {
     // provide simple transacties so charts can render but no selection yet
-    cy.intercept('GET', 'http://localhost:3000/api/transacties', { statusCode: 200, body: [] }).as('getTransacties');
+    cy.intercept('GET', '**/api/transacties*', { statusCode: 200, body: [] }).as('getTransacties');
 
     cy.visit('http://localhost:5173/categories');
     cy.wait(['@me', '@getCategories', '@getTransacties']);
@@ -29,9 +29,9 @@ describe('Categories page flows', () => {
       { transactieID: 102, beschrijving: 'Verkoop', datum: '2025-11-05', bedrag: 20, in_uit: 'IN', categorieDetails: [{ categorieID: 10, categorienaam: 'Boodschappen' }] }
     ];
 
-    cy.intercept('GET', 'http://localhost:3000/api/transacties', { statusCode: 200, body: tx }).as('getTransacties');
+    cy.intercept('GET', '**/api/transacties*', { statusCode: 200, body: tx }).as('getTransacties');
     cy.fixture('categories.json').then((cats) => {
-      cy.intercept('GET', 'http://localhost:3000/api/categorieen', { statusCode: 200, body: cats }).as('getCategories2');
+      cy.intercept('GET', '**/api/categorieen*', { statusCode: 200, body: cats }).as('getCategories2');
     });
 
     cy.visit('http://localhost:5173/categories');
@@ -56,7 +56,7 @@ describe('Categories page flows', () => {
   });
 
   it('adds a category and shows validation for empty name', () => {
-    cy.intercept('GET', 'http://localhost:3000/api/transacties', { statusCode: 200, body: [] }).as('getTransactiesEmpty');
+    cy.intercept('GET', '**/api/transacties*', { statusCode: 200, body: [] }).as('getTransactiesEmpty');
     cy.visit('http://localhost:5173/categories');
     cy.wait(['@me', '@getCategories', '@getTransactiesEmpty']);
 
@@ -102,9 +102,9 @@ describe('Categories page flows', () => {
     const tx = [
       { transactieID: 201, beschrijving: 'X', datum: '2025-11-02', bedrag: 10, in_uit: 'IN', categorieDetails: [{ categorieID: 11, categorienaam: 'Salaris' }] }
     ];
-    cy.intercept('GET', 'http://localhost:3000/api/transacties', { statusCode: 200, body: tx }).as('getTransacties2');
+    cy.intercept('GET', '**/api/transacties*', { statusCode: 200, body: tx }).as('getTransacties2');
     cy.fixture('categories.json').then((cats) => {
-      cy.intercept('GET', 'http://localhost:3000/api/categorieen', { statusCode: 200, body: cats }).as('getCategories3');
+      cy.intercept('GET', '**/api/categorieen*', { statusCode: 200, body: cats }).as('getCategories3');
     });
 
     cy.visit('http://localhost:5173/categories');
@@ -146,7 +146,7 @@ describe('Categories page flows', () => {
     cy.contains('Categorie aanpassen').closest('div').within(() => {
       cy.get('input[placeholder="Bijv. kilometervergoeding"]').type('Salaris Nieuw');
     });
-    cy.intercept('PUT', 'http://localhost:3000/api/categorieen/*', (req) => {
+    cy.intercept('PUT', '**/api/categorieen/*', (req) => {
       req.reply({ statusCode: 200, body: { ok: true } });
     }).as('putCat');
 
@@ -162,7 +162,7 @@ describe('Categories page flows', () => {
     cy.contains('Categorie aanpassen', { timeout: 10000 }).should('be.visible');
 
     // now delete: click delete button inside modal and intercept delete
-    cy.intercept('DELETE', 'http://localhost:3000/api/categorieen/*', { statusCode: 200, body: { ok: true } }).as('delCat');
+    cy.intercept('DELETE', '**/api/categorieen/*', { statusCode: 200, body: { ok: true } }).as('delCat');
     cy.contains('Categorie aanpassen').closest('div').within(() => {
       cy.contains('Verwijder categorie').click();
     });
@@ -172,10 +172,10 @@ describe('Categories page flows', () => {
   });
 
   it('does not show add/edit buttons for normal user', () => {
-    cy.intercept('GET', 'http://localhost:3000/api/users/me', { statusCode: 200, body: { userid: 3, voornaam: 'Jan', roles: ['user'] } }).as('meUser');
-    cy.intercept('GET', 'http://localhost:3000/api/transacties', { statusCode: 200, body: [] }).as('getTransactiesEmpty2');
+    cy.intercept('GET', '**/api/users/me', { statusCode: 200, body: { userid: 3, voornaam: 'Jan', roles: ['user'] } }).as('meUser');
+    cy.intercept('GET', '**/api/transacties*', { statusCode: 200, body: [] }).as('getTransactiesEmpty2');
     cy.fixture('categories.json').then((cats) => {
-      cy.intercept('GET', 'http://localhost:3000/api/categorieen', { statusCode: 200, body: cats }).as('getCategories4');
+      cy.intercept('GET', '**/api/categorieen*', { statusCode: 200, body: cats }).as('getCategories4');
     });
 
     cy.visit('http://localhost:5173/categories');
