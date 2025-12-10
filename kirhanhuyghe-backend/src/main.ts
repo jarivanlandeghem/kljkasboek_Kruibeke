@@ -44,11 +44,11 @@ async function bootstrap() {
   // CORS
 
   const cors = config.get<CorsConfig>('cors')!;
-  // If no origins configured (development), fall back to localhost:5173
   const allowedOrigins =
     cors.origins && cors.origins.length > 0
       ? cors.origins
       : ['http://localhost:5173'];
+
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
