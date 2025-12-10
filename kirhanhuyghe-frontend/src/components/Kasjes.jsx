@@ -22,18 +22,29 @@ const LEEFTIJDSGROEPEN = ['-8', '-12', '-16', '+20'];
 export default function BudgetsPage() {
   const { mutate } = useSWRConfig();
 
-  const { data: transacties = [], isLoading: loadingTx } = useSWR('transacties', getAll);
+  // Fetch all transactions (large limit) for budget calculations.
+  const { data: transacties = [], isLoading: loadingTx } = useSWR(
+    'transacties',
+    () => getAll('transacties', { page: 1, limit: 100000 })
+  );
+
+  // Normalize transactions: getAll might return { items: [...] } or an array
+  const transactiesArray = useMemo(() => {
+    if (Array.isArray(transacties)) return transacties;
+    if (transacties && Array.isArray(transacties.items)) return transacties.items;
+    return [];
+  }, [transacties]);
   const { data: kasjes = [], isLoading: loadingKasjes } = useSWR('kasjes', getAll);
 
   const getTransactionsForGroup = useMemo(() => (groepNaam) => {
-    if (!transacties.length) return [];
-    return transacties
+    if (!transactiesArray.length) return [];
+    return transactiesArray
       .filter(t => {
         const catNaam = (t.categorienaam || t.categorieDetails?.[0]?.categorienaam || '').toLowerCase();
         return catNaam.includes(groepNaam.toLowerCase()) && String(t.in_uit).toUpperCase() === 'UIT';
       })
       .sort((a, b) => new Date(b.datum) - new Date(a.datum)); // Nieuwste bovenaan
-  }, [transacties]);
+  }, [transactiesArray]);
 
   return (
     <div className="bg-gray-50 min-h-screen">
