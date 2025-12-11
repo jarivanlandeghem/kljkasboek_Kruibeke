@@ -18,8 +18,9 @@ Cypress.Commands.add('login', (email, password) => {
     cy.get('[data-cy=email_input]').type(email); 
     cy.get('[data-cy=password_input]').clear(); 
     cy.get('[data-cy=password_input]').type(password);
-    cy.get('[data-cy=submit_btn]').click();
-    cy.wait('@login');
+    // support both `login_submit` and older `submit_btn` attribute names
+    cy.get('[data-cy=login_submit], [data-cy=submit_btn]').first().click();
+    // don't wait for an undefined alias here; tests should stub and wait for their own login intercepts
 
 });
 //
