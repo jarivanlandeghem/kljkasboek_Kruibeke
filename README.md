@@ -5,8 +5,8 @@
 - E-mailadres: <aykon.kirhan@student.hogent.be>
 
 - Student: Jasper Huyghe
-- Studentennummer: xxxxxxxxx TODO
-- E-mailadres: <voornaam.naam@student.hogent.be>
+- Studentennummer: 202405272
+- E-mailadres: <jasper.huyghe@student.hogent.be>
 
 ## Vereisten
 
@@ -16,6 +16,11 @@ Om dit project te kunnen draaien, moet je volgende software geïnstalleerd hebbe
 - [pnpm](https://pnpm.io)
 - [MySQL Community Server](https://dev.mysql.com/downloads/mysql/)
 
+Aanbevolen versies
+
+- **Node.js:** LTS (bijv. 18.x of 20.x)
+- **pnpm:** recente versie (installeer globaal via `npm install -g pnpm`)
+
 ## Front-end
 
 ### Setup
@@ -23,6 +28,7 @@ Om dit project te kunnen draaien, moet je volgende software geïnstalleerd hebbe
 1. Installeer de dependencies:
 
 ```bash
+cd kirhanhuyghe-frontend
 pnpm install
 ```
 
@@ -39,6 +45,7 @@ VITE_API_URL=http://localhost:3000/api
 #### Development
 
 ```bash
+cd kirhanhuyghe-frontend
 pnpm run dev
 ```
 
@@ -60,12 +67,11 @@ pnpm run preview
 1. Voer het volgende commando uit in je frontend map
 
 ```bash
+cd kirhanhuyghe-frontend
 pnpm test
 ```
 
 2. Selecteer een van de testen. De testen worden dan automatisch uitgevoerd.
-
----
 
 ## Back-end
 
@@ -74,6 +80,7 @@ pnpm test
 1. Installeer de dependencies:
 
 ```bash
+cd kirhanhuyghe-backend
 pnpm install
 ```
 
@@ -93,11 +100,11 @@ GOOGLE_REFRESH_TOKEN=vul_hier_jouw_refresh_token_in
 ```
 
 > Pas indien nodig de `DATABASE_URL` aan voor jouw MySQL-configuratie.
-> 
-> De mailservice werkt met Google OAuth 2.0. Omdat deze tokens je volledige toegang geven tot een Google account zetten wij dit niet in de readme. Zoals afgesproken krijgen deze lectors deze opgestuurd via mail. 
+>
+> De mailservice werkt met Google OAuth 2.0. Omdat deze tokens je volledige toegang geven tot een Google account zetten wij dit niet in de readme. Zoals afgesproken krijgen deze lectors deze opgestuurd via mail.
 > [OAuth 2.0 opzetten]((https://developers.google.com/identity/protocols/oauth2))
 >
-TODO bij ons zit dit opgedeeld.. mag dit??
+> In een echte omgeving wordt de JWT-secret uiteraard niet gedeeld. In deze leeromgeving werd afgesproken om dit wel te doen.
 
 ### Development
 
@@ -105,7 +112,12 @@ TODO bij ons zit dit opgedeeld.. mag dit??
 
 ```bash
 
+# Ga naar backend map (indien nog niet gedaan)
+cd kirhanhuyghe-backend
+# Start eerst de database (zie Docker sectie hieronder) of zorg dat je MySQL bereikbaar is
 pnpm run db:migrate
+# Optional: vul de database met voorbeelddata
+pnpm run db:seed
 ```
 
 2. Start de backend:
@@ -129,7 +141,7 @@ cd kirhanhuyghe-backend
 - Start de database:
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 - Stop en verwijder containers:
@@ -151,11 +163,44 @@ Opmerkingen / tip
 - Na het opstarten van de database kun je lokaal de migraties uitvoeren zodat de schema's worden aangemaakt:
 
 ```bash
+c:\# vanuit project root of waar je zit, ga naar backend en run migraties:
 cd kirhanhuyghe-backend
-pnpm db:migrate
+pnpm run db:migrate
 ```
 
 - Als de backend nog niet in een container draait, draait de app lokaal (via `pnpm run start:dev`) en praat die met de DB-container via `localhost:3307`.
+
+### Snelcheck & Troubleshooting
+
+- Controleer dat de API bereikbaar is (voorbeeld):
+
+```powershell
+Invoke-RestMethod -Uri http://localhost:3000/api/aanwezigheden/event/30
+# of via curl
+curl http://localhost:3000/api/aanwezigheden/event/30
+```
+
+- Als bovenstaande call data teruggeeft maar de frontend geen data toont:
+  - Controleer `VITE_API_URL` in `kirhanhuyghe-frontend/.env` (moet `http://localhost:3000/api` zijn)
+  - Open browser DevTools → Network → bekijk de response body van het verzoek naar `/aanwezigheden/event/:id`
+  - Controleer CORS-instellingen (`CORS_ORIGINS`) in backend `.env` bevat `http://localhost:5173`
+
+- Zorg dat je migraties en seed uitvoert na het starten van de DB, anders zijn tabellen mogelijk leeg (geen users/events).
+
+- Mailfunctionaliteit: vereist Google OAuth-gegevens. Als die ontbreken, werkt mail niet maar de rest van de applicatie draait wel.
+
+### Voorbeeldcommando - volledige start (development)
+
+```powershell
+# 1) start DB (in backend folder) - zorgt voor database op poort 3307
+cd kirhanhuyghe-backend; docker compose up -d
+
+# 2) backend: install, migraties, seed en start
+cd kirhanhuyghe-backend; pnpm install; pnpm run db:migrate; pnpm run db:seed; pnpm run start:dev
+
+# 3) frontend: install en start
+cd kirhanhuyghe-frontend; pnpm install; pnpm run dev
+```
 
 ### Production
 

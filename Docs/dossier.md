@@ -1,12 +1,5 @@
 # Dossier
 
-> **Instructies:**
->
-> - Vul dit dossier volledig in en zorg ervoor dat alle links correct zijn
-> - In het geval je slechts één olod volgt, verwijder alle inhoud omtrent het andere olod uit dit document
-> - Lees [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) om te weten hoe een Markdown-bestand opgemaakt moet worden
-> - Verwijder alle instructies (lijnen die starten met >) wanneer je klaar bent
-
 ## 📋 Studentgegevens
 
 - **Student:** Aykon Kirhan
@@ -15,11 +8,12 @@
 - **Student:** Jasper Huyghe
 - **Studentennummer:** 202405272
 - **E-mailadres:** <jasper.huyghe@student.hogent.be>
+- **Telefoonnummer:** +324 99 91 24 05 / +324 94 67 00 49
 
 - **GitHub repository:** <https://github.com/HOGENT-frontendweb/frontendweb-2526-kirhanhuyghe>
 - **Online versies:**
-  - **Back-end:** <LINK_NAAR_ONLINE_BACKEND>
-  - **Front-end:** <LINK_NAAR_ONLINE_FRONTEND>
+  - **Back-end:** <https://frontendweb-2526-kirhanhuyghe-backend.onrender.com/>
+  - **Front-end:** <https://portaal.kljsgw.be/>
 - **Demo:** <LINK_NAAR_DEMO_VIDEO>
 
 ## 🔐 Logingegevens
@@ -58,16 +52,7 @@ Opmerking: op het transactiescherm, klik zeker nog eens op de headers om de sort
 
 ### Lokale omgeving
 
-- **E-mailadres**: <test@example.com>
-- **Wachtwoord**: testpassword
-- **Rol**: admin/user
-
-### Online omgeving
-
-- **E-mailadres**: <test@example.com>
-- **Wachtwoord**: testpassword
-- **Rol**: admin/user
-TODO wat moet hier
+ZIE HIERBOVEN + IN DE INSTRUCTIES
 
 ## 📖 Projectbeschrijving
 
@@ -126,20 +111,47 @@ Loguit
 
 Gebruiker toevoegen (alleen admin)
   Alleen een admin kan via hier een gebruiker toevoegen.
->
 
-ERD - TODO
+## 🌳 ERD
 
-TODO uitleg erd?
+![ERD](./KLJPORTAAL_ERD.png)
+
+#### 1. Kasboekhouding (Transacties & Categorieën)
+
+Transacties zijn geld die in of uit gaat: inkomsten en uitgaven. Om dit georganiseerd te houden, kun je elke transactie in één of meer categorieën plaatsen (bijvoorbeeld "snacks", "materiaal", "vervoer"). De tabel Transactie_Categorie verbindt deze twee: één transactie kan in meerdere categorieën zitten, en één categorie kan veel transacties hebben.
+
+#### 2. Evenementen & Aanwezigheid
+
+Evenementen zijn dingen die gebeuren: activiteiten, vergaderingen, uitstappen, enzovoort. Ze hebben een datum, tijd en beschrijving.
+Voor elk evenement houd je bij wie aanwezig is via Aanwezigheid. Dit is een koppeling tussen een User en een Evenement: je ziet wie er was, wie niet, en waarom (met optionele aangepaste tijden als iemand later kwam of eerder wegging).
+
+#### 3. Ronde-Verdeling
+
+Per ronde heb je:
+
+Ronde_Leiding: Dit zijn de mensen die deze ronde gaan lopen. Ze hebben een naam, adres (hun startpunt) en coördinaten.
+Ronde_Huizen: Dit zijn alle huizen/adressen in die wijk met hun coördinaten.
+Ronde_Bewoners: Dit zijn de namen van de mensen in elk huis.
+
+Je algoritme berekent dan de optimale verdeling: welke huizen krijgt welke ronde-leiding toegewezen op basis van afstand.
+
+#### 4. Kasjes (Groepsbudgetten)
+
+Kasjes houden per leeftijdsgroep (zoals "-8", "-12", "+16") en per jaar bij hoeveel geld beschikbaar is. Dit is een centrale plek waar je ziet hoeveel budget elke leeftijdsgroep heeft.
+
+#### 5. Hoe alles samenkomt
+
+Users zijn het middelpunt: zij maken transacties aan, zij worden ingedeeld in rondes, zij worden geregistreerd voor evenementen.
+Leiding_Profiel geeft extra info over elke user: hun telefoonnummer, welke leeftijdsgroep ze begeleiden, en wat hun beschrijvende functies zijn.
+Rondes zijn tijdelijk: je maakt er een aan, voert huizen in, het algoritme verdeelt alles, en je bent klaar.
+Kasjes zijn permanent: je stelt ze in per jaar, en ze tonen het budget dat beschikbaar is.
 
 ## ✅ Ontvankelijkheidscriteria
 
-- [ ] Het project van Web Services voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
-- [ ] Het project van Front-end Web Development voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
+- [x] Het project van Web Services voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
+- [x] Het project van Front-end Web Development voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
 
 ## 🚀 Extra technologieën
-
-> **Instructie:** Beschrijf welke extra technologieën je hebt gebruikt. Vermeld waarom je deze hebt gekozen.
 
 ### Front-end Web Development
 
@@ -188,7 +200,34 @@ TODO uitleg erd?
 
 ## 🤔 Reflectie
 
-> **Instructie:** Reflecteer eerlijk over je leerproces en het project. Dit helpt zowel jezelf als de docenten om de cursus te verbeteren.
+### Aykon
+
+**Wat heb je geleerd?**
+
+Tijdens het maken van het project heb ik heel wat nieuwe technologieën ontdekt. Ik vond dit een heel leerrijke ervaring, omdat we niet enkel dingen uit de les hebben overgenomen, maar ook zelf zoveel technologieën en libraries mochten toevoegen. Ik vond het tof dat we heel vrij waren om alles te gebruiken om zo een mooie. functionele applicatie te ontwikkelen.
+Ik heb vooral bijgeleerd dat er enorm veel mogelijkheden zijn binnen de IT-wereld aan de hand van libraries. Ook vind ik het heel handig dat we nu ook al een goede kennis qua pnpm-commandos hebben opgedaan.
+
+**Wat vond je goed aan dit project?**
+
+Ik heb mezelf verbaasd met wat we hebben bereikt en had nooit gedacht dat ons project zo uitgebreid en professioneel zou zijn. De UI en UX vind ik heel gebruiksvriendelijk en ik vind dat we zeer mooie code hebben geschreven.
+
+**Wat zou je anders doen?**
+
+Ik zou eerste een beter plan opstellen met alle functies en pagina's dat we nodig hebben voor ons project en dan pas te beginnen ontwerpen en programmeren.
+
+**Wat waren de grootste uitdagingen?**
+
+De hoeveelheid keer dat een bepaalde pagina of functie niet meer werkte na het toevoegen van nieuwe code was enorm en hier hebben we dus ook heel veel tijd in moeten steken. Een voorbeeld hiervan zijn de cypress-testen. Ze werkten allemaal perfect en dan een week later werkte nog maar de helft.
+
+**Wat zou je behouden aan de cursus?**
+
+Ik vind dat zowel de cursus Front-end Web Development als Web Services goed is opgebouwd aan de hand van een handige inhoudstafel en dat de commandos ook zeer duidelijk zijn opgemaakt.
+
+**Wat zou je toevoegen/aanpassen?**
+
+Grote blokken uitleg opdelen in kleinere stukjes met voorbeelden ertussen. Soms is het wat moeilijk om te onthouden wat je net hebt gelezen als je ondertussen al aan de volgende alinea zit die over iets anders gaat.
+
+### Jasper
 
 **Wat heb je geleerd?**
 
@@ -197,13 +236,9 @@ Mijn belangrijkste leerproces vond ik dat er heel veel libraries gebruikt die je
 
 **Wat vond je goed aan dit project?**
 
-[Positieve aspecten...]
-
 Ik vind dat onze applicatie heel modern en professioneel oogt. Qua backend denk ik dat we een paar knappe algoritmes hebben uitgeschreven.
 
 **Wat zou je anders doen?**
-
-[Verbeterpunten voor jezelf...]
 
 Ik zou vanaf het begin meer kijken naar 'het grote plaatje' in plaats van heel hard te focussen op één functie.
 
@@ -213,22 +248,13 @@ De bestandsindeling die KBC geeft wanneer je via KBC Touch een csv aanvraagt, is
 
 **Wat zou je behouden aan de cursus?**
 
-[Wat werkt goed...]
-
 De opbouw en de voorgekauwde code vind ik top!
 
 **Wat zou je toevoegen/aanpassen?**
 
-[Suggesties voor verbetering...]
-
 Minder grote blokken tekst, dit is iets waar je snel overleest. Ik denk dat het nuttiger zou zijn als de code gedocumenteerd was met comments in plaats van pijltjes.
 
 ### Reflectie groepswerk
-
-> **Instructies:**
->
-> - Vul dit eerlijk in, we controleren ook de GitHub contributions en pull requests.
-> - Verwijder deze sectie als je alleen hebt gewerkt.
 
 **Hoe verliep het groepswerk?**
 Aykon en ik werken al samen aan groepswerken sinds het zesde middelbaar, ik durf te zeggen dat wij heel goed op elkaar zijn ingespeeld en elkaars tekortkomingen kunnen opvullen.
@@ -245,10 +271,8 @@ Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel on
 
 - **Aykon:**
   - [ ] Ik heb minder bijgedragen dan mijn groepsgenoot
-  - [ ] Ik heb evenveel bijgedragen als mijn groepsgenoot
+  - [x] Ik heb evenveel bijgedragen als mijn groepsgenoot
   - [ ] Ik heb meer bijgedragen dan mijn groepsgenoot
-
-**Welke functionaliteiten heeft elk groepslid toegevoegd voor Web Services?**
 
 > **Instructie:** Geef per persoon een duidelijk overzicht van wat die heeft geïmplementeerd voor het project voor het olod Web Services.
 
@@ -274,8 +298,6 @@ Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel on
 | **Testing** |   | ✅| |
 
 **Welke functionaliteiten heeft elk groepslid toegevoegd voor Front-end Web Development?**
-
-> **Instructie:** Geef per persoon een duidelijk overzicht van wat die heeft geïmplementeerd voor het project voor het olod Front-end Web Development.
 
  Functionaliteit | Jasper | Aykon | Beide |
 |------------------|--------|-------|-------|

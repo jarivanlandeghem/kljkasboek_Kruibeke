@@ -182,7 +182,8 @@ const AttendeeListDialog = ({ open, onClose, event, onMail }) => {
         setSending(false);
     };
 
-    const listItems = attendees?.items || [];
+   
+    const listItems = Array.isArray(attendees) ? attendees : (attendees?.items || []);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, minHeight: '50vh' } }}>
@@ -202,7 +203,7 @@ const AttendeeListDialog = ({ open, onClose, event, onMail }) => {
                             const config = STATUS_CONFIG[att.status] || STATUS_CONFIG['UNKNOWN'];
                             
                             return (
-                                <div key={att.aanwezigheidID || i}>
+                                <div key={att.aanwezigheidID || `user-${att.userID}`}>
                                     <ListItem>
                                         <ListItemAvatar>
                                             <Avatar sx={{ bgcolor: config.color + '.main' }}>
@@ -295,6 +296,7 @@ export default function AanwezighedenPage() {
           mutate('aanwezigheden'); 
           setShowAttendanceDialog(false);
       } catch (err) {
+        this.logger.log(err);
           alert('Opslaan mislukt');
       }
   };
@@ -310,6 +312,7 @@ export default function AanwezighedenPage() {
           mutate('aanwezigheden'); 
           setShowEventDialog(false);
       } catch (err) {
+        this.logger.log(err);
           alert('Fout bij opslaan');
       }
   };
@@ -320,6 +323,7 @@ export default function AanwezighedenPage() {
               await deleteById('evenementen', { arg: id });
               mutate('evenementen');
           } catch(err) { 
+            this.logger.log(err);
               alert("Kon niet verwijderen"); 
           }
       }
