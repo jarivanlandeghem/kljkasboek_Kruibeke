@@ -1,19 +1,19 @@
 // src/drizzle/schema.ts
 import {
-  mysqlTable,
-  int,
-  decimal,
-  date,
-  time,
-  boolean,
-  text,
-  mysqlEnum,
-  primaryKey,
-  varchar,
-  uniqueIndex,
-  json,
-  index,
-  timestamp,
+    mysqlTable,
+    int,
+    decimal,
+    date,
+    time,
+    boolean,
+    text,
+    mysqlEnum,
+    primaryKey,
+    varchar,
+    uniqueIndex,
+    json,
+    index,
+    timestamp,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
@@ -59,6 +59,8 @@ export const transactieCategorie = mysqlTable(
 export const users = mysqlTable(
   'users',
   {
+    // Keep the JS/TS field name `userid` for compatibility, but map it
+    // to the actual SQL column name `id` (some migrations created `id`).
     userid: int('id', { unsigned: true }).primaryKey().autoincrement(),
     voornaam: varchar('voornaam', { length: 255 }).notNull(),
     familienaam: varchar('familienaam', { length: 255 }).notNull(),

@@ -13,7 +13,7 @@ export const TRANSACTIES_SEED = [
   },
   {
     transactieID: 2,
-    userID: 2,
+    userID: 1,
     beschrijving: 'Benzine',
     in_uit: 'UIT' as const,
     bedrag: 55.75,
@@ -21,7 +21,7 @@ export const TRANSACTIES_SEED = [
   },
   {
     transactieID: 3,
-    userID: 3,
+    userID: 1,
     beschrijving: 'Irish pub',
     in_uit: 'UIT' as const,
     bedrag: 48.5,
