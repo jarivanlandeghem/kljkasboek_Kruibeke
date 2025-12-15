@@ -1,6 +1,4 @@
-// src/transactie/transactie.service.ts
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { Transactie } from '../api/data/mock_data';
 import { eq, sql, and, like, desc, asc } from 'drizzle-orm';
 import {
   CreateTransactieRequestDto,
@@ -40,7 +38,6 @@ export class TransactieService {
       ? and(like(transacties.beschrijving, `%${search}%`))
       : undefined;
 
-    // 1. Haal totaal aantal op voor pagination
     const [countResult] = await this.db
       .select({ count: sql<number>`count(*)` })
       .from(transacties)
@@ -48,7 +45,6 @@ export class TransactieService {
 
     const total = Number(countResult.count);
 
-    // 2. Haal de data op met limit/offset + dynamische sortering
     const sortField = query.sort || 'datum';
     const direction = query.direction || 'desc';
     const dirFunc = direction === 'asc' ? asc : desc;
@@ -73,7 +69,6 @@ export class TransactieService {
       with: { categorieKoppelingen: true },
     });
 
-    // 3. Verrijk data (categorieën & users)
     const allCategories = await this.db.query.categorieen.findMany();
     const catMap = new Map(
       allCategories.map((c) => [c.categorieID, c.categorienaam]),
@@ -191,8 +186,6 @@ export class TransactieService {
     if (res.affectedRows === 0) throw new NotFoundException('Niet gevonden');
   }
 
-  //  PDF RAPPORTAGE LOGICA
-
   async generateAndMailReport(
     userId: number,
     userEmail: string,
@@ -240,7 +233,6 @@ export class TransactieService {
     );
   }
 
-  // pdf genereren
   private createPdfBuffer(
     groupedData: Map<string, { in: any[]; out: any[] }>,
     name: string,
@@ -253,40 +245,49 @@ export class TransactieService {
       });
       const buffers: Buffer[] = [];
 
-      const assetsPath = path.join(process.cwd(), 'assets');
+      const assetsPath = path.join(__dirname, '..', '..', 'assets');
 
-      const fonts = {
+      const fontPaths = {
         Regular: path.join(assetsPath, 'Poppins-Regular.ttf'),
         Bold: path.join(assetsPath, 'Poppins-Bold.ttf'),
         SemiBold: path.join(assetsPath, 'Poppins-SemiBold.ttf'),
         Light: path.join(assetsPath, 'Poppins-Light.ttf'),
-        Italic: path.join(assetsPath, 'Poppins-Italic.ttf'),
         Medium: path.join(assetsPath, 'Poppins-Medium.ttf'),
       };
 
       const logoPath = path.join(assetsPath, 'KLJ_LOGO_MANNETJE.png');
 
-      try {
-        if (fs.existsSync(fonts.Regular))
-          doc.registerFont('Poppins', fonts.Regular);
-        if (fs.existsSync(fonts.Bold))
-          doc.registerFont('Poppins-Bold', fonts.Bold);
-        if (fs.existsSync(fonts.SemiBold))
-          doc.registerFont('Poppins-SemiBold', fonts.SemiBold);
-        if (fs.existsSync(fonts.Light))
-          doc.registerFont('Poppins-Light', fonts.Light);
-        if (fs.existsSync(fonts.Medium))
-          doc.registerFont('Poppins-Medium', fonts.Medium);
+      const registerFont = (name: string, p: string, fallback: string) => {
+        if (fs.existsSync(p)) {
+          doc.registerFont(name, p);
+          return name;
+        }
+        return fallback;
+      };
 
-        // Zet standaard font
-        doc.font('Poppins');
-      } catch (e) {
-        console.log(e);
-        this.logger.warn(
-          'Kon Poppins fonts niet laden, fallback naar Helvetica. Check je assets map.',
-        );
-        doc.font('Helvetica');
-      }
+      const fRegular = registerFont('Poppins', fontPaths.Regular, 'Helvetica');
+      const fBold = registerFont(
+        'Poppins-Bold',
+        fontPaths.Bold,
+        'Helvetica-Bold',
+      );
+      const fSemiBold = registerFont(
+        'Poppins-SemiBold',
+        fontPaths.SemiBold,
+        'Helvetica-Bold',
+      );
+      const fLight = registerFont(
+        'Poppins-Light',
+        fontPaths.Light,
+        'Helvetica',
+      );
+      const fMedium = registerFont(
+        'Poppins-Medium',
+        fontPaths.Medium,
+        'Helvetica',
+      );
+
+      doc.font(fRegular);
 
       doc.on('data', (chunk) => buffers.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
@@ -294,19 +295,14 @@ export class TransactieService {
         reject(err instanceof Error ? err : new Error(String(err)));
       });
 
-      // --- HEADER ---
-
-      // Logo
       if (fs.existsSync(logoPath)) {
         doc.image(logoPath, 40, 30, { width: 60 });
       }
 
-      // Titel en Info (Rechts van logo of gecentreerd)
-      //  Poppins-Bold voor de titel
-      doc.font('Poppins-Bold').fontSize(22).fillColor('#222222');
+      doc.font(fBold).fontSize(22).fillColor('#222222');
       doc.text('Transactie Rapport', 120, 40);
 
-      doc.font('Poppins-Medium').fontSize(10).fillColor('#666666');
+      doc.font(fMedium).fontSize(10).fillColor('#666666');
       doc.text(`Lid: ${name}`, 120, 68);
       doc.text(
         `Aangemaakt op: ${new Date().toLocaleDateString('nl-BE')}`,
@@ -314,7 +310,6 @@ export class TransactieService {
         82,
       );
 
-      // Rode lijn onder header (KLJ Rood stijl)
       doc
         .moveTo(40, 110)
         .lineTo(550, 110)
@@ -323,55 +318,49 @@ export class TransactieService {
         .stroke();
 
       doc.moveDown(3);
-      doc.y = 130; // Start y-positie voor content
-
-      //  CONTENT
+      doc.y = 130;
 
       groupedData.forEach((data, categoryName) => {
-        // Check of we ruimte hebben op de pagina
         if (doc.y > 650) doc.addPage();
 
-        // Categorie Header
-        doc.font('Poppins-SemiBold').fontSize(14).fillColor('#222222');
+        doc.font(fSemiBold).fontSize(14).fillColor('#222222');
         doc.text(categoryName.toUpperCase());
         doc.moveDown(0.5);
 
         let totalIn = 0;
         let totalOut = 0;
 
-        // Tabel Inkomsten
+        const tableFonts = { regular: fRegular, semiBold: fSemiBold };
+
         if (data.in.length > 0) {
           doc
-            .font('Poppins-Medium')
+            .font(fMedium)
             .fontSize(10)
             .fillColor('#2e7d32')
             .text('INKOMSTEN', { indent: 2 });
           doc.moveDown(0.2);
-          this.drawTable(doc, data.in, '#e8f5e9'); // Groene header achtergrond
+          this.drawTable(doc, data.in, '#e8f5e9', tableFonts);
           totalIn = data.in.reduce((sum, t) => sum + t.bedrag, 0);
           doc.moveDown(1);
         }
 
-        // Tabel Uitgaven
         if (data.out.length > 0) {
           doc
-            .font('Poppins-Medium')
+            .font(fMedium)
             .fontSize(10)
             .fillColor('#c62828')
             .text('UITGAVEN', { indent: 2 });
           doc.moveDown(0.2);
-          this.drawTable(doc, data.out, '#ffebee'); // Rode header achtergrond
+          this.drawTable(doc, data.out, '#ffebee', tableFonts);
           totalOut = data.out.reduce((sum, t) => sum + Math.abs(t.bedrag), 0);
           doc.moveDown(1);
         }
 
-        // Totaal blokje per categorie
         const saldo = totalIn - totalOut;
         const startX = 320;
 
-        doc.font('Poppins-Regular').fontSize(10).fillColor('black');
+        doc.font(fRegular).fontSize(10).fillColor('black');
 
-        // Totalen uitlijning
         doc.text(`Totaal In:`, startX, doc.y, { continued: true });
         doc.text(`€ ${totalIn.toFixed(2)}`, { align: 'right' });
 
@@ -380,17 +369,14 @@ export class TransactieService {
 
         doc.moveDown(0.3);
 
-        // Saldo dikgedrukt
-        doc.font('Poppins-Bold');
-        doc.fillColor(saldo >= 0 ? '#2e7d32' : '#c62828'); // Groen of Rood
+        doc.font(fBold);
+        doc.fillColor(saldo >= 0 ? '#2e7d32' : '#c62828');
         doc.text(`Saldo ${categoryName}:`, startX, doc.y, { continued: true });
         doc.text(`€ ${saldo.toFixed(2)}`, { align: 'right' });
 
-        // Reset
-        doc.font('Poppins-Regular');
+        doc.font(fRegular);
         doc.moveDown(1.5);
 
-        // Stippellijn scheiding
         doc
           .moveTo(40, doc.y)
           .lineTo(550, doc.y)
@@ -403,11 +389,10 @@ export class TransactieService {
         doc.moveDown(2);
       });
 
-      //  FOOTER (Paginanummers)
       const range = doc.bufferedPageRange();
       for (let i = 0; i < range.count; i++) {
         doc.switchToPage(i);
-        doc.font('Poppins-Light').fontSize(8).fillColor('#999999');
+        doc.font(fLight).fontSize(8).fillColor('#999999');
         doc.text(
           `Pagina ${i + 1} van ${range.count} - Gegenereerd door KLJ Portaal`,
           40,
@@ -420,11 +405,11 @@ export class TransactieService {
     });
   }
 
-  // Helper om mooie tabellen te tekenen
   private drawTable(
     doc: PDFKit.PDFDocument,
     transactions: any[],
     headerBgColor: string,
+    fonts: { regular: string; semiBold: string },
   ) {
     const startX = 40;
     const colDatum = startX + 5;
@@ -434,21 +419,20 @@ export class TransactieService {
 
     let currentY = doc.y;
 
-    // Header Balk
     doc.rect(startX, currentY, 510, rowHeight).fill(headerBgColor);
-    doc.fillColor('#333333').font('Poppins-SemiBold').fontSize(9);
+    doc.fillColor('#333333').font(fonts.semiBold).fontSize(9);
 
-    // Header Tekst
     doc.text('DATUM', colDatum, currentY + 6);
     doc.text('BESCHRIJVING', colBeschr, currentY + 6);
-    doc.text('BEDRAG', colBedrag, currentY + 6, { width: 100, align: 'right' });
+    doc.text('BEDRAG', colBedrag, currentY + 6, {
+      width: 100,
+      align: 'right',
+    });
 
     currentY += rowHeight;
-    doc.font('Poppins');
+    doc.font(fonts.regular);
 
-    // Rijen
     transactions.forEach((t, index) => {
-      // Nieuwe pagina check
       if (currentY > 700) {
         doc.addPage();
         currentY = 50;
