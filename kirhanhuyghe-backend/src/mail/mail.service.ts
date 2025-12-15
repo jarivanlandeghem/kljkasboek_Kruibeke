@@ -1,4 +1,3 @@
-// src/mail/mail.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -10,12 +9,12 @@ export class MailService {
 
   async sendAccountRequest(firstName: string, lastName: string, email: string) {
     const adminEmail = 'kasboek@kljsgw.be';
-
     this.logger.log(
-      `📧 Poging tot mailen... Van: OAuth User -> Naar: ${adminEmail}`,
+      `[1/3] Start sendAccountRequest. Van: OAuthUser -> Naar Admin: ${adminEmail} en User: ${email}`,
     );
 
     try {
+      this.logger.log(`[2/3] Versturen mail naar Admin (${adminEmail})...`);
       await this.mailerService.sendMail({
         to: adminEmail,
         subject: `Nieuwe accountaanvraag: ${firstName} ${lastName}`,
@@ -25,16 +24,23 @@ export class MailService {
           <p><strong>Email:</strong> ${email}</p>
         `,
       });
-      this.logger.log(`✅ Mail naar admin (${adminEmail}) verzonden!`);
+      this.logger.log(`[CHECK] Mail naar Admin verzonden.`);
 
+      this.logger.log(`[2/3] Versturen bevestiging naar User (${email})...`);
       await this.mailerService.sendMail({
         to: email,
         subject: 'Bevestiging aanvraag KLJ Portaal',
         html: `<p>Beste ${firstName}, we hebben je aanvraag ontvangen.</p>`,
       });
-      this.logger.log(`✅ Bevestiging naar gebruiker (${email}) verzonden!`);
+
+      this.logger.log(
+        `[3/3] ✅ sendAccountRequest volledig succesvol afgerond.`,
+      );
     } catch (error) {
-      this.logger.error('❌ FOUT BIJ VERZENDEN MAIL:', error);
+      this.logger.error(
+        `[ERROR] Fout in sendAccountRequest: ${error instanceof Error ? error.message : error}`,
+        error,
+      );
       throw error;
     }
   }
@@ -44,9 +50,12 @@ export class MailService {
     firstName: string,
     pdfBuffer: Buffer,
   ) {
-    this.logger.log(`📧 Rapport versturen naar ${userEmail}...`);
+    this.logger.log(
+      `[1/3] Start sendTransactionReport naar ${userEmail}. PDF grootte: ${pdfBuffer.length} bytes`,
+    );
 
     try {
+      this.logger.log(`[2/3] Verbinding maken met SMTP server...`);
       await this.mailerService.sendMail({
         to: userEmail,
         subject: 'Jouw Rapport - KLJ Portaal',
@@ -63,21 +72,28 @@ export class MailService {
           },
         ],
       });
-      this.logger.log(`✅ Rapport verzonden naar ${userEmail}`);
+      this.logger.log(
+        `[3/3] ✅ Rapport succesvol afgeleverd bij mailserver voor ${userEmail}`,
+      );
     } catch (error) {
-      this.logger.error('❌ Fout bij versturen rapport:', error);
+      this.logger.error(
+        `[ERROR] Fout in sendTransactionReport: ${error instanceof Error ? error.message : error}`,
+        error,
+      );
       throw error;
     }
   }
 
   async sendNotification(to: string, subject: string, message: string) {
-    this.logger.log(`🔔 Notificatie sturen naar ${to}`);
+    this.logger.log(
+      `[1/3] Start sendNotification naar ${to}. Onderwerp: ${subject}`,
+    );
 
     try {
+      this.logger.log(`[2/3] Versturen notificatie...`);
       await this.mailerService.sendMail({
         to: to,
         subject: subject,
-
         html: `
           <h3>KLJ Systeem Melding</h3>
           <p>${message.replace(/\n/g, '<br>')}</p> 
@@ -85,9 +101,12 @@ export class MailService {
           <small>Dit is een geautomatiseerd bericht.</small>
         `,
       });
-      this.logger.log(`✅ Notificatie verzonden naar ${to}`);
+      this.logger.log(`[3/3] ✅ Notificatie verzonden naar ${to}`);
     } catch (error) {
-      this.logger.error(`❌ Fout bij sturen notificatie naar ${to}`, error);
+      this.logger.error(
+        `[ERROR] Fout in sendNotification naar ${to}: ${error instanceof Error ? error.message : error}`,
+        error,
+      );
     }
   }
 }

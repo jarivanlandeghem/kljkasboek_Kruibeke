@@ -226,11 +226,18 @@ export class TransactieService {
     });
 
     const pdfBuffer = await this.createPdfBuffer(grouped, firstName);
-    await this.mailService.sendTransactionReport(
-      userEmail,
-      firstName,
-      pdfBuffer,
-    );
+
+    this.mailService
+      .sendTransactionReport(userEmail, firstName, pdfBuffer)
+      .then(() => {
+        this.logger.log(`✅ ACHTERGROND: Mail verzonden naar ${userEmail}`);
+      })
+      .catch((err) => {
+        this.logger.error(
+          `❌ ACHTERGROND: Mail mislukt: ${err.message}`,
+          err.stack,
+        );
+      });
   }
 
   private createPdfBuffer(

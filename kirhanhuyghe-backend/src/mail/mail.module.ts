@@ -1,4 +1,3 @@
-// src/mail/mail.module.ts
 import { Module, Global } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -11,7 +10,9 @@ import { ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         transport: {
-          service: 'gmail',
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
           family: 4,
           auth: {
             type: 'OAuth2',
@@ -20,9 +21,14 @@ import { ConfigService } from '@nestjs/config';
             clientSecret: config.get<string>('GOOGLE_CLIENT_SECRET'),
             refreshToken: config.get<string>('GOOGLE_REFRESH_TOKEN'),
           },
+          debug: true,
+          logger: true,
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
         },
         defaults: {
-          from: `"KLJ Kasboek" <${config.get<string>('MAIL_USER')}>`,
+          from: `"KLJ Portaal" <${config.get<string>('MAIL_USER')}>`,
         },
       }),
     }),
