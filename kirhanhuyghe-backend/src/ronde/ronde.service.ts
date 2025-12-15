@@ -169,14 +169,17 @@ export class RondeService {
     }));
   }
 
+  // ALGORITME
   private berekenOptimaleVerdeling(
     huizen: HuisEntity[],
     leiding: LeidingEntity[],
   ) {
+    // filter alleen huizen en leiding met geldige coördinaten
     const validHuizen = huizen.filter((h) => h.lat && h.lon);
     const validLeiding = leiding.filter((l) => l.lat && l.lon);
     if (!validLeiding.length || !validHuizen.length) return [];
 
+    // maak een array met alle leiders en hun huizen (leeg te beginnen)
     const leidingMap = validLeiding.map((l) => ({
       id: l.rondeLeidingID,
       lat: Number(l.lat),
@@ -184,9 +187,13 @@ export class RondeService {
       assigned: [] as HuisEntity[],
     }));
 
+    // stap één: verdeel huizen eerlijk
+    // bereken hoeveel huizen per leider
     const baseQuota = Math.floor(validHuizen.length / leidingMap.length);
+    // en hoeveel huizen zijn er over
     let remainder = validHuizen.length % leidingMap.length;
 
+    // geef elk leider hun quota + eventueel eentje extra
     let huisIdx = 0;
     for (const l of leidingMap) {
       const quota = baseQuota + (remainder > 0 ? 1 : 0);
@@ -200,6 +207,8 @@ export class RondeService {
       }
     }
 
+    // stap twee: optimalisatie van afstanden
+    // deze lus kijkt of we huizen kunnen ruilen voor kortere routes
     let improved = true;
     let iterations = 0;
     const MAX_LOOPS = 5000;
@@ -208,22 +217,27 @@ export class RondeService {
       improved = false;
       iterations++;
 
+      // vergelijk alle paren leiders met elkaar
       for (let i = 0; i < leidingMap.length; i++) {
         for (let j = i + 1; j < leidingMap.length; j++) {
           const personA = leidingMap[i];
           const personB = leidingMap[j];
 
+          // voor elk huis van leider a en elk huis van leider b
           for (let aIdx = 0; aIdx < personA.assigned.length; aIdx++) {
             for (let bIdx = 0; bIdx < personB.assigned.length; bIdx++) {
               const huisA = personA.assigned[aIdx];
               const huisB = personB.assigned[bIdx];
 
+              // bereken huidige kosten: afstand a naar zijn huis plus b naar zijn huis
               const currentCost =
                 this.getDistSq(personA, huisA) + this.getDistSq(personB, huisB);
 
+              // bereken kosten als we zouden ruilen
               const swapCost =
                 this.getDistSq(personA, huisB) + this.getDistSq(personB, huisA);
 
+              // wissel alleen als het echt beter is (en niet gelijk)
               if (swapCost < currentCost - 0.00001) {
                 personA.assigned[aIdx] = huisB;
                 personB.assigned[bIdx] = huisA;
@@ -235,6 +249,7 @@ export class RondeService {
       }
     }
 
+    // zet alle toewijzingen in een lijst
     const resultaat = [];
     for (const person of leidingMap) {
       for (const huis of person.assigned) {
@@ -244,6 +259,7 @@ export class RondeService {
     return resultaat;
   }
 
+  // bereken gekwadrateerde afstand
   private getDistSq(
     p1: { lat: number; lon: number },
     p2: { lat: string | null; lon: string | null },
@@ -253,6 +269,7 @@ export class RondeService {
     return dx * dx + dy * dy;
   }
 
+  // hulpklasse voor het ophalen van de lat en lon door de API van komoot. er wordt telkens 50ms gewacht uit beleefdheid.
   private async geocodePhoton(
     adres: string,
   ): Promise<{ lat: string; lon: string } | null> {

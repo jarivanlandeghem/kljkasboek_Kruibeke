@@ -5,8 +5,43 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1765284432986,
-      "tag": "0000_happy_naoko",
+      "when": 1730246400000,
+      "tag": "0000_init_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1731110400000,
+      "tag": "0001_add_events_attendance",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1731801600000,
+      "tag": "0002_extend_attendance_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1732492800000,
+      "tag": "0003_add_leiding_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1733184000000,
+      "tag": "0004_add_ronde_system",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1733961600000,
+      "tag": "0005_add_kasjes",
       "breakpoints": true
     }
   ]
