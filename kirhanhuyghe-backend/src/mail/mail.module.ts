@@ -11,8 +11,8 @@ import { ConfigService } from '@nestjs/config';
       useFactory: (config: ConfigService) => ({
         transport: {
           host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
+          port: 587,
+          secure: false,
           family: 4,
           auth: {
             type: 'OAuth2',
@@ -23,9 +23,12 @@ import { ConfigService } from '@nestjs/config';
           },
           debug: true,
           logger: true,
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 15000,
+          connectionTimeout: 20000,
+          greetingTimeout: 20000,
+          socketTimeout: 20000,
+          tls: {
+            rejectUnauthorized: false,
+          },
         },
         defaults: {
           from: `"KLJ Portaal" <${config.get<string>('MAIL_USER')}>`,
