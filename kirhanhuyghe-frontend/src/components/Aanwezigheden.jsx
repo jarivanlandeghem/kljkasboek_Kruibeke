@@ -295,26 +295,31 @@ export default function AanwezighedenPage() {
           await updateAanwezigheid(id, payload);
           mutate('aanwezigheden'); 
           setShowAttendanceDialog(false);
-      } catch (err) {
-        this.logger.log(err);
-          alert('Opslaan mislukt');
-      }
+            } catch (err) {
+                    console.error(err);
+                    alert('Opslaan mislukt');
+            }
   };
 
   const handleEventSave = async (data) => {
       try {
+          // Ensure we don't send internal fields (like evenementID) which
+          // are not allowed by the DTO validation (whitelist).
+          const safeData = { ...data };
+          if (safeData.evenementID) delete safeData.evenementID;
+
           if (selectedEvent?.evenementID) {
-              await update(`evenementen/${selectedEvent.evenementID}`, { arg: data });
+              await update(`evenementen/${selectedEvent.evenementID}`, { arg: safeData });
           } else {
-              await post('evenementen', { arg: data });
+              await post('evenementen', { arg: safeData });
           }
           mutate('evenementen');
           mutate('aanwezigheden'); 
           setShowEventDialog(false);
-      } catch (err) {
-        this.logger.log(err);
-          alert('Fout bij opslaan');
-      }
+            } catch (err) {
+                    console.error(err);
+                    alert('Fout bij opslaan');
+            }
   };
 
   const handleDeleteEvent = async (id) => {
@@ -322,10 +327,10 @@ export default function AanwezighedenPage() {
           try {
               await deleteById('evenementen', { arg: id });
               mutate('evenementen');
-          } catch(err) { 
-            this.logger.log(err);
-              alert("Kon niet verwijderen"); 
-          }
+                    } catch(err) { 
+                            console.error(err);
+                            alert("Kon niet verwijderen"); 
+                    }
       }
   };
 
