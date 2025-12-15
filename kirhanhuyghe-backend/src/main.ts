@@ -70,8 +70,8 @@ async function bootstrap() {
   }
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Budget Web Services')
-    .setDescription('The Budget API application')
+    .setTitle('KLJ Portaal')
+    .setDescription('KLJ Portaal API Documentation')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
