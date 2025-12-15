@@ -6,11 +6,8 @@ import {
   Matches,
   MaxLength,
   Length,
+  IsOptional,
 } from 'class-validator';
-
-// ----------------------------------------------------------------------
-// CONSTANTEN
-// ----------------------------------------------------------------------
 
 const EVENEMENT_TYPES = [
   'ACTIVITEIT',
@@ -19,12 +16,8 @@ const EVENEMENT_TYPES = [
   'OVERIGE',
 ] as const;
 
-// Regex voor Tijd formaat HH:MM of HH:MM:SS
 const TIME_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
-// Regex voor Datum formaat YYYY-MM-DD
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-// CREATE REQUEST DTO
 
 export class CreateEvenementRequestDto {
   @IsNotEmpty()
@@ -86,23 +79,15 @@ export class CreateEvenementRequestDto {
   einduur: string;
 }
 
-// ----------------------------------------------------------------------
-// DB OUTPUT INTERFACE
-// ----------------------------------------------------------------------
-
 export interface EvenementDbOutput {
   evenementID: number;
   type: 'ACTIVITEIT' | 'EVENEMENT' | 'VERGADERING' | 'OVERIGE';
   naam: string;
   beschrijving: string;
-  datum: string | Date; // Kan variëren in raw output
+  datum: string | Date;
   startuur: string;
   einduur: string;
 }
-
-// ----------------------------------------------------------------------
-// RESPONSE DTO
-// ----------------------------------------------------------------------
 
 export class EvenementResponseDto {
   @ApiProperty({ example: 1, description: 'Uniek ID van het evenement' })
@@ -146,13 +131,6 @@ export class EvenementResponseDto {
   einduur: string;
 }
 
-// ----------------------------------------------------------------------
-// LIST RESPONSE & UPDATE DTO
-// ----------------------------------------------------------------------
-
-/**
- * DTO voor lijstweergave van evenementen
- */
 export class EvenementListResponseDto {
   @ApiProperty({
     type: [EvenementResponseDto],
@@ -161,16 +139,13 @@ export class EvenementListResponseDto {
   items: EvenementResponseDto[];
 }
 
-/**
- * DTO voor het wijzigen van een bestaand evenement.
- * Alle velden zijn optioneel.
- */
 export class UpdateEvenementDto {
   @ApiProperty({
     required: false,
     enum: EVENEMENT_TYPES,
     description: 'Optioneel nieuw type',
   })
+  @IsOptional()
   @IsIn(EVENEMENT_TYPES)
   type?: (typeof EVENEMENT_TYPES)[number];
 
@@ -179,6 +154,8 @@ export class UpdateEvenementDto {
     example: 'Aangepaste naam',
     description: 'Optionele nieuwe naam',
   })
+  @IsOptional()
+  @IsString()
   @MaxLength(255)
   naam?: string;
 
@@ -187,6 +164,8 @@ export class UpdateEvenementDto {
     example: 'Nieuwe beschrijving',
     description: 'Optionele nieuwe beschrijving',
   })
+  @IsOptional()
+  @IsString()
   beschrijving?: string;
 
   @ApiProperty({
@@ -194,6 +173,8 @@ export class UpdateEvenementDto {
     example: '2025-06-01',
     description: 'Optionele nieuwe datum (YYYY-MM-DD)',
   })
+  @IsOptional()
+  @IsString()
   @Matches(DATE_REGEX, { message: 'Datum moet in YYYY-MM-DD formaat zijn' })
   datum?: string;
 
@@ -202,6 +183,8 @@ export class UpdateEvenementDto {
     example: '19:00:00',
     description: 'Optioneel nieuw startuur',
   })
+  @IsOptional()
+  @IsString()
   @Matches(TIME_REGEX)
   startuur?: string;
 
@@ -210,6 +193,8 @@ export class UpdateEvenementDto {
     example: '21:00:00',
     description: 'Optioneel nieuw einduur',
   })
+  @IsOptional()
+  @IsString()
   @Matches(TIME_REGEX)
   einduur?: string;
 }
