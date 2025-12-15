@@ -31,7 +31,6 @@ pnpm install
 ```env
 VITE_API_URL=http://localhost:3000/api
 ```
-
 > Dit wijst de frontend naar de lokale backend.
 
 ### Opstarten
