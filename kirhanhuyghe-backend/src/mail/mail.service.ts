@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common'; // 👈 Import Logger
+// src/mail/mail.service.ts
+import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class MailService {
-  private readonly logger = new Logger(MailService.name); // 👈 Logger aanmaken
+  private readonly logger = new Logger(MailService.name);
 
   constructor(private mailerService: MailerService) {}
 
@@ -34,9 +35,10 @@ export class MailService {
       this.logger.log(`✅ Bevestiging naar gebruiker (${email}) verzonden!`);
     } catch (error) {
       this.logger.error('❌ FOUT BIJ VERZENDEN MAIL:', error);
-      throw error; // Gooi de fout door zodat de frontend een 500 krijgt
+      throw error;
     }
   }
+
   async sendTransactionReport(
     userEmail: string,
     firstName: string,
@@ -67,6 +69,7 @@ export class MailService {
       throw error;
     }
   }
+
   async sendNotification(to: string, subject: string, message: string) {
     this.logger.log(`🔔 Notificatie sturen naar ${to}`);
 
@@ -85,7 +88,6 @@ export class MailService {
       this.logger.log(`✅ Notificatie verzonden naar ${to}`);
     } catch (error) {
       this.logger.error(`❌ Fout bij sturen notificatie naar ${to}`, error);
-      // We throwen hier niet per se, zodat de cronjob door kan gaan naar de volgende persoon
     }
   }
 }

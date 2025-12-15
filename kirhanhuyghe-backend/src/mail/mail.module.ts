@@ -12,16 +12,17 @@ import { ConfigService } from '@nestjs/config';
       useFactory: (config: ConfigService) => ({
         transport: {
           service: 'gmail',
+          family: 4,
           auth: {
             type: 'OAuth2',
-            user: config.get<string>('mail.user'),
-            clientId: config.get<string>('mail.clientId'),
-            clientSecret: config.get<string>('mail.clientSecret'),
-            refreshToken: config.get<string>('mail.refreshToken'),
+            user: config.get<string>('MAIL_USER'),
+            clientId: config.get<string>('GOOGLE_CLIENT_ID'),
+            clientSecret: config.get<string>('GOOGLE_CLIENT_SECRET'),
+            refreshToken: config.get<string>('GOOGLE_REFRESH_TOKEN'),
           },
         },
         defaults: {
-          from: `"KLJ Kasboek" <${config.get<string>('mail.user')}>`,
+          from: `"KLJ Kasboek" <${config.get<string>('MAIL_USER')}>`,
         },
       }),
     }),
