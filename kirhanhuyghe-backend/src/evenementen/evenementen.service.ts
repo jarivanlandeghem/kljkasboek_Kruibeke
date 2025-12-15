@@ -199,9 +199,9 @@ export class EvenementenService {
         bufferPages: true,
       });
       const buffers: Buffer[] = [];
-      const assetsPath = path.join(process.cwd(), 'assets');
+      const assetsPath = path.join(__dirname, '..', '..', 'assets');
 
-      const fonts = {
+      const fontPaths = {
         Regular: path.join(assetsPath, 'Poppins-Regular.ttf'),
         Bold: path.join(assetsPath, 'Poppins-Bold.ttf'),
         SemiBold: path.join(assetsPath, 'Poppins-SemiBold.ttf'),
@@ -211,24 +211,37 @@ export class EvenementenService {
 
       const logoPath = path.join(assetsPath, 'KLJ_LOGO_MANNETJE.png');
 
-      try {
-        if (fs.existsSync(fonts.Regular))
-          doc.registerFont('Poppins', fonts.Regular);
-        if (fs.existsSync(fonts.Bold))
-          doc.registerFont('Poppins-Bold', fonts.Bold);
-        if (fs.existsSync(fonts.SemiBold))
-          doc.registerFont('Poppins-SemiBold', fonts.SemiBold);
-        if (fs.existsSync(fonts.Medium))
-          doc.registerFont('Poppins-Medium', fonts.Medium);
-        if (fs.existsSync(fonts.Light))
-          doc.registerFont('Poppins-Light', fonts.Light);
-        doc.font('Poppins');
-      } catch (e) {
-        this.logger.warn(
-          'Kon Poppins fonts niet laden, fallback naar Helvetica.',
-        );
-        doc.font('Helvetica');
-      }
+      const registerFont = (name: string, p: string, fallback: string) => {
+        if (fs.existsSync(p)) {
+          doc.registerFont(name, p);
+          return name;
+        }
+        return fallback;
+      };
+
+      const fRegular = registerFont('Poppins', fontPaths.Regular, 'Helvetica');
+      const fBold = registerFont(
+        'Poppins-Bold',
+        fontPaths.Bold,
+        'Helvetica-Bold',
+      );
+      const fSemiBold = registerFont(
+        'Poppins-SemiBold',
+        fontPaths.SemiBold,
+        'Helvetica-Bold',
+      );
+      const fMedium = registerFont(
+        'Poppins-Medium',
+        fontPaths.Medium,
+        'Helvetica',
+      );
+      const fLight = registerFont(
+        'Poppins-Light',
+        fontPaths.Light,
+        'Helvetica',
+      );
+
+      doc.font(fRegular);
 
       doc.on('data', (chunk) => buffers.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
@@ -238,10 +251,10 @@ export class EvenementenService {
         doc.image(logoPath, 40, 30, { width: 60 });
       }
 
-      doc.font('Poppins-Bold').fontSize(22).fillColor('#222222');
+      doc.font(fBold).fontSize(22).fillColor('#222222');
       doc.text('Aanwezigheidslijst', 120, 40);
 
-      doc.font('Poppins-Medium').fontSize(10).fillColor('#666666');
+      doc.font(fMedium).fontSize(10).fillColor('#666666');
       doc.text(`${eventInfo.naam} (${eventInfo.type})`, 120, 68);
       doc.text(
         `${new Date(eventInfo.datum).toLocaleDateString('nl-BE')} • ${eventInfo.startuur.slice(0, 5)} - ${eventInfo.einduur.slice(0, 5)}`,
@@ -266,20 +279,23 @@ export class EvenementenService {
         (a) => a.status === 'PARTIAL',
       ).length;
 
-      doc.font('Poppins-SemiBold').fontSize(12).fillColor('black');
+      doc.font(fSemiBold).fontSize(12).fillColor('black');
       doc.text(
-        `Aanwezig: ${presentCount}   |   Afwezig: ${absentCount}   |   Aangepast: ${partialCount}`,
+        `Aanwezig: ${presentCount}   |   Afwezig: ${absentCount}   |   Aangepast: ${partialCount}`,
         40,
         doc.y,
       );
       doc.moveDown(1);
 
-      this.drawAttendanceTable(doc, attendees);
+      this.drawAttendanceTable(doc, attendees, {
+        regular: fRegular,
+        semiBold: fSemiBold,
+      });
 
       const range = doc.bufferedPageRange();
       for (let i = 0; i < range.count; i++) {
         doc.switchToPage(i);
-        doc.font('Poppins-Light').fontSize(8).fillColor('#999999');
+        doc.font(fLight).fontSize(8).fillColor('#999999');
         doc.text(
           `Pagina ${i + 1} van ${range.count} - Gegenereerd door KLJ Portaal`,
           40,
@@ -292,7 +308,11 @@ export class EvenementenService {
     });
   }
 
-  private drawAttendanceTable(doc: PDFKit.PDFDocument, attendees: any[]) {
+  private drawAttendanceTable(
+    doc: PDFKit.PDFDocument,
+    attendees: any[],
+    fonts: { regular: string; semiBold: string },
+  ) {
     const startX = 40;
     const colNaam = startX + 10;
     const colStatus = startX + 160;
@@ -303,14 +323,14 @@ export class EvenementenService {
     let currentY = doc.y + 10;
 
     doc.rect(startX, currentY, 515, rowHeight).fill('#eeeeee');
-    doc.fillColor('#333333').font('Poppins-SemiBold').fontSize(9);
+    doc.fillColor('#333333').font(fonts.semiBold).fontSize(9);
 
     doc.text('NAAM', colNaam, currentY + 7);
     doc.text('STATUS', colStatus, currentY + 7);
     doc.text('REDEN / INFO', colInfo, currentY + 7);
 
     currentY += rowHeight;
-    doc.font('Poppins');
+    doc.font(fonts.regular);
 
     attendees.forEach((p, index) => {
       if (currentY > 720) {
@@ -331,7 +351,7 @@ export class EvenementenService {
       const statusColor = STATUS_COLORS[statusKey] || 'black';
 
       doc.save();
-      doc.fillColor(statusColor).font('Poppins-SemiBold');
+      doc.fillColor(statusColor).font(fonts.semiBold);
       doc.text(statusLabel, colStatus, currentY + 7);
       doc.restore();
 
