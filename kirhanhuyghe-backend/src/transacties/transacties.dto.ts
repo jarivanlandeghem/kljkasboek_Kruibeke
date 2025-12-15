@@ -16,8 +16,6 @@ import { Type } from 'class-transformer';
 export class CreateTransactieRequestDto {
   @IsInt()
   @ApiProperty({ example: 1, description: 'ID van de rekening' })
-  
-
   @IsInt()
   @ApiProperty({ example: 1, description: 'ID van de gebruiker' })
   @IsNotEmpty()
