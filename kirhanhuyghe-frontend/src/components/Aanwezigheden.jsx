@@ -168,7 +168,6 @@ const EventDialog = ({ open, onClose, event, onSave }) => {
 const AttendeeListDialog = ({ open, onClose, event, onMail }) => {
     const eventId = event?.evenementID;
     
-    // Safety check: only fetch if open AND eventId exists
     const { data: attendees, isLoading } = useSWR(
         open && eventId ? `aanwezigheden/event/${eventId}` : null, 
         getAll
@@ -199,7 +198,6 @@ const AttendeeListDialog = ({ open, onClose, event, onMail }) => {
                         {listItems.length === 0 && <Typography sx={{ p: 2, textAlign: 'center' }}>Nog geen aanwezigen gevonden.</Typography>}
                         
                         {listItems.map((att, i) => {
-                            // Safe status lookup
                             const config = STATUS_CONFIG[att.status] || STATUS_CONFIG['UNKNOWN'];
                             
                             return (
@@ -303,8 +301,6 @@ export default function AanwezighedenPage() {
 
   const handleEventSave = async (data) => {
       try {
-          // Ensure we don't send internal fields (like evenementID) which
-          // are not allowed by the DTO validation (whitelist).
           const safeData = { ...data };
           if (safeData.evenementID) delete safeData.evenementID;
 
