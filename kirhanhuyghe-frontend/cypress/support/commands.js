@@ -23,6 +23,20 @@ Cypress.Commands.add('login', (email, password) => {
     // don't wait for an undefined alias here; tests should stub and wait for their own login intercepts
 
 });
+
+// Click helper: scroll into view, assert visible, wait a short moment, then click
+Cypress.Commands.add(
+  'clickWhenReady',
+  { prevSubject: 'element' },
+  (subject, options) => {
+    return cy
+      .wrap(subject)
+      .scrollIntoView({ offset: { top: -100, left: 0 } })
+      .should('be.visible')
+      .wait(200)
+      .click(options);
+  },
+);
 //
 //
 // -- This is a child command --

@@ -15,3 +15,10 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+
+// Disable CSS animations/transitions to avoid flakiness in tests
+Cypress.on('window:before:load', (win) => {
+	const style = win.document.createElement('style');
+	style.innerHTML = `* { transition-duration: 0s !important; animation-duration: 0s !important; }`;
+	win.document.head.appendChild(style);
+});
