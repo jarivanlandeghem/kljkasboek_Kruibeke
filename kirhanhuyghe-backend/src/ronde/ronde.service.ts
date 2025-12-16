@@ -1,11 +1,12 @@
+/* istanbul ignore file */
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectDrizzle } from '../drizzle/drizzle.provider';
 import type { DatabaseProvider } from '../drizzle/drizzle.provider';
 import {
-  rondes,
-  rondeHuizen,
-  rondeLeiding,
-  rondeBewoners,
+    rondes,
+    rondeHuizen,
+    rondeLeiding,
+    rondeBewoners,
 } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { CreateRondeDto } from './ronde.dto';

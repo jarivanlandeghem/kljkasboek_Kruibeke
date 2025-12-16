@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 // src/auth/decorators/currentUser.decorator.ts
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 

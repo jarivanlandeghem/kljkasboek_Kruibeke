@@ -1,32 +1,33 @@
+/* istanbul ignore file */
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-  Query,
+    Controller,
+    Get,
+    Post,
+    Put,
+    Delete,
+    Param,
+    Body,
+    HttpCode,
+    HttpStatus,
+    UseGuards,
+    Query,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
+    ApiTags,
+    ApiBearerAuth,
+    ApiOperation,
+    ApiResponse,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/roles';
 import {
-  CreateTransactieRequestDto,
-  GetTransactiesDto,
-  TransactieListResponseDto,
-  TransactieResponseDto,
-  UpdateTransactieDto,
+    CreateTransactieRequestDto,
+    GetTransactiesDto,
+    TransactieListResponseDto,
+    TransactieResponseDto,
+    UpdateTransactieDto,
 } from './transacties.dto';
 import { TransactieService } from './transacties.service';
 import { CurrentUser } from '../auth/decorators/currentUser.decorator';

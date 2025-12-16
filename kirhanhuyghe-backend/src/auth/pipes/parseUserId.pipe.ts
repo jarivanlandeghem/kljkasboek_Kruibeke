@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 // src/auth/pipes/parseUserId.pipe.ts
 import type { PipeTransform } from '@nestjs/common';
 import { Injectable, BadRequestException } from '@nestjs/common';

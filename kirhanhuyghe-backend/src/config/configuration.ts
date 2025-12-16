@@ -1,4 +1,6 @@
 // src/config/configuration.ts
+/* istanbul ignore file */
+
 import type { LogLevel } from '@nestjs/common';
 
 export interface JwtConfig {

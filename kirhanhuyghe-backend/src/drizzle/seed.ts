@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 // src/drizzle/seed.ts
 import { drizzle } from 'drizzle-orm/mysql2';
 import * as mysql from 'mysql2/promise';

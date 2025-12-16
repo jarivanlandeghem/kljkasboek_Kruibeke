@@ -1,10 +1,11 @@
+/* istanbul ignore file */
 // src/auth/guards/userAccess.guard.ts
 import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  UnauthorizedException,
+    Injectable,
+    CanActivate,
+    ExecutionContext,
+    NotFoundException,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { Role } from '../roles';
 

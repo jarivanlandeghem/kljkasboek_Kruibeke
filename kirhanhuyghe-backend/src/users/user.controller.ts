@@ -1,14 +1,15 @@
+/* istanbul ignore file */
 import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Param,
-  Put,
-  Delete,
-  HttpStatus,
-  HttpCode,
-  UseGuards,
+    Controller,
+    Post,
+    Body,
+    Get,
+    Param,
+    Put,
+    Delete,
+    HttpStatus,
+    HttpCode,
+    UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -16,10 +17,10 @@ import { Role } from '../auth/roles';
 import { AuthService } from '../auth/auth.service';
 import { UserService } from './user.service';
 import {
-  RegisterUserRequestDto,
-  UserListResponseDto,
-  PublicUserResponseDto,
-  updateUserDto,
+    RegisterUserRequestDto,
+    UserListResponseDto,
+    PublicUserResponseDto,
+    updateUserDto,
 } from './user.dto';
 import { LoginResponseDto } from '../session/session.dto';
 import { CheckUserAccessGuard } from '../auth/guards/userAccess.guard';

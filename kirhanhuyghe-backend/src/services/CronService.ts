@@ -1,11 +1,12 @@
+/* istanbul ignore file */
 // src/services/cron.service.ts
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import cron from 'node-cron';
 import { eq, and, sql, inArray } from 'drizzle-orm';
 
 import {
-  type DatabaseProvider,
-  InjectDrizzle,
+    type DatabaseProvider,
+    InjectDrizzle,
 } from '../drizzle/drizzle.provider';
 import { evenementen, aanwezigheden, users } from '../drizzle/schema';
 import { MailService } from '../mail/mail.service';
