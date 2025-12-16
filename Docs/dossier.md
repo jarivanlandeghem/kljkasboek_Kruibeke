@@ -5,16 +5,18 @@
 - **Student:** Aykon Kirhan
 - **Studentennummer:** 202405274
 - **E-mailadres:** <aykon.kirhan@student.hogent.be>
+- **Telefoonnummer:** +324 94 67 00 49
+
 - **Student:** Jasper Huyghe
 - **Studentennummer:** 202405272
 - **E-mailadres:** <jasper.huyghe@student.hogent.be>
-- **Telefoonnummer:** +324 99 91 24 05 / +324 94 67 00 49
+- **Telefoonnummer:** +324 99 91 24 05
 
 - **GitHub repository:** <https://github.com/HOGENT-frontendweb/frontendweb-2526-kirhanhuyghe>
 - **Online versies:**
   - **Back-end:** <https://frontendweb-2526-kirhanhuyghe-backend.onrender.com/>
   - **Front-end:** <https://portaal.kljsgw.be/>
-- **Demo:** <LINK_NAAR_DEMO_VIDEO>
+- **Demo:** <https://hogent.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=13d365e0-e69e-4eeb-bce7-b3b400e04cca>
 
 ## 🔐 Logingegevens
 
@@ -22,7 +24,7 @@
 > <jasper.huyghe@outlook.be> | hashed_pw_123
 >
 > LOGIN ALS USER:
-> <aykon.kirhan@kljsgw.be> | v
+> <aykon.kirhan@kljsgw.be> | aykonkirhan
 >
 > LOGIN ALS HOOFDLEIDING:
 > <lander.leeman@kljsgw.be> | landerleeman
@@ -33,7 +35,7 @@
 ## 🧐 Testen van onze applicatie
 
 - Email exports testen
-*Voor mevrouw Samyn en meneer De Witte maakte ik al logingegevens aan. Jullie kunnen stap 2 tot 4 skippen: (<karine.samyn@hogent.be> | karinesamyn of <andreas.dewitte@hogent.be> || andreasdewitte)*
+*Voor mevrouw Samyn en meneer De Witte maakte ik al logingegevens aan. Jullie kunnen stap 2 tot 4 overslaan: (<karine.samyn@hogent.be> | karinesamyn of <andreas.dewitte@hogent.be> | andreasdewitte)*
   - 1. Ik mailde u de .env gegevens door om de nodemailer te doen werken, maak een .env file in de backend en kopieer deze hierin.
   - 2. Log in als uzelf jasper huyghe (<jasper.huyghe@outlook.be> | hashed_pw_123)
   - 3. Maak een gebruiker aan (../register) waar je uw emailadres gebruikt en een wachtwoord van minimum 8 tekens
@@ -55,8 +57,6 @@ Opmerking: op het transactiescherm, klik zeker nog eens op de headers om de sort
 ZIE HIERBOVEN + IN DE INSTRUCTIES
 
 ## 📖 Projectbeschrijving
-
-> **Instructie:** Beschrijf hier duidelijk en beknopt waarover jouw project gaat. Wat is het doel? Wie is de doelgroep? Welke functionaliteiten biedt het?
 
 Het KLJ portaal biedt verschillende oplossingen en automatisaties voor problemen waar KLJ afdelingen en soortgelijke verenigingen dagelijks mee te maken krijgen. Hieronder vindt u een lijst van functionaliteiten
 
@@ -151,6 +151,8 @@ Kasjes zijn permanent: je stelt ze in per jaar, en ze tonen het budget dat besch
 - [x] Het project van Web Services voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
 - [x] Het project van Front-end Web Development voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
 
+Opmerking: De demo duurt langer dan 15 minuten omdat we enorm veel moesten tonen. We hebben dit zo snel mogelijk gedaan maar het lukte helaas niet om alles binnen de 15 minuten uit te leggen. Onze excuses hiervoor.
+
 ## 🚀 Extra technologieën
 
 ### Front-end Web Development
@@ -202,16 +204,16 @@ Kasjes zijn permanent: je stelt ze in per jaar, en ze tonen het budget dat besch
 
 ### Aykon
 
-**Wat heb je geleerd?**
+**Wat heb ik geleerd?**
 
 Tijdens het maken van het project heb ik heel wat nieuwe technologieën ontdekt. Ik vond dit een heel leerrijke ervaring, omdat we niet enkel dingen uit de les hebben overgenomen, maar ook zelf zoveel technologieën en libraries mochten toevoegen. Ik vond het tof dat we heel vrij waren om alles te gebruiken om zo een mooie. functionele applicatie te ontwikkelen.
 Ik heb vooral bijgeleerd dat er enorm veel mogelijkheden zijn binnen de IT-wereld aan de hand van libraries. Ook vind ik het heel handig dat we nu ook al een goede kennis qua pnpm-commandos hebben opgedaan.
 
-**Wat vond je goed aan dit project?**
+**Wat vond ik goed aan dit project?**
 
 Ik heb mezelf verbaasd met wat we hebben bereikt en had nooit gedacht dat ons project zo uitgebreid en professioneel zou zijn. De UI en UX vind ik heel gebruiksvriendelijk en ik vind dat we zeer mooie code hebben geschreven.
 
-**Wat zou je anders doen?**
+**Wat zou ik anders doen?**
 
 Ik zou eerste een beter plan opstellen met alle functies en pagina's dat we nodig hebben voor ons project en dan pas te beginnen ontwerpen en programmeren.
 
@@ -219,26 +221,26 @@ Ik zou eerste een beter plan opstellen met alle functies en pagina's dat we nodi
 
 De hoeveelheid keer dat een bepaalde pagina of functie niet meer werkte na het toevoegen van nieuwe code was enorm en hier hebben we dus ook heel veel tijd in moeten steken. Een voorbeeld hiervan zijn de cypress-testen. Ze werkten allemaal perfect en dan een week later werkte nog maar de helft.
 
-**Wat zou je behouden aan de cursus?**
+**Wat zou ik behouden aan de cursus?**
 
 Ik vind dat zowel de cursus Front-end Web Development als Web Services goed is opgebouwd aan de hand van een handige inhoudstafel en dat de commandos ook zeer duidelijk zijn opgemaakt.
 
-**Wat zou je toevoegen/aanpassen?**
+**Wat zou ik toevoegen/aanpassen?**
 
 Grote blokken uitleg opdelen in kleinere stukjes met voorbeelden ertussen. Soms is het wat moeilijk om te onthouden wat je net hebt gelezen als je ondertussen al aan de volgende alinea zit die over iets anders gaat.
 
 ### Jasper
 
-**Wat heb je geleerd?**
+**Wat heb ik geleerd?**
 
 Doorheen het project heb ik heel veel bijgeleerd. Hoe routing werkt, hoe de beveiliging werkt, ...
 Mijn belangrijkste leerproces vond ik dat er heel veel libraries gebruikt die je als een soort puzzelstukjes allemaal kunt implementeren om je applicatie naar een hoger niveau te tillen.
 
-**Wat vond je goed aan dit project?**
+**Wat vond ik goed aan dit project?**
 
 Ik vind dat onze applicatie heel modern en professioneel oogt. Qua backend denk ik dat we een paar knappe algoritmes hebben uitgeschreven.
 
-**Wat zou je anders doen?**
+**Wat zou ik anders doen?**
 
 Ik zou vanaf het begin meer kijken naar 'het grote plaatje' in plaats van heel hard te focussen op één functie.
 
@@ -246,20 +248,19 @@ Ik zou vanaf het begin meer kijken naar 'het grote plaatje' in plaats van heel h
 
 De bestandsindeling die KBC geeft wanneer je via KBC Touch een csv aanvraagt, is verschrikkelijk opgebouwd. Zorgen dat de applicatie deze zonder conversies kan lezen was ongetwijfeld mijn grootste uitdaging.
 
-**Wat zou je behouden aan de cursus?**
+**Wat zou ik behouden aan de cursus?**
 
 De opbouw en de voorgekauwde code vind ik top!
 
-**Wat zou je toevoegen/aanpassen?**
+**Wat zou ik toevoegen/aanpassen?**
 
 Minder grote blokken tekst, dit is iets waar je snel overleest. Ik denk dat het nuttiger zou zijn als de code gedocumenteerd was met comments in plaats van pijltjes.
 
 ### Reflectie groepswerk
 
 **Hoe verliep het groepswerk?**
-Aykon en ik werken al samen aan groepswerken sinds het zesde middelbaar, ik durf te zeggen dat wij heel goed op elkaar zijn ingespeeld en elkaars tekortkomingen kunnen opvullen.
 
-> **Instructie:** Vink voor elk groepslid één van de drie opties aan door een 'x' tussen de vierkante haken te plaatsen: `[x]`
+Aykon en ik werken al samen aan groepswerken sinds het zesde middelbaar, ik durf te zeggen dat wij heel goed op elkaar zijn ingespeeld en elkaars tekortkomingen kunnen opvullen.
 
 - **Jasper:**
 
@@ -274,11 +275,13 @@ Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel on
   - [x] Ik heb evenveel bijgedragen als mijn groepsgenoot
   - [ ] Ik heb meer bijgedragen dan mijn groepsgenoot
 
-> **Instructie:** Geef per persoon een duidelijk overzicht van wat die heeft geïmplementeerd voor het project voor het olod Web Services.
+Zoals hierboven beschreven heeft Jasper meer commits en lijnen code geschreven, maar ik denk wel dat we over het algemeen evenveel hebben bijgedragen om dit project tot een succesvol einde te brengen.
+
+> ## Implementaties Web Services per groepsgenoot
 
 | Functionaliteit | Jasper | Aykon | Beide |
 |------------------|--------|-------|-------|
-| **Login / authenticatie** | ✅ (JWT, guards, decorators, login/register endpoints) | ✅ (login bugfix) | |
+| **Login / authenticatie** | ✅ (JWT, guards, decorators, login/register endpoints) | ✅ (login bugfix, automatisch JWT token laten vervallen) | |
 | **Transacties** | | | |
 | - CRUD + validatie | ✅ (transactieservice, DTOs, controllers) | ✅ (async refactoring, getById, updateById) | |
 | - CSV-import logica | ✅ | ✅ (KBC format ondersteuning) | ✅ |
@@ -297,7 +300,7 @@ Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel on
 | **CI/CD** | ✅  | | |
 | **Testing** |   | ✅| |
 
-**Welke functionaliteiten heeft elk groepslid toegevoegd voor Front-end Web Development?**
+> ## Implementaties Front-end Web Development per groepsgenoot
 
  Functionaliteit | Jasper | Aykon | Beide |
 |------------------|--------|-------|-------|
@@ -319,7 +322,7 @@ Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel on
 | **Kasjes / Budgets** | ✅ (volledige UI + doughnut chart) | | |
 | **Profielpagina** | ✅ (wachtwoord wijzigen, rollen UI) | | |
 | **Layout & UX** | | | |
-| - Responsiveness | ✅ | ✅ (verbeterde layout, hamburgermenu, overflow) | ✅ |
+| - Responsiveness | ✅ | ✅ (webpaginas responsive gemaakt,verbeterde layout, hamburgermenu, overflow) | ✅ |
 | - Dark mode (later verwijderd) | ✅ | ✅ | |
 | - Routing / navigatie | ✅ | ✅ (React Router, links, navbar) | |
 | **Gebruiker toevoegen** | ✅ (knop alleen zichtbaar voor admins) | | |
