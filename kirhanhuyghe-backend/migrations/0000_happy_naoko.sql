@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `ronde_leiding` (
 CREATE TABLE IF NOT EXISTS `rondes` (
     `ronde_id` int AUTO_INCREMENT NOT NULL,
     `naam` varchar(255) NOT NULL,
-    `datum` timestamp DEFAULT(now()),
+    `datum` timestamp DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `rondes_ronde_id` PRIMARY KEY (`ronde_id`)
 );
 --> statement-breakpoint
