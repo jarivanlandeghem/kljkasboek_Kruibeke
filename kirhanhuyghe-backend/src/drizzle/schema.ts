@@ -59,7 +59,7 @@ export const transactieCategorie = mysqlTable(
 export const users = mysqlTable(
   'users',
   {
-    userid: int('userid', { unsigned: true }).primaryKey().autoincrement(),
+    userid: int('id', { unsigned: true }).primaryKey().autoincrement(),
     voornaam: varchar('voornaam', { length: 255 }).notNull(),
     familienaam: varchar('familienaam', { length: 255 }).notNull(),
     email: varchar('email', { length: 255 }).notNull(),
