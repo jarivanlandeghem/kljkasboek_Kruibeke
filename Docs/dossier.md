@@ -34,6 +34,12 @@
 
 ## 🧐 Testen van onze applicatie
 
+!! Belangrijk: In de demo verwijzen we hier al naar, maar nu hebben we bevestiging: Render blokkeert uitgaande SMTP poorten waardoor de mailfunctie in productie niet werkt. Dit is wel perfect lokaal te testen. De credentials worden dus nog steeds doorgemaild.
+<https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports>
+
+Tijdens de demo liepen enkele tests fout. Na wat aanpassingen hebben we ze alsnog correct laten werken:
+** TODO zet de screenshots hier. sla ze op in Docs
+
 - Email exports testen
 *Voor mevrouw Samyn en meneer De Witte maakte ik al logingegevens aan. Jullie kunnen stap 2 tot 4 overslaan: (<karine.samyn@hogent.be> | karinesamyn of <andreas.dewitte@hogent.be> | andreasdewitte)*
   - 1. Ik mailde u de .env gegevens door om de nodemailer te doen werken, maak een .env file in de backend en kopieer deze hierin.
@@ -151,7 +157,7 @@ Kasjes zijn permanent: je stelt ze in per jaar, en ze tonen het budget dat besch
 - [x] Het project van Web Services voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
 - [x] Het project van Front-end Web Development voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
 
-Opmerking: De demo duurt langer dan 15 minuten omdat we enorm veel moesten tonen. We hebben dit zo snel mogelijk gedaan maar het lukte helaas niet om alles binnen de 15 minuten uit te leggen. Onze excuses hiervoor.
+Opmerking: Zoals afgesproken met meneer De Witte overschrijdt onze demo de 15 minuten aangezien de applicatie dermate groot is.
 
 ## 🚀 Extra technologieën
 
