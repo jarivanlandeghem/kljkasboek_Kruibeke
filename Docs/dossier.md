@@ -1,338 +1,360 @@
-# Dossier
+# KLJ Portaal - Projectdossier
 
 ## 📋 Studentgegevens
 
-- **Student:** Aykon Kirhan
+### Student 1: Aykon Kirhan
+
 - **Studentennummer:** 202405274
 - **E-mailadres:** <aykon.kirhan@student.hogent.be>
 - **Telefoonnummer:** +324 94 67 00 49
 
-- **Student:** Jasper Huyghe
+### Student 2: Jasper Huyghe
+
 - **Studentennummer:** 202405272
 - **E-mailadres:** <jasper.huyghe@student.hogent.be>
 - **Telefoonnummer:** +324 99 91 24 05
 
-- **GitHub repository:** <https://github.com/HOGENT-frontendweb/frontendweb-2526-kirhanhuyghe>
-- **Online versies:**
-  - **Back-end:** <https://frontendweb-2526-kirhanhuyghe-backend.onrender.com/>
-  - **Front-end:** <https://portaal.kljsgw.be/>
-- **Demo:** <https://hogent.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=13d365e0-e69e-4eeb-bce7-b3b400e04cca>
+---
+
+## 🔗 Projectlinks
+
+**GitHub Repository:** <https://github.com/HOGENT-frontendweb/frontendweb-2526-kirhanhuyghe>
+
+**Online Versies:**
+
+- Back-end: <https://frontendweb-2526-kirhanhuyghe-backend.onrender.com/>
+- Front-end: <https://portaal.kljsgw.be/>
+- Swagger documentatie <https://frontendweb-2526-kirhanhuyghe-backend.onrender.com/docs>
+
+**Demo Video:** <https://hogent.cloud.panopto.eu/Panopto/Pages/Sessions/List.aspx?folderID=8d8e68af-0777-4a29-80be-b3b700fad82a>
+
+---
 
 ## 🔐 Logingegevens
 
-> LOGIN ALS ADMIN:
-> <jasper.huyghe@outlook.be> | hashed_pw_123
->
-> LOGIN ALS USER:
-> <aykon.kirhan@kljsgw.be> | aykonkirhan
->
-> LOGIN ALS HOOFDLEIDING:
-> <lander.leeman@kljsgw.be> | landerleeman
->
-> LOGIN ALS GROEPSVERANTWOORDELIJKE:
-> <robbe.braem@kljsgw.be> | robbebraem
+| Rol | E-mailadres | Wachtwoord |
+|-----|-------------|------------|
+| **Admin** | <jasper.huyghe@outlook.be> | hashed_pw_123 |
+| **User** | <aykon.kirhan@kljsgw.be> | aykonkirhan |
+| **Hoofdleiding** | <lander.leeman@kljsgw.be> | landerleeman |
+| **Groepsverantwoordelijke** | <robbe.braem@kljsgw.be> | robbebraem |
 
-## 🧐 Testen van onze applicatie
+---
 
-!! Belangrijk: In de demo verwijzen we hier al naar, maar nu hebben we bevestiging: Render blokkeert uitgaande SMTP poorten waardoor de mailfunctie in productie niet werkt. Dit is wel perfect lokaal te testen. De credentials worden dus nog steeds doorgemaild.
-<https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports>
+## 🧐 Testen van de Applicatie
 
-Tijdens de demo liepen enkele tests fout. Na wat aanpassingen hebben we ze alsnog correct laten werken:
-** TODO zet de screenshots hier. sla ze op in Docs
+### ⚠️ Belangrijke Opmerking
 
-- Email exports testen
-*Voor mevrouw Samyn en meneer De Witte maakte ik al logingegevens aan. Jullie kunnen stap 2 tot 4 overslaan: (<karine.samyn@hogent.be> | karinesamyn of <andreas.dewitte@hogent.be> | andreasdewitte)*
-  - 1. Ik mailde u de .env gegevens door om de nodemailer te doen werken, maak een .env file in de backend en kopieer deze hierin.
-  - 2. Log in als uzelf jasper huyghe (<jasper.huyghe@outlook.be> | hashed_pw_123)
-  - 3. Maak een gebruiker aan (../register) waar je uw emailadres gebruikt en een wachtwoord van minimum 8 tekens
-  - 4. Klik op "beheer gebruikers" en maak nieuwe testaccount admin, save en sluit
-  - 5. Klik bij transacties op 'PDF rapport'
-  - 6. Als alles goed loopt, is deze binnen de minuut zeker bezorgd. Check zeker de spamfolder!
+Render blokkeert uitgaande SMTP-poorten, waardoor de mailfunctie in productie niet werkt. Dit kan wel perfect lokaal getest worden.
 
-- Ronde maken/transacties csv import testen
-  - Onder Docs/testbestanden zit de csv bestanden die hier nodig zijn.
+Bron: <https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports>
 
-1. Importeer het bestand voor leden bij leden
-2. Importeer het bestand voor leiding bij leiding
-3. Klik op de knop (het is normaal dat de verwerking even duurt.)
+CRON-jobs kunnen niet getest worden aangezien deze niet in de free tier van Render beschikbaar zijn.
 
-Opmerking: op het transactiescherm, klik zeker nog eens op de headers om de sorting te testen!
+### Email Exports Testen
 
-### Lokale omgeving
+**Voor evaluators (pre-configured):**
 
-ZIE HIERBOVEN + IN DE INSTRUCTIES
+- Karine Samyn: <karine.samyn@hogent.be> | karinesamyn
+- Andreas De Witte: <andreas.dewitte@hogent.be> | andreasdewitte
+- Stappen 2-4 kunnen overgeslagen worden
+
+**Stappen:**
+
+1. Kopieer de .env-gegevens in de backend (gekregen via mail voor nodemailer configuratie)
+2. Log in als Jasper Huyghe (<jasper.huyghe@outlook.be> | hashed_pw_123)
+3. Maak een gebruiker aan op ../register met uw emailadres en wachtwoord (min. 8 tekens)
+4. Klik op "Beheer gebruikers" en maak een nieuwe testaccount als admin
+5. Navigeer naar "Transacties" en klik op "PDF rapport"
+6. De PDF wordt binnen een minuut bezorgd (controleer ook spamfolder!)
+
+### Ronde/Transacties CSV-Import Testen
+
+De CSV-testbestanden bevinden zich in: `Docs/testbestanden`
+
+**Stappen:**
+
+1. Importeer het bestand voor leden bij "Leden"
+2. Importeer het bestand voor leiding bij "Leiding"
+3. Klik op de verwerkingsknop (verwerking kan even duren)
+
+**💡 Tip:** Op het transactiescherm kunnen headers geklikt worden om de sortering te testen!
+
+### Lokale Omgeving
+
+Zie instructies hierboven en in de projectdocumentatie.
+
+---
 
 ## 📖 Projectbeschrijving
 
-Het KLJ portaal biedt verschillende oplossingen en automatisaties voor problemen waar KLJ afdelingen en soortgelijke verenigingen dagelijks mee te maken krijgen. Hieronder vindt u een lijst van functionaliteiten
+Het KLJ Portaal biedt verschillende oplossingen en automatisaties voor problemen waar KLJ-afdelingen en soortgelijke verenigingen dagelijks mee te maken krijgen.
 
-Functionaliteiten:
-login
-  inloggen
-  login aanvragen (omdat de doelgroep van onze applicatie is dat alleen een kleine groep mensen (leiding) de info mag zien, worden logins manueel aangevraagd en aangemaakt door de admlin. Wanneer iemand een login aanvraagt, voert hij/zij deze gegevens in en krijgt de admin hier een mail van.)
+### Functionaliteiten
 
-Transacties
-  het manueel toevoegen of aanpassen van transacties
-  het importeren van transacties uit een csv
-  het sorteren van de tabel op datum
-  een PDF laten genereren en doorsturen op basis van de transacties gesorteerd op de categorieën
+#### 🔑 Login & Authenticatie
 
-Categorieën
-  Het kiezen van een categorie
-  Een overzicht via grafieken over alle categorieën
-  een tabel overzicht per categorie wat er IN en UIT is gegaan.
-  een paar nuttige grafieken per categorie
-  een knop om categorieen aan te maken/verwijderen
+- **Inloggen** via JWT-tokens
+- **Login aanvragen** - Alleen admins kunnen handmatig logins aanmaken. Gebruikers vragen inloggegevens aan en ontvangen een bevestigingsmail
 
-Leiding
-  een overzicht van alle leiding
-  leiding verwijderen, wijzigen of toevoegen (alleen admins)
+#### 💰 Transacties
 
-Aanwezigheden
-  Een lijst van aankomende evenementen, activiteiten, vergaderingen
-  Een knop om aan te geven of je aanwezigheid toe te voegen
-  Evenementen toevoegen, wijzigen of verwijderen (alleen admins of hoofdleiding of groepsverantwoordelijke)
-  De lijst van aanwezigheden bekijken
-  De mogelijkheid om aanwezigheden als PDF door te mailen (alleen admins of hoofdleiding of groepsverantwoordelijke)
-  Als een leiding 7 dagen voordat een evenement begint nog geen antwoord heeft gegeven krijgt deze een reminder toegestuurd per mail
-  Als een leiding 4 dagen op voorhand nog steeds geen antwoord heeft krijgt de hoofdleiding hier een mail van.
-  Als er te weinig mankracht is voor een activiteit krijgen de groepsverantwoordelijke hier een mail van zodat ze kunnen schuiven met de leiding die wél kan.
+- Manueel toevoegen of aanpassen van transacties
+- Importeren van transacties uit CSV-bestand
+- Sorteren van tabel op datum
+- PDF-rapport genereren en per mail versturen (gesorteerd op categorieën)
 
-Ronde maken
-  *Elk jaar gaat bij de inschrijving elke leiding rond bij de leden om uitleg te geven en de leden in te schrijven, nu kijkt iemand manueel welke huizen het dichtst bij elk huis liggen, deze tool automatiuseert dit*
-  Een ronde een naam geven, data importeren (ledenlijst en leidinglijst) zodat een algoritme de kortste afstand berekent tot elk huis.
-  Hierna toont hij een overzicht van elke leiding en zijn/haar huizen dat hij/zij moet doen. Onder elk adres staat welke leden dit zijn en er is een link naar het adres via Google Maps
+#### 📊 Categorieën
 
-Kasjes
-  *Elke leeftijdsgroep heeft jaarlijks een budget om op te doen. Om redundante toevoegingen te voorkomen wordt deze in het systeem gezet door als categorie een leeftijdsgroep in te geven.*
-  Jaarbudget aanpassen (Alleen admin/hoofdleiding)
-  Bekijken van budget per leeftijdsgroep en een overzicht van de recente transacties
+- Categorie selecteren per transactie
+- Grafische overzichten van alle categorieën
+- Tabel-overzicht per categorie (inkomsten vs. uitgaven)
+- Nuttige grafieken per categorie
+- Optie om categorieën aan te maken/verwijderen
 
-Profielpagina
-  Wachtwoord veranderen
-  Users hun roles aanpassen (alleen admin)
+#### 👥 Leiding
 
-Loguit
-  Simpele logout pagina met knop om terug te gaan
+- Overzicht van alle leidinggevenden
+- Toevoegen, wijzigen of verwijderen van leiding (alleen admins)
 
-Gebruiker toevoegen (alleen admin)
-  Alleen een admin kan via hier een gebruiker toevoegen.
+#### ✅ Aanwezigheden
 
-## 🌳 ERD
+- Lijst van aankomende evenementen, activiteiten en vergaderingen
+- Aanwezigheid toevoegen/aanpassen
+- Evenementen toevoegen, wijzigen of verwijderen (alleen admins, hoofdleiding of groepsverantwoordelijken)
+- Overzicht van alle aanwezigheiden
+- Aanwezigheden als PDF per mail versturen (alleen bevoegden)
+- **Automatische Reminders:**
+  - 7 dagen vóór event: herinnering naar leidinggevenden
+  - 4 dagen vóór event: alert naar hoofdleiding als geen antwoord
+  - Alert naar groepsverantwoordelijken als onvoldoende mankracht
+
+#### 🗺️ Ronde Maken
+
+*Automatisering van jaarlijkse inschrijfrondes waarbij leiding huizen bezoeken.*
+
+- Ronde een naam geven
+- Leden- en leidinglijst importeren via CSV
+- Algoritme berekent optimale route (kortste afstand)
+- Overzicht per leidinggevende met:
+  - Toegewezen huizen
+  - Bewonersgegevens per adres
+  - Google Maps link naar elk adres
+
+#### 💳 Kasjes (Leeftijdsbudgetten)
+
+- Jaarbudget aanpassen per leeftijdsgroep (alleen admin/hoofdleiding)
+- Budget-overzicht per leeftijdsgroep
+- Overzicht van recente transacties per groep
+
+#### 👤 Profielpagina
+
+- Wachtwoord wijzigen
+- Gebruikersrollen beheren (alleen admin)
+
+#### 🚪 Logout
+
+- Simpele logout-pagina
+
+#### ➕ Gebruiker Toevoegen
+
+- Alleen admins kunnen nieuwe gebruikers aanmaken
+
+---
+
+## 🌳 Entity-Relationship Diagram (ERD)
 
 ![ERD](./KLJPORTAAL_ERD.png)
 
+### Schema-Uitleg
+
 #### 1. Kasboekhouding (Transacties & Categorieën)
 
-Transacties zijn geld die in of uit gaat: inkomsten en uitgaven. Om dit georganiseerd te houden, kun je elke transactie in één of meer categorieën plaatsen (bijvoorbeeld "snacks", "materiaal", "vervoer"). De tabel Transactie_Categorie verbindt deze twee: één transactie kan in meerdere categorieën zitten, en één categorie kan veel transacties hebben.
+Transacties vertegenwoordigen geld in- en uitgaande (inkomsten/uitgaven). Via de Transactie_Categorie join-tabel kunnen transacties in meerdere categorieën ingedeeld worden.
 
 #### 2. Evenementen & Aanwezigheid
 
-Evenementen zijn dingen die gebeuren: activiteiten, vergaderingen, uitstappen, enzovoort. Ze hebben een datum, tijd en beschrijving.
-Voor elk evenement houd je bij wie aanwezig is via Aanwezigheid. Dit is een koppeling tussen een User en een Evenement: je ziet wie er was, wie niet, en waarom (met optionele aangepaste tijden als iemand later kwam of eerder wegging).
+Evenementen zijn activiteiten, vergaderingen en uitstappen. De Aanwezigheid-tabel koppelt gebruikers aan evenementen met status (aanwezig/afwezig) en optionele aangepaste tijden.
 
 #### 3. Ronde-Verdeling
 
-Per ronde heb je:
+**Ronde_Leiding:** Leidinggevenden met startpunt en coördinaten
+**Ronde_Huizen:** Alle adressen in de wijk met coördinaten
+**Ronde_Bewoners:** Bewonersgegevens per huis
 
-Ronde_Leiding: Dit zijn de mensen die deze ronde gaan lopen. Ze hebben een naam, adres (hun startpunt) en coördinaten.
-Ronde_Huizen: Dit zijn alle huizen/adressen in die wijk met hun coördinaten.
-Ronde_Bewoners: Dit zijn de namen van de mensen in elk huis.
-
-Je algoritme berekent dan de optimale verdeling: welke huizen krijgt welke ronde-leiding toegewezen op basis van afstand.
+Het algoritme berekent de optimale verdeling op basis van afstand.
 
 #### 4. Kasjes (Groepsbudgetten)
 
-Kasjes houden per leeftijdsgroep (zoals "-8", "-12", "+16") en per jaar bij hoeveel geld beschikbaar is. Dit is een centrale plek waar je ziet hoeveel budget elke leeftijdsgroep heeft.
+Per leeftijdsgroep (bv. -8, -12, +16) en per jaar wordt het beschikbare budget bijgehouden.
 
-#### 5. Hoe alles samenkomt
+#### 5. Samenhang
 
-Users zijn het middelpunt: zij maken transacties aan, zij worden ingedeeld in rondes, zij worden geregistreerd voor evenementen.
-Leiding_Profiel geeft extra info over elke user: hun telefoonnummer, welke leeftijdsgroep ze begeleiden, en wat hun beschrijvende functies zijn.
-Rondes zijn tijdelijk: je maakt er een aan, voert huizen in, het algoritme verdeelt alles, en je bent klaar.
-Kasjes zijn permanent: je stelt ze in per jaar, en ze tonen het budget dat beschikbaar is.
+- **Users** zijn centraal: maken transacties aan, worden ingedeeld in rondes, registreren aanwezigheid
+- **Leiding_Profiel** geeft extra info: telefoonnummer, leeftijdsgroep, functies
+- **Rondes** zijn tijdelijk en project-gebonden
+- **Kasjes** zijn permanent en jaarlijks
+
+---
 
 ## ✅ Ontvankelijkheidscriteria
 
-- [x] Het project van Web Services voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
-- [x] Het project van Front-end Web Development voldoet aan **alle** ontvankelijkheidscriteria zoals beschreven in de rubrics.
+- ✅ Het project van **Web Services** voldoet aan alle ontvankelijkheidscriteria
+- ✅ Het project van **Front-end Web Development** voldoet aan alle ontvankelijkheidscriteria
 
-Opmerking: Zoals afgesproken met meneer De Witte overschrijdt onze demo de 15 minuten aangezien de applicatie dermate groot is.
+**Opmerking:** In overleg met meneer De Witte, om de demo korter te houden dan 15 minuten hebben we geen edge cases getest en hebben we de endpoints die in de frontend zichtbaar waren niet meer in postman getest. Ook hebben we de 'waarom' bij het gebruiken van de extra's visueel toegelicht maar niet uitgebreid besproken.
 
-## 🚀 Extra technologieën
+---
+
+## 🚀 Extra Technologieën
 
 ### Front-end Web Development
 
-- <https://mui.com/material-ui/>
-  - Een visuele upgrade voor onze applicatie
-  - Het gebrui van een avatar
-  - Het gerbruik van een datepicker
-  - Het gebruiken van icoontjes & het loading icoontje
-  - custom forms aanmaken
-  - custom dialog boxes
-
-- <https://www.npmjs.com/package/dayjs>
-  - Dependency van de MUI Datepicker om met datums te werken
-
-- <https://tanstack.com/table/latest>
-  - De lector gaf de opmerking dat onze tabel te veel leek op degene in de voorbeeldapplicatie. De synax om een tanstack table op te zetten verschilt van de native React syntax.
-  - Door tanstack te gebruiken konden we makkelijk een sorteerfunctie toevoegen
-
-- <https://www.npmjs.com/package/chart.js?activeTab=readme>
-  - Het visualiseren van zowel de kasjes als de categorieën
-
-- <https://react-chartjs-2.js.org/>
-  - Extra componenten voor chartjs
-
-- <https://www.npmjs.com/package/framer-motion>
-  - Een visuele upgrade voor onze applicatie, zowel het laden van de pagina als het tonen van de grafieken
-- <https://www.npmjs.com/package/react-csv-importer>
-  - Importeren van csv bestanden mogelijk maken gebruikt voor transacties & de rondes
-
-- <https://www.npmjs.com/package/papaparse>
-  - Dependency van react-csv-importer
+| Technologie | Doel |
+|------------|------|
+| **[Material-UI](https://mui.com/material-ui/)** | Visuele upgrade, avatar, datepicker, iconen, custom forms & dialogs |
+| **[dayjs](https://www.npmjs.com/package/dayjs)** | Datumsverwerking (dependency van MUI Datepicker) |
+| **[TanStack Table](https://tanstack.com/table/latest)** | Geavanceerde tabel-functionaliteit met sortering (anders dan standaard React) |
+| **[Chart.js](https://www.npmjs.com/package/chart.js)** | Visualisatie kasjes en categorieën |
+| **[react-chartjs-2](https://react-chartjs-2.js.org/)** | React-componenten voor Chart.js |
+| **[Framer Motion](https://www.npmjs.com/package/framer-motion)** | Animaties voor paginaladen en grafieken |
+| **[react-csv-importer](https://www.npmjs.com/package/react-csv-importer)** | CSV-import functionaliteit |
+| **[papaparse](https://www.npmjs.com/package/papaparse)** | CSV-parsing (dependency van react-csv-importer) |
 
 ### Web Services
 
-- <https://www.npmjs.com/package/@faker-js/faker>
-  - Dit w 1 van de voorgestelde extra's
-  - Handig om veel data in het project te krijgen
+| Technologie | Doel |
+|------------|------|
+| **[@faker-js/faker](https://www.npmjs.com/package/@faker-js/faker)** | Testdata generatie |
+| **[nodemailer](https://nodemailer.com/)** | Email-functionaliteit (PDF-verstuur, aanvragen, reminders) |
+| **[pdfkit](https://www.npmjs.com/package/pdfkit)** | PDF-rapporten genereren |
 
-- <https://nodemailer.com/>
-  - We moesten een manier hebben om de pdf op te sturen
-  - We moesten een manier hebben voor een gebruiker om een aanvraag in te dienen
-  - We moesten een manier hebben om reminders te sturen naar leiding. Whatsapp APIs of SMS zijn betalend.
-
-- <https://www.npmjs.com/package/pdfkit>
-  - Makkelijke manier om een rapport op te maken om te delen tijdens een vergadering
+---
 
 ## 🤔 Reflectie
 
-### Aykon
+### Aykon Kirhan
 
-**Wat heb ik geleerd?**
+#### Wat heb ik geleerd?
 
-Tijdens het maken van het project heb ik heel wat nieuwe technologieën ontdekt. Ik vond dit een heel leerrijke ervaring, omdat we niet enkel dingen uit de les hebben overgenomen, maar ook zelf zoveel technologieën en libraries mochten toevoegen. Ik vond het tof dat we heel vrij waren om alles te gebruiken om zo een mooie. functionele applicatie te ontwikkelen.
-Ik heb vooral bijgeleerd dat er enorm veel mogelijkheden zijn binnen de IT-wereld aan de hand van libraries. Ook vind ik het heel handig dat we nu ook al een goede kennis qua pnpm-commandos hebben opgedaan.
+Tijdens het project heb ik veel nieuwe technologieën ontdekt. Het was leerrijk om niet alleen les-materiaal toe te passen, maar ook zelf libraries te mogen kiezen. Ik heb geleerd dat er enorm veel mogelijkheden zijn via libraries, en heb goede kennis opgedaan van pnpm-commando's.
 
-**Wat vond ik goed aan dit project?**
+#### Wat vond ik goed?
 
-Ik heb mezelf verbaasd met wat we hebben bereikt en had nooit gedacht dat ons project zo uitgebreid en professioneel zou zijn. De UI en UX vind ik heel gebruiksvriendelijk en ik vind dat we zeer mooie code hebben geschreven.
+Ik was aangenaam verrast door wat we hebben bereikt. Het project is veel uitgebreider en professioneler dan verwacht. De UI/UX is gebruiksvriendelijk en de code is van hoge kwaliteit.
 
-**Wat zou ik anders doen?**
+#### Wat zou ik anders doen?
 
-Ik zou eerste een beter plan opstellen met alle functies en pagina's dat we nodig hebben voor ons project en dan pas te beginnen ontwerpen en programmeren.
+Eerst een beter plan opstellen met alle benodigde functies en pagina's voordat ik begin met ontwerp en programmering.
 
-**Wat waren de grootste uitdagingen?**
+#### Wat waren de grootste uitdagingen?
 
-De hoeveelheid keer dat een bepaalde pagina of functie niet meer werkte na het toevoegen van nieuwe code was enorm en hier hebben we dus ook heel veel tijd in moeten steken. Een voorbeeld hiervan zijn de cypress-testen. Ze werkten allemaal perfect en dan een week later werkte nog maar de helft.
+De hoeveelheid keren dat pagina's of functies braken na het toevoegen van nieuwe code. Cypress-testen werkten perfect, maar een week later werkte nog maar de helft.
 
-**Wat zou ik behouden aan de cursus?**
+#### Wat zou ik behouden?
 
-Ik vind dat zowel de cursus Front-end Web Development als Web Services goed is opgebouwd aan de hand van een handige inhoudstafel en dat de commandos ook zeer duidelijk zijn opgemaakt.
+De cursusopbouw met duidelijke inhoudsopgave en goed opgestelde commando's.
 
-**Wat zou ik toevoegen/aanpassen?**
+#### Wat zou ik toevoegen/aanpassen?
 
-Grote blokken uitleg opdelen in kleinere stukjes met voorbeelden ertussen. Soms is het wat moeilijk om te onthouden wat je net hebt gelezen als je ondertussen al aan de volgende alinea zit die over iets anders gaat.
-
-### Jasper
-
-**Wat heb ik geleerd?**
-
-Doorheen het project heb ik heel veel bijgeleerd. Hoe routing werkt, hoe de beveiliging werkt, ...
-Mijn belangrijkste leerproces vond ik dat er heel veel libraries gebruikt die je als een soort puzzelstukjes allemaal kunt implementeren om je applicatie naar een hoger niveau te tillen.
-
-**Wat vond ik goed aan dit project?**
-
-Ik vind dat onze applicatie heel modern en professioneel oogt. Qua backend denk ik dat we een paar knappe algoritmes hebben uitgeschreven.
-
-**Wat zou ik anders doen?**
-
-Ik zou vanaf het begin meer kijken naar 'het grote plaatje' in plaats van heel hard te focussen op één functie.
-
-**Wat waren de grootste uitdagingen?**
-
-De bestandsindeling die KBC geeft wanneer je via KBC Touch een csv aanvraagt, is verschrikkelijk opgebouwd. Zorgen dat de applicatie deze zonder conversies kan lezen was ongetwijfeld mijn grootste uitdaging.
-
-**Wat zou ik behouden aan de cursus?**
-
-De opbouw en de voorgekauwde code vind ik top!
-
-**Wat zou ik toevoegen/aanpassen?**
-
-Minder grote blokken tekst, dit is iets waar je snel overleest. Ik denk dat het nuttiger zou zijn als de code gedocumenteerd was met comments in plaats van pijltjes.
-
-### Reflectie groepswerk
-
-**Hoe verliep het groepswerk?**
-
-Aykon en ik werken al samen aan groepswerken sinds het zesde middelbaar, ik durf te zeggen dat wij heel goed op elkaar zijn ingespeeld en elkaars tekortkomingen kunnen opvullen.
-
-- **Jasper:**
-
-  - [ ] Ik heb minder bijgedragen dan mijn groepsgenoot
-  - [x] Ik heb evenveel bijgedragen als mijn groepsgenoot
-  - [ ] Ik heb meer bijgedragen dan mijn groepsgenoot
-
-Hoewel ik het meeste commits en lijnen code heb denk ik dat onze bijdrage wel ongeveer 50/50 is. Veel complexe problemen, ideeën en designs werkte we samen achter de schermen uit.
-
-- **Aykon:**
-  - [ ] Ik heb minder bijgedragen dan mijn groepsgenoot
-  - [x] Ik heb evenveel bijgedragen als mijn groepsgenoot
-  - [ ] Ik heb meer bijgedragen dan mijn groepsgenoot
-
-Zoals hierboven beschreven heeft Jasper meer commits en lijnen code geschreven, maar ik denk wel dat we over het algemeen evenveel hebben bijgedragen om dit project tot een succesvol einde te brengen.
-
-> ## Implementaties Web Services per groepsgenoot
-
-| Functionaliteit | Jasper | Aykon | Beide |
-|------------------|--------|-------|-------|
-| **Login / authenticatie** | ✅ (JWT, guards, decorators, login/register endpoints) | ✅ (login bugfix, automatisch JWT token laten vervallen) | |
-| **Transacties** | | | |
-| - CRUD + validatie | ✅ (transactieservice, DTOs, controllers) | ✅ (async refactoring, getById, updateById) | |
-| - CSV-import logica | ✅ | ✅ (KBC format ondersteuning) | ✅ |
-| - Dubbele transactie check | ✅ | | |
-| **Categorieën** | | | |
-| - CRUD + join-tabel met transacties | ✅ (schema, service, endpoints) | ✅ (categoriekeuze, join-tabel logica) | ✅ |
-| - Categorie toevoegen via DB | ✅ | ✅ | |
-| **Gebruikers & rollen** | ✅ (rol-based access, role guards, user service, DTOs) | ✅ (gebruikersdata ophalen, Swagger docs) | ✅ |
-| **Kasjes / Budgets** | ✅ (DB schema, seeding, API endpoints) | | |
-| **Mailfunctionaliteit** | ✅ (nodemailer voor wachtwoordherstel & rapporten) | | |
-| **Logging & error handling** | ✅ (global filters, Drizzle error handling) | | |
-| **Database & ORM** | ✅ (Drizzle, MySQL, docker-compose, migrations) | | |
-| **Registratie** | ✅ (wachtwoord hashing, default role) | | |
-| **Email reminders** | ✅ | | |
-| **PDF exports** | ✅ | ✅| ✅|
-| **CI/CD** | ✅  | | |
-| **Testing** |   | ✅| |
-
-> ## Implementaties Front-end Web Development per groepsgenoot
-
- Functionaliteit | Jasper | Aykon | Beide |
-|------------------|--------|-------|-------|
-| **Login / authenticatie** | ✅ (auth context, login pagina, JWT, logout) | ✅ (fix login bug, logout bij token vervallen) | ✅ |
-| **Transacties** | | | |
-| - Manueel toevoegen/aanpassen | ✅ (dialog, forms) | ✅ (edit-popup volledig werkend) | ✅ |
-| - CSV-import | ✅ (import logica, vertaling) | ✅ (CSV-fix, import werkt volledig) | ✅ |
-| - Sorteren op datum | | ✅ | |
-| - PDF genereren & mailen | ✅ (rapport opmaak + mail) | | |
-| **Categorieën** | | | |
-| - Categorie kiezen bij transactie | ✅ | ✅ (dropdown gefixt, categorie-ID mapping) | ✅ |
-| - Tabel overzicht per categorie (IN/UIT) | | ✅ (onnodige kolommen verwijderd) | |
-| - Categorie toevoegen/verwijderen | ✅ (frontend integratie) | | |
-| **Leiding** | | | |
-| - Overzicht en CRUD (alleen admin) | ✅ (leidingspagina + knop alleen voor admins) | | |
-| **Aanwezigheden** | | | |
-| - Lijst evenementen + aanwezigheid aanduiden | ✅ (frontend OK) | | |
-| - Evenementen beheren (alleen bevoegden) | ✅ | | |
-| **Kasjes / Budgets** | ✅ (volledige UI + doughnut chart) | | |
-| **Profielpagina** | ✅ (wachtwoord wijzigen, rollen UI) | | |
-| **Layout & UX** | | | |
-| - Responsiveness | ✅ | ✅ (webpaginas responsive gemaakt,verbeterde layout, hamburgermenu, overflow) | ✅ |
-| - Dark mode (later verwijderd) | ✅ | ✅ | |
-| - Routing / navigatie | ✅ | ✅ (React Router, links, navbar) | |
-| **Gebruiker toevoegen** | ✅ (knop alleen zichtbaar voor admins) | | |
-| **CI/CD** | ✅  | | |
-| **Testing** |   | ✅| |
+Grote blokken uitleg opdelen in kleinere stukjes met voorbeelden ertussen. Lange alinea's zijn moeilijk om te onthouden.
 
 ---
+
+### Jasper Huyghe
+
+#### Wat heb ik geleerd?
+
+Veel hebben geleerd over routing, beveiliging, en hoe libraries als puzzelstukjes kunnen werken om de applicatie naar een hoger niveau te tillen.
+
+#### Wat vond ik goed?
+
+De applicatie ziet er modern en professioneel uit. Met name enkele geavanceerde algoritmes in de backend ben ik trots op.
+
+#### Wat zou ik anders doen?
+
+Meer naar het "grote plaatje" kijken in plaats van heel hard op één functie te focussen.
+
+#### Wat waren de grootste uitdagingen?
+
+Het CSV-bestandsformat van KBC Touch is slecht opgebouwd. Zorgen dat de applicatie dit zonder conversie kan lezen was zeer uitdagend.
+
+#### Wat zou ik behouden?
+
+De cursusopbouw en voorgekauwde code zijn top!
+
+#### Wat zou ik toevoegen/aanpassen?
+
+Minder grote tekstblokken. Beter gedocumenteerde code met comments in plaats van beschrijvende pijltjes.
+
+---
+
+### Reflectie Groepswerk
+
+#### Samenwerking
+
+Aykon en Jasper werken sinds het zesde middelbaar samen. Ze zijn goed op elkaar ingespeeld en kunnen elkaars tekortkomingen opvullen.
+
+#### Bijdrage - Jasper
+
+- ✅ **Evenveel bijgedragen als groepsgenoot**
+
+Hoewel Jasper meer commits en coderegels heeft, is de bijdrage ongeveer 50/50. Veel complexe problemen, ideeën en designs werden samen achter de schermen uitgewerkt.
+
+#### Bijdrage - Aykon
+
+- ✅ **Evenveel bijgedragen als groepsgenoot**
+
+Jasper heeft meer commits en coderegels geschreven, maar beiden hebben evenveel bijgedragen aan het succes van het project.
+
+---
+
+## 📋 Implementaties per Groepsgenoot
+
+### Web Services
+
+| Functionaliteit | Jasper | Aykon | Beide |
+|---|:---:|:---:|:---:|
+| **Login / Authenticatie** | ✅ JWT, guards, decorators | ✅ Bugfix, token-vervallen | |
+| **Transacties CRUD** | ✅ Service, DTOs, controllers | ✅ Async refactoring, getById | |
+| **CSV-import logica** | ✅ | ✅ KBC-formaat | ✅ |
+| **Dubbele transactie check** | ✅ | | |
+| **Categorieën CRUD** | ✅ Schema, service, endpoints | ✅ Categoriekeuze, join-logica | ✅ |
+| **Gebruikers & Rollen** | ✅ Rol-based access, guards | ✅ Datagebruikers, Swagger | ✅ |
+| **Kasjes / Budgets** | ✅ DB schema, seeding | | |
+| **Mailfunctionaliteit** | ✅ Nodemailer | | |
+| **Logging & Error Handling** | ✅ Global filters | | |
+| **Database & ORM** | ✅ Drizzle, MySQL, Docker | | |
+| **Registratie** | ✅ Hashing, default role | | |
+| **Email Reminders** | ✅ | | |
+| **PDF Exports** | ✅ | ✅ | ✅ |
+| **CI/CD** | ✅ | | |
+| **Testing** | | ✅ | |
+
+### Front-end Web Development
+
+| Functionaliteit | Jasper | Aykon | Beide |
+|---|:---:|:---:|:---:|
+| **Login / Authenticatie** | ✅ Auth context, JWT | ✅ Login-bugfix, logout | ✅ |
+| **Transacties - Manueel** | ✅ Dialog, forms | ✅ Edit-popup werkend | ✅ |
+| **Transacties - CSV-import** | ✅ Import-logica | ✅ CSV-fix | ✅ |
+| **Transacties - Sorteren** | | ✅ | |
+| **Transacties - PDF & Mail** | ✅ Rapport-opmaak | | |
+| **Categorieën - Selectie** | ✅ | ✅ Dropdown-fix | ✅ |
+| **Categorieën - Tabel** | | ✅ Kolommen verwijderd | |
+| **Categorieën - CRUD** | ✅ Frontend-integratie | | |
+| **Leiding - Overzicht & CRUD** | ✅ Pagina, admin-knop | | |
+| **Aanwezigheden - Overzicht** | ✅ Frontend OK | | |
+| **Aanwezigheden - Beheer** | ✅ | | |
+| **Kasjes / Budgets** | ✅ Volledige UI, chart | | |
+| **Profielpagina** | ✅ Wachtwoord, rollen | | |
+| **Responsiveness** | ✅ | ✅ Layout, menu | ✅ |
+| **Dark Mode** | ✅ | ✅ | ✅ (verwijderd) |
+| **Routing & Navigatie** | ✅ | ✅ React Router | ✅ |
+| **Gebruiker Toevoegen** | ✅ Admin-knop | | |
+| **CI/CD** | ✅ | | |
+| **Testing** | | ✅ | |
+
+---
+
+*Dossier opgesteld door Aykon Kirhan en Jasper Huyghe*
