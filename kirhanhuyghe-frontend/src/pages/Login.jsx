@@ -85,8 +85,8 @@ export default function Login() {
 
   const loginMethods = useForm({
     defaultValues: {
-      email: 'jasper.huyghe@outlook.be',
-      password: 'hashed_pw_123',
+      email: '',
+      password: '',
     },
   });
 

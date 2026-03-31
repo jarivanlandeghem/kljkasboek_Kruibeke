@@ -7,7 +7,6 @@ import * as schema from './schema';
 
 export const DrizzleAsyncProvider = 'DrizzleAsyncProvider';
 
-// Voeg import toe voor type
 export type DatabaseProvider = MySql2Database<typeof schema> & {
   $client: mysql.Pool;
 };
@@ -22,15 +21,15 @@ export const drizzleProvider = [
       const pool = mysql.createPool({
         uri: databaseConfig.url,
         connectionLimit: 5,
+        ssl: { rejectUnauthorized: false }, // 👈 SSL voor Aiven
       });
 
       return drizzle(pool, {
-        schema, // 👈 schema meegeven
+        schema,
         mode: 'default',
       }) as DatabaseProvider;
     },
   },
 ];
 
-// Helper decorator voor injectie
 export const InjectDrizzle = () => Inject(DrizzleAsyncProvider);
