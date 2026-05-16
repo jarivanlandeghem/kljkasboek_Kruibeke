@@ -1,90 +1,83 @@
-# Examenopdracht Front-end Web Development & Web Services
+# KLJ Kasboek
 
-- Student: Aykon Kirhan
-- Studentennummer: 202405274
-- E-mailadres: <aykon.kirhan@student.hogent.be>
+A full-stack web application for managing finances, tracking attendance and a routeplanner for pupil registration, built with a Node.js/NestJS backend and a Vite-powered frontend.
 
-- Student: Jasper Huyghe
-- Studentennummer: 202405272
-- E-mailadres: <jasper.huyghe@student.hogent.be>
+## Tech Stack
 
-## Vereisten
+- **Frontend:** Vite + (React/Vue)
+- **Backend:** Node.js, NestJS
+- **Database:** MySQL
+- **Auth:** JWT + Google OAuth 2.0
+- **Package manager:** pnpm
 
-Om dit project te kunnen draaien, moet je volgende software geïnstalleerd hebben:
+## Prerequisites
 
-- [NodeJS](https://nodejs.org) (versie ≥18)
-- [pnpm](https://pnpm.io)
-- [MySQL Community Server](https://dev.mysql.com/downloads/mysql/)
+Make sure you have the following installed:
 
-Aanbevolen versies
+- [Node.js](https://nodejs.org) (v18 or higher)
+- [pnpm](https://pnpm.io) — install globally via `npm install -g pnpm`
+- [MySQL Community Server](https://dev.mysql.com/downloads/mysql/) — or use the included Docker setup
 
-- **Node.js:** LTS (bijv. 18.x of 20.x)
-- **pnpm:** recente versie (installeer globaal via `npm install -g pnpm`)
+---
 
-## Front-end
+## Frontend
 
 ### Setup
 
-1. Installeer de dependencies:
+1. Install dependencies:
 
 ```bash
 cd kirhanhuyghe-frontend
 pnpm install
 ```
 
-2. Maak een `.env`-bestand in de root van het frontend-project met de volgende inhoud:
+2. Create a `.env` file in the frontend root:
 
 ```env
 VITE_API_URL=http://localhost:3000/api
 ```
 
-> Dit wijst de frontend naar de lokale backend.
+### Running
 
-### Opstarten
-
-#### Development
+**Development:**
 
 ```bash
-cd kirhanhuyghe-frontend
 pnpm run dev
 ```
 
-- Zorg dat het `.env` bestand aanwezig is en correct ingesteld.
-- De app is standaard beschikbaar op [http://localhost:5173](http://localhost:5173).
+The app is available at [http://localhost:5173](http://localhost:5173).
 
-#### Production
+**Production:**
 
 ```bash
 pnpm run build
 pnpm run preview
 ```
 
-- Build de applicatie met `vite build`.
-- Preview met `vite preview` of host de bestanden in `dist` via een server.
+Builds with Vite and previews the output from `dist/`. You can also serve `dist/` via any static file host.
 
-### Testen
-
-1. Voer het volgende commando uit in je frontend map
+### Tests
 
 ```bash
-cd kirhanhuyghe-frontend
 pnpm test
 ```
 
-2. Selecteer een van de testen. De testen worden dan automatisch uitgevoerd.
+Select a test from the menu — it will run automatically.
 
-## Back-end
+---
+
+## Backend
 
 ### Setup
 
-1. Installeer de dependencies:
+1. Install dependencies:
 
 ```bash
 cd kirhanhuyghe-backend
 pnpm install
 ```
 
-2. Maak een `.env`-bestand in de root van het backend-project met de volgende inhoud:
+2. Create a `.env` file in the backend root:
 
 ```env
 NODE_ENV=development
@@ -93,169 +86,130 @@ CORS_ORIGINS=["http://localhost:5173"]
 CORS_MAX_AGE=10800
 DATABASE_URL=mysql://devusr:devpwd@localhost:3307/kirhanhuyghe
 LOG_LEVELS=["log","error","warn","debug"]
-AUTH_JWT_SECRET=eensuperveiligsecretvoorindevelopment 
-GOOGLE_CLIENT_ID=vul_hier_jouw_client_id_in
-GOOGLE_CLIENT_SECRET=vul_hier_jouw_client_secret_in
-GOOGLE_REFRESH_TOKEN=vul_hier_jouw_refresh_token_in
+AUTH_JWT_SECRET=your_jwt_secret_here
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REFRESH_TOKEN=your_google_refresh_token
 ```
 
-> Pas indien nodig de `DATABASE_URL` aan voor jouw MySQL-configuratie.
->
-> De mailservice werkt met Google OAuth 2.0. Omdat deze tokens je volledige toegang geven tot een Google account zetten wij dit niet in de readme. Zoals afgesproken krijgen deze lectors deze opgestuurd via mail.
-> [OAuth 2.0 opzetten]((https://developers.google.com/identity/protocols/oauth2))
->
-> In een echte omgeving wordt de JWT-secret uiteraard niet gedeeld. In deze leeromgeving werd afgesproken om dit wel te doen.
+> **Note:** The mail service uses Google OAuth 2.0. See [Google's OAuth 2.0 guide](https://developers.google.com/identity/protocols/oauth2) to generate your credentials. Without these, mail functionality is disabled but the rest of the app works normally.
 
-### Development
+> **Note:** Never commit real secrets to version control. Use a secrets manager or environment injection in production.
 
-1. Voer databank migraties uit:
+### Database (Docker)
 
-```bash
-
-# Ga naar backend map (indien nog niet gedaan)
-cd kirhanhuyghe-backend
-# Start eerst de database (zie Docker sectie hieronder) of zorg dat je MySQL bereikbaar is
-pnpm run db:migrate
-# Optional: vul de database met voorbeelddata
-pnpm run db:seed
-```
-
-2. Start de backend:
-
-```bash
-pnpm run start:dev
-```
-
-- De backend is standaard beschikbaar op [http://localhost:3000](http://localhost:3000).
-
-### Docker (database via Docker Compose)
-
-Het backend-project bevat een `docker-compose.yml` die een MySQL-container start. Gebruik Docker Compose om snel een lokale database te draaien voor development of tests.
-
-- Ga naar de backend map:
+The backend includes a `docker-compose.yml` for running MySQL locally:
 
 ```bash
 cd kirhanhuyghe-backend
-```
 
-- Start de database:
-
-```bash
+# Start the database
 docker compose up -d
-```
 
-- Stop en verwijder containers:
-
-```bash
+# Stop and remove containers
 docker compose down
 ```
 
-#### Test-database
+### Running in Development
 
-Er is ook een `docker-compose.test.yml` aanwezig die een aparte MySQL-instance voor de testen start. Gebruik deze wanneer je de testomgeving wil opzetten:
+```bash
+# Run database migrations
+pnpm run db:migrate
+
+# (Optional) Seed with example data
+pnpm run db:seed
+
+# Start the dev server
+pnpm run start:dev
+```
+
+The API is available at [http://localhost:3000](http://localhost:3000).
+
+### Quick Start (all-in-one)
+
+```bash
+# 1. Start the database (port 3307)
+cd kirhanhuyghe-backend && docker compose up -d
+
+# 2. Install, migrate, seed, and start the backend
+pnpm install && pnpm run db:migrate && pnpm run db:seed && pnpm run start:dev
+
+# 3. In a new terminal — install and start the frontend
+cd kirhanhuyghe-frontend && pnpm install && pnpm run dev
+```
+
+### Production
+
+```bash
+pnpm install
+pnpm run build
+pnpm run db:migrate
+node dist/main.js
+```
+
+### Tests
+
+1. Make sure `.env.test` exists with test database configuration.
+
+2. Start the test database:
 
 ```bash
 docker compose -f docker-compose.test.yml up
 ```
 
-Opmerkingen / tip
-
-- Na het opstarten van de database kun je lokaal de migraties uitvoeren zodat de schema's worden aangemaakt:
-
-```bash
-c:\# vanuit project root of waar je zit, ga naar backend en run migraties:
-cd kirhanhuyghe-backend
-pnpm run db:migrate
-```
-
-- Als de backend nog niet in een container draait, draait de app lokaal (via `pnpm run start:dev`) en praat die met de DB-container via `localhost:3307`.
-
-### Snelcheck & Troubleshooting
-
-- Controleer dat de API bereikbaar is (voorbeeld):
-
-```powershell
-Invoke-RestMethod -Uri http://localhost:3000/api/aanwezigheden/event/30
-# of via curl
-curl http://localhost:3000/api/aanwezigheden/event/30
-```
-
-- Als bovenstaande call data teruggeeft maar de frontend geen data toont:
-  - Controleer `VITE_API_URL` in `kirhanhuyghe-frontend/.env` (moet `http://localhost:3000/api` zijn)
-  - Open browser DevTools → Network → bekijk de response body van het verzoek naar `/aanwezigheden/event/:id`
-  - Controleer CORS-instellingen (`CORS_ORIGINS`) in backend `.env` bevat `http://localhost:5173`
-
-- Zorg dat je migraties en seed uitvoert na het starten van de DB, anders zijn tabellen mogelijk leeg (geen users/events).
-
-- Mailfunctionaliteit: vereist Google OAuth-gegevens. Als die ontbreken, werkt mail niet maar de rest van de applicatie draait wel.
-
-### Voorbeeldcommando - volledige start (development)
-
-```powershell
-# 1) start DB (in backend folder) - zorgt voor database op poort 3307
-cd kirhanhuyghe-backend; docker compose up -d
-
-# 2) backend: install, migraties, seed en start
-cd kirhanhuyghe-backend; pnpm install; pnpm run db:migrate; pnpm run db:seed; pnpm run start:dev
-
-# 3) frontend: install en start
-cd kirhanhuyghe-frontend; pnpm install; pnpm run dev
-```
-
-### Production
-
-1. Installeer dependencies:
-
-```bash
-pnpm install
-```
-
-2. Build de applicatie:
-
-```bash
-pnpm run build
-```
-
-3. Deploy migraties:
-
-```bash
-
-pnpm run db:migrate
-```
-
-4. Start de productieversie:
-
-```bash
-node dist/main.js
-```
-
-### Testen
-
-1. Zorg dat `.env.test` aanwezig is met test-configuratie.
-2. Installeer dependencies:
-
-```bash
-pnpm install
-```
-
-3. Voer migraties uit voor testdatabase:
+3. Run migrations against the test database:
 
 ```bash
 pnpm run migrate:test
 ```
 
-4. Start de testen:
+4. Run the test suite:
 
 ```bash
 pnpm run test:jest
 ```
 
-5. Voor coverage:
+5. Generate a coverage report:
 
 ```bash
 pnpm run test:cov
 ```
 
-- Coverage-rapport wordt aangemaakt in `__tests__/coverage`. Open `index.html` in de browser om het te bekijken.
+The report is saved to `__tests__/coverage/`. Open `index.html` in your browser to view it.
 
 ---
+
+## Troubleshooting
+
+**Check the API is reachable:**
+
+```bash
+curl http://localhost:3000/api/aanwezigheden/event/30
+```
+
+**Frontend shows no data?**
+
+- Verify `VITE_API_URL` in `.env` is set to `http://localhost:3000/api`
+- Open browser DevTools → Network and inspect the response body
+- Check that `CORS_ORIGINS` in the backend `.env` includes `http://localhost:5173`
+
+**Empty tables after starting?**
+
+Run migrations and seed after the database is up:
+
+```bash
+pnpm run db:migrate && pnpm run db:seed
+```
+
+---
+
+## Contributing
+
+Pull requests are welcome. Please open an issue first to discuss any significant changes.
+
+## Credits
+This is a schoolproject made by Jasper Huyghe and Aykon Kirhan, it will be mantained by Jasper Huyghe
+
+## License
+
+[MIT](LICENSE)
