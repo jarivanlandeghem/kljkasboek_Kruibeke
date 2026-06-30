@@ -19,11 +19,15 @@
 		"eslint-plugin-cypress": "^5.2.0"
 	},
 	"pnpm": {
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "argon2",
-      "esbuild",
-      "unrs-resolver"
-    ]
-  }
+		"onlyBuiltDependencies": [
+			"@nestjs/core",
+			"@scarf/scarf",
+			"argon2",
+			"esbuild",
+			"unrs-resolver"
+		],
+		"ignoredBuiltDependencies": [
+			"cypress"
+		]
+	}
 }

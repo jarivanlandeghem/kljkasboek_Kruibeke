@@ -58,10 +58,13 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "argon2",
-      "esbuild",
-      "unrs-resolver"
+      "@swc/core",
+      "@tailwindcss/oxide",
+      "core-js",
+      "esbuild"
+    ],
+    "ignoredBuiltDependencies": [
+      "cypress"
     ]
   }
 }
