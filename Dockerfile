@@ -1,5 +1,6 @@
 FROM node:22
 
+ENV NPM_CONFIG_ONLY_BUILT_DEPENDENCIES='["@nestjs/core","argon2","esbuild","unrs-resolver"]'
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
