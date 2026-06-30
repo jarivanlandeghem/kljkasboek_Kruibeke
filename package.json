@@ -17,5 +17,13 @@
 	"devDependencies": {
 		"cypress": "^15.6.0",
 		"eslint-plugin-cypress": "^5.2.0"
-	}
+	},
+	"pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "argon2",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
 }
