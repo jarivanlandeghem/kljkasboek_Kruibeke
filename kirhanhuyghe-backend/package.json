@@ -28,6 +28,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@nestjs/core",
+      "@scarf/scarf",
       "argon2",
       "esbuild",
       "unrs-resolver"
