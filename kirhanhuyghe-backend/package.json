@@ -25,6 +25,15 @@
     "db:migrate:test": "env-cmd -f .env.test drizzle-kit migrate",
     "db:seed": "env-cmd tsx src/drizzle/seed.ts"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "argon2",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  },
+  
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
     "@nestjs-modules/mailer": "^2.0.2",
