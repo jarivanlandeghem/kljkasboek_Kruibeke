@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: kirhanhuyghe-backend
+    env: node
+    rootDir: kirhanhuyghe-backend
+    buildCommand: npm install -g pnpm@9 && pnpm install --frozen-lockfile && pnpm build
+    startCommand: node dist/src/main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: CORS_MAX_AGE
+        value: 10800
+
+  - type: web
+    name: kirhanhuyghe-frontend
+    env: static
+    rootDir: kirhanhuyghe-frontend
+    buildCommand: npm install -g pnpm@9 && pnpm install --frozen-lockfile && pnpm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
